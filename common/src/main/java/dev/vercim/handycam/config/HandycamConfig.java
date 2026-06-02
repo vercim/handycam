@@ -23,8 +23,8 @@ public class HandycamConfig {
     // ── Idle ───────────────────────────────────────────────────────────────
     // idleIntensity = max amplitude in degrees (FractalNoise output is in [-1, 1])
     public boolean idleEnabled   = true;
-    public float   idleIntensity = 0.25f;  // ±0.25° drift — subtle but alive
-    public float   idleFrequency = 0.3f;   // speed multiplier for noise time
+    public float   idleIntensity = 1.5f;   // amplitude scalar (Perlin peaks ~±0.3)
+    public float   idleFrequency = 0.5f;   // speed multiplier for noise time
 
     // ── Walk Bob ───────────────────────────────────────────────────────────
     // walkBobFrequency = cycles per second at speed=1.0
@@ -44,9 +44,8 @@ public class HandycamConfig {
 
     // ── Sprint ─────────────────────────────────────────────────────────────
     public boolean sprintEnabled = true;
-    public float   sprintRoll    = 1.8f;   // degrees of roll when sprinting
-    public float   turnSway      = 0.08f;  // roll per degree/tick of turn rate
-                                           // (was 0.5 — way too strong)
+    public float   sprintRoll    = 3.5f;   // degrees of roll when sprinting
+    public float   turnSway      = 0.15f;  // roll per degree/tick of turn rate
 
     // ── Misc ───────────────────────────────────────────────────────────────
     public boolean disableVanillaBob = true;

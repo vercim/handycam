@@ -40,7 +40,7 @@ public final class CameraShakeSystem {
 
     // Fall distance tracking (Y-position based)
     private static boolean wasOnGround  = true;
-    private static float   fallStartY   = 0f;
+    private static float   peakY        = 0f;  // highest Y reached while airborne
 
     private CameraShakeSystem() {}
 
@@ -49,13 +49,14 @@ public final class CameraShakeSystem {
         boolean onGround = player.onGround();
         float   currentY = (float) player.getY();
 
-        if (wasOnGround && !onGround) {
-            // Player just left the ground — record Y so we can measure net drop
-            fallStartY = currentY;
-        } else if (!wasOnGround && onGround) {
-            // Just landed — fall distance = net downward displacement (ignore jumps)
-            float fallDist = fallStartY - currentY;
-            if (fallDist > 0.5f) {
+        if (!onGround) {
+            // Track the apex while airborne so a jump's fall is measured from the top
+            if (wasOnGround) peakY = currentY;
+            else if (currentY > peakY) peakY = currentY;
+        } else if (!wasOnGround) {
+            // Just landed — fall distance = drop from the highest point reached
+            float fallDist = peakY - currentY;
+            if (fallDist > 0.15f) {
                 LANDING.onLand(fallDist);
             }
         }

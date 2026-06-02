@@ -11,7 +11,8 @@ import net.fabricmc.api.Environment;
 @Environment(EnvType.CLIENT)
 public class SprintSwayLayer implements ShakeLayer {
 
-    private final SpringSimulator rollSpring = new SpringSimulator(50f, 14f);
+    // Higher stiffness = snappier/shorter sway response (critical damping: 2*sqrt(k))
+    private final SpringSimulator rollSpring = new SpringSimulator(140f, 24f);
 
     @Override
     public CameraOffset compute(PlayerState state, float time, float dt) {

@@ -27,16 +27,26 @@ public abstract class CameraMixin {
 
         CameraAccessor self = (CameraAccessor) (Object) this;
 
-        // Pitch and yaw via the xRot/yRot scalar fields
+        // The camera's `rotation` quaternion has ALREADY been built from xRot/yRot
+        // by the time this TAIL injection runs, so writing the scalar fields has no
+        // visual effect. We must apply all offsets directly to the quaternion.
+        //
+        // Camera space: X = right (pitch axis), Y = up (yaw axis), Z = back (roll axis).
+        // Post-multiplying (rotate*) rotates about the camera's LOCAL axes — exactly
+        // what we want for view-space shake.
+        Quaternionf rotation = self.getRotation();
+        if (Math.abs(offset.pitch) > 1.0e-4f) {
+            rotation.rotateX(offset.pitch * Mth.DEG_TO_RAD);
+        }
+        if (Math.abs(offset.yaw) > 1.0e-4f) {
+            rotation.rotateY(-offset.yaw * Mth.DEG_TO_RAD);
+        }
+        if (Math.abs(offset.roll) > 1.0e-4f) {
+            rotation.rotateZ(offset.roll * Mth.DEG_TO_RAD);
+        }
+
+        // Keep the scalar fields roughly in sync for any code that reads them.
         self.setXRot(self.getXRot() + offset.pitch);
         self.setYRot(self.getYRot() + offset.yaw);
-
-        // Roll via the camera quaternion — rotate around the forward (Z) axis
-        if (Math.abs(offset.roll) > 0.001f) {
-            float radians = offset.roll * Mth.DEG_TO_RAD;
-            Quaternionf rotation = self.getRotation();
-            // Local Z = forward for camera space; premultiply so roll is in view space
-            rotation.rotateLocalZ(radians);
-        }
     }
 }

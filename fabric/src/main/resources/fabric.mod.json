@@ -12,10 +12,11 @@
     "sources": "https://github.com/vercim/handycam-mod"
   },
   "license": "MIT",
+  "icon": "icon.png",
   "environment": "client",
   "entrypoints": {
     "client": [
-      "dev.vercim.handycam.fabric.HandycamFabricClient"
+      "dev.vercim.handycam.fabric.client.HandycamFabricClient"
     ]
   },
   "mixins": [
