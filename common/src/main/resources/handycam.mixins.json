@@ -1,0 +1,16 @@
+{
+  "required": true,
+  "package": "dev.vercim.handycam.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "minVersion": "0.8",
+  "client": [
+    "CameraAccessor",
+    "CameraMixin",
+    "GameRendererMixin"
+  ],
+  "mixins": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "id": "handycam",
+  "version": "${version}",
+  "name": "Handycam",
+  "description": "Cinematic camera shake for Minecraft — idle drift, walk bob, landing impact, damage hit, and sprint sway.",
+  "authors": [
+    "vercim"
+  ],
+  "contact": {
+    "homepage": "https://github.com/vercim/handycam-mod",
+    "sources": "https://github.com/vercim/handycam-mod"
+  },
+  "license": "MIT",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "dev.vercim.handycam.fabric.HandycamFabricClient"
+    ]
+  },
+  "mixins": [
+    "handycam.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.19.3",
+    "minecraft": "~1.21.4",
+    "java": ">=21",
+    "architectury": ">=15.0.3",
+    "fabric-api": "*"
+  }
+}
