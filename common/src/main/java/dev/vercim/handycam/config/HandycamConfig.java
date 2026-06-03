@@ -81,9 +81,6 @@ public class HandycamConfig {
     public float   hitIntensity = 1.2f;   // degrees of pitch kick on attack
     public float   hitDecay     = 8.0f;   // decay rate (higher = snappier)
 
-    // ── Misc ───────────────────────────────────────────────────────────────
-    public boolean disableVanillaBob = false;
-
     public static HandycamConfig get() {
         if (instance == null) instance = new HandycamConfig();
         return instance;

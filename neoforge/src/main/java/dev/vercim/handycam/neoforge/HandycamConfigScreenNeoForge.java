@@ -51,12 +51,6 @@ public class HandycamConfigScreenNeoForge {
             .setDefaultValue(3)
             .setSaveConsumer(v -> cfg.noiseOctaves = v)
             .build());
-        general.addEntry(e.startBooleanToggle(
-                Component.literal("Disable Vanilla Bob"), cfg.disableVanillaBob)
-            .setDefaultValue(false)
-            .setSaveConsumer(v -> cfg.disableVanillaBob = v)
-            .build());
-
         // ── Idle ──────────────────────────────────────────────────────────────
         ConfigCategory idle = builder.getOrCreateCategory(Component.literal("Idle"));
 
