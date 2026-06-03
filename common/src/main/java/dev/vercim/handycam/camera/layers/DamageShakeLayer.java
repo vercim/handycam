@@ -40,22 +40,22 @@ public class DamageShakeLayer implements ShakeLayer {
         HandycamConfig cfg = HandycamConfig.get();
         if (!cfg.damageEnabled || traumaAmount < 0.01f) return CameraOffset.ZERO;
 
-        float shake = traumaAmount * traumaAmount; // nonlinear: small trauma = subtle
+        float shake = traumaAmount * traumaAmount;
         float i = cfg.damageIntensity * cfg.masterIntensity;
+        int oct = cfg.noiseOctaves;
 
-        // Each axis: blend of slow (large displacement) + mid + fast (detail) layers
         float t = time;
-        float p = (pitchA.get(t)        * 0.5f
-                 + pitchB.get(t + 13f)  * 0.35f
-                 + pitchC.get(t + 29f)  * 0.15f) * shake * i;
+        float p = (pitchA.get(t,       oct) * 0.5f
+                 + pitchB.get(t + 13f,  oct) * 0.35f
+                 + pitchC.get(t + 29f,  oct) * 0.15f) * shake * i;
 
-        float y = (yawA.get(t + 7f)    * 0.5f
-                 + yawB.get(t + 41f)    * 0.35f
-                 + yawC.get(t + 83f)    * 0.15f) * shake * i * 0.85f;
+        float y = (yawA.get(t + 7f,  oct) * 0.5f
+                 + yawB.get(t + 41f,  oct) * 0.35f
+                 + yawC.get(t + 83f,  oct) * 0.15f) * shake * i * 0.85f;
 
-        float r = (rollA.get(t + 19f)  * 0.5f
-                 + rollB.get(t + 57f)   * 0.35f
-                 + rollC.get(t + 97f)   * 0.15f) * shake * i * 0.6f;
+        float r = (rollA.get(t + 19f, oct) * 0.5f
+                 + rollB.get(t + 57f,  oct) * 0.35f
+                 + rollC.get(t + 97f,  oct) * 0.15f) * shake * i * 0.6f;
 
         traumaAmount -= cfg.damageDecay * dt;
         if (traumaAmount < 0f) traumaAmount = 0f;

@@ -60,26 +60,25 @@ public class WalkBobLayer implements ShakeLayer {
         if (speed < 0.05f) return CameraOffset.ZERO;
 
         float sprintMult = state.isSprinting ? cfg.sprintBobMult : 1.0f;
+        int oct = cfg.noiseOctaves;
 
         // ── Vertical bob ────────────────────────────────────────────────────
-        // abs(sin) gives two bumps per stride cycle — classic footstep feel.
-        // Two noise layers add organic irregularity.
         float baseBob = (float) Math.abs(Math.sin(bobPhase));
-        float vn1 = vertNoise1.get(bobPhase * 0.5f);
-        float vn2 = vertNoise2.get(bobPhase * 0.25f);
+        float vn1 = vertNoise1.get(bobPhase * 0.5f,  oct);
+        float vn2 = vertNoise2.get(bobPhase * 0.25f, oct);
         float verticalBob = -(baseBob * 0.6f + vn1 * 0.25f + vn2 * 0.15f)
                             * cfg.walkBobIntensity * speed * sprintMult;
 
         // ── Lateral sway ────────────────────────────────────────────────────
         float baseSway = (float) Math.sin(bobPhase * 2f);
-        float ln1 = latNoise1.get(bobPhase * 0.7f);
-        float ln2 = latNoise2.get(bobPhase * 0.35f);
+        float ln1 = latNoise1.get(bobPhase * 0.7f,  oct);
+        float ln2 = latNoise2.get(bobPhase * 0.35f, oct);
         float lateralBob = (baseSway * 0.6f + ln1 * 0.25f + ln2 * 0.15f)
                            * cfg.walkBobIntensity * speed * sprintMult * 0.45f;
 
         // ── Roll ─────────────────────────────────────────────────────────────
-        float rn1 = rollNoise1.get(bobPhase * 0.6f);
-        float rn2 = rollNoise2.get(bobPhase * 0.4f);
+        float rn1 = rollNoise1.get(bobPhase * 0.6f, oct);
+        float rn2 = rollNoise2.get(bobPhase * 0.4f, oct);
         float rollBob = ((float) Math.sin(bobPhase * 2f) * 0.5f + rn1 * 0.35f + rn2 * 0.15f)
                         * cfg.walkBobIntensity * speed * sprintMult * 0.25f;
 

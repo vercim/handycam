@@ -45,6 +45,12 @@ public class HandycamConfigScreenNeoForge {
             .setDefaultValue(200)
             .setSaveConsumer(v -> cfg.masterIntensity = fromSlider(v))
             .build());
+        general.addEntry(e.startIntSlider(
+                Component.literal("Noise Octaves  " + cfg.noiseOctaves),
+                cfg.noiseOctaves, 1, 6)
+            .setDefaultValue(3)
+            .setSaveConsumer(v -> cfg.noiseOctaves = v)
+            .build());
         general.addEntry(e.startBooleanToggle(
                 Component.literal("Disable Vanilla Bob"), cfg.disableVanillaBob)
             .setDefaultValue(true)

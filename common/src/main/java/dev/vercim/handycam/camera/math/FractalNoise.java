@@ -19,18 +19,24 @@ public final class FractalNoise {
 
     /** Returns fBm value in approximately [-1, 1]. */
     public float get(float t) {
+        return get(t, octaves);
+    }
+
+    /** Returns fBm with up to {@code maxOctaves} octaves (clamped to constructor max). */
+    public float get(float t, int maxOctaves) {
+        int n = Math.max(1, Math.min(maxOctaves, octaves));
         float value = 0f;
         float amplitude = 1f;
         float freq = frequency;
         float maxValue = 0f;
 
-        for (int i = 0; i < octaves; i++) {
+        for (int i = 0; i < n; i++) {
             value += noise.get(t * freq) * amplitude;
             maxValue += amplitude;
             amplitude *= gain;
             freq *= lacunarity;
         }
 
-        return value / maxValue; // normalize to [-1, 1]
+        return value / maxValue;
     }
 }

@@ -27,10 +27,11 @@ public class IdleShakeLayer implements ShakeLayer {
         // Scale time by frequency so idleFrequency acts as a speed multiplier
         float t = time * cfg.idleFrequency;
 
+        int oct = cfg.noiseOctaves;
         return new CameraOffset(
-            noisePitch.get(t)          * intensity,
-            noiseYaw  .get(t + 100f)   * intensity,
-            noiseRoll .get(t + 200f)   * intensity * 0.4f  // roll is subtler
+            noisePitch.get(t,       oct) * intensity,
+            noiseYaw  .get(t + 100f, oct) * intensity,
+            noiseRoll .get(t + 200f, oct) * intensity * 0.4f
         );
     }
 }
