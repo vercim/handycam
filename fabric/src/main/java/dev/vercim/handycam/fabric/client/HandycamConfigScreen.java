@@ -63,9 +63,9 @@ public class HandycamConfigScreen {
             .setSaveConsumer(v -> cfg.idleFrequency = fromSlider(v))
             .build());
         idle.addEntry(e.startIntSlider(
-                Component.literal("Tremor Scale  " + fmt(cfg.idleTremorScale)),
+                Component.literal("Hand Tremor  " + fmt(cfg.idleTremorScale)),
                 toSlider(cfg.idleTremorScale), 0, 1000)
-            .setDefaultValue(500)
+            .setDefaultValue(80)
             .setSaveConsumer(v -> cfg.idleTremorScale = fromSlider(v))
             .build());
 
@@ -141,29 +141,26 @@ public class HandycamConfigScreen {
             .setSaveConsumer(v -> cfg.maxTurnRoll = fromSlider(v))
             .build());
 
-        // ── Forward Tilt ──────────────────────────────────────────────────────
-        ConfigCategory forward = builder.getOrCreateCategory(Component.literal("Forward Tilt"));
+        // ── Movement Tilt ─────────────────────────────────────────────────────
+        ConfigCategory moveTilt = builder.getOrCreateCategory(Component.literal("Movement Tilt"));
 
-        forward.addEntry(e.startBooleanToggle(Component.literal("Enabled"), cfg.forwardTiltEnabled)
+        moveTilt.addEntry(e.startBooleanToggle(Component.literal("Forward/Back Lean"), cfg.forwardTiltEnabled)
             .setDefaultValue(true)
             .setSaveConsumer(v -> cfg.forwardTiltEnabled = v)
             .build());
-        forward.addEntry(e.startIntSlider(
-                Component.literal("Intensity  " + fmt(cfg.forwardTiltIntensity)),
+        moveTilt.addEntry(e.startIntSlider(
+                Component.literal("Forward Intensity  " + fmt(cfg.forwardTiltIntensity)),
                 toSlider(cfg.forwardTiltIntensity), 0, 600)
             .setDefaultValue(300)
             .setSaveConsumer(v -> cfg.forwardTiltIntensity = fromSlider(v))
             .build());
 
-        // ── Strafe Tilt ───────────────────────────────────────────────────────
-        ConfigCategory strafe = builder.getOrCreateCategory(Component.literal("Strafe Tilt"));
-
-        strafe.addEntry(e.startBooleanToggle(Component.literal("Enabled"), cfg.strafeTiltEnabled)
+        moveTilt.addEntry(e.startBooleanToggle(Component.literal("Left/Right Lean"), cfg.strafeTiltEnabled)
             .setDefaultValue(true)
             .setSaveConsumer(v -> cfg.strafeTiltEnabled = v)
             .build());
-        strafe.addEntry(e.startIntSlider(
-                Component.literal("Intensity  " + fmt(cfg.strafeTiltIntensity)),
+        moveTilt.addEntry(e.startIntSlider(
+                Component.literal("Strafe Intensity  " + fmt(cfg.strafeTiltIntensity)),
                 toSlider(cfg.strafeTiltIntensity), 0, 600)
             .setDefaultValue(300)
             .setSaveConsumer(v -> cfg.strafeTiltIntensity = fromSlider(v))

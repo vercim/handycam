@@ -25,7 +25,7 @@ public class HandycamConfig {
     public boolean idleEnabled      = true;
     public float   idleIntensity    = 1.5f;
     public float   idleFrequency    = 0.5f;
-    public float   idleTremorScale  = 2.0f;  // tremor magnitude relative to breath (1=same)
+    public float   idleTremorScale  = 0.8f;  // tremor magnitude relative to breath (1=same)
 
     // ── Walk Bob ───────────────────────────────────────────────────────────
     public boolean walkBobEnabled      = true;
