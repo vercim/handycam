@@ -40,13 +40,13 @@ public class HandycamConfigScreenNeoForge {
         ConfigCategory general = builder.getOrCreateCategory(Component.literal("General"));
 
         general.addEntry(e.startIntSlider(
-                Component.literal("Master Intensity  " + fmt(cfg.masterIntensity)),
+                Component.literal("Global Intensity  " + fmt(cfg.masterIntensity)),
                 toSlider(cfg.masterIntensity), 0, 600)
             .setDefaultValue(200)
             .setSaveConsumer(v -> cfg.masterIntensity = fromSlider(v))
             .build());
         general.addEntry(e.startIntSlider(
-                Component.literal("Noise Octaves  " + cfg.noiseOctaves),
+                Component.literal("Detail Layers  " + cfg.noiseOctaves),
                 cfg.noiseOctaves, 1, 6)
             .setDefaultValue(3)
             .setSaveConsumer(v -> cfg.noiseOctaves = v)
@@ -91,19 +91,19 @@ public class HandycamConfigScreenNeoForge {
             .setSaveConsumer(v -> cfg.walkBobIntensity = fromSlider(v))
             .build());
         walkBob.addEntry(e.startIntSlider(
-                Component.literal("Frequency  " + fmt(cfg.walkBobFrequency)),
+                Component.literal("Step Frequency  " + fmt(cfg.walkBobFrequency)),
                 toSlider(cfg.walkBobFrequency), 20, 200)
             .setDefaultValue(90)
             .setSaveConsumer(v -> cfg.walkBobFrequency = fromSlider(v))
             .build());
         walkBob.addEntry(e.startIntSlider(
-                Component.literal("Vertical Scale  " + fmt(cfg.walkBobVerticalMult)),
+                Component.literal("Vertical Boost  " + fmt(cfg.walkBobVerticalMult)),
                 toSlider(cfg.walkBobVerticalMult), 50, 600)
             .setDefaultValue(250)
             .setSaveConsumer(v -> cfg.walkBobVerticalMult = fromSlider(v))
             .build());
         walkBob.addEntry(e.startIntSlider(
-                Component.literal("Sprint Multiplier  " + fmt(cfg.sprintBobMult)),
+                Component.literal("Sprint Boost  " + fmt(cfg.sprintBobMult)),
                 toSlider(cfg.sprintBobMult), 100, 500)
             .setDefaultValue(220)
             .setSaveConsumer(v -> cfg.sprintBobMult = fromSlider(v))
@@ -157,7 +157,7 @@ public class HandycamConfigScreenNeoForge {
             .setSaveConsumer(v -> cfg.forwardTiltEnabled = v)
             .build());
         moveTilt.addEntry(e.startIntSlider(
-                Component.literal("Forward Intensity  " + fmt(cfg.forwardTiltIntensity)),
+                Component.literal("Forward/Back Intensity  " + fmt(cfg.forwardTiltIntensity)),
                 toSlider(cfg.forwardTiltIntensity), 0, 600)
             .setDefaultValue(300)
             .setSaveConsumer(v -> cfg.forwardTiltIntensity = fromSlider(v))
@@ -168,7 +168,7 @@ public class HandycamConfigScreenNeoForge {
             .setSaveConsumer(v -> cfg.strafeTiltEnabled = v)
             .build());
         moveTilt.addEntry(e.startIntSlider(
-                Component.literal("Strafe Intensity  " + fmt(cfg.strafeTiltIntensity)),
+                Component.literal("Left/Right Intensity  " + fmt(cfg.strafeTiltIntensity)),
                 toSlider(cfg.strafeTiltIntensity), 0, 600)
             .setDefaultValue(300)
             .setSaveConsumer(v -> cfg.strafeTiltIntensity = fromSlider(v))
@@ -188,17 +188,17 @@ public class HandycamConfigScreenNeoForge {
             .setSaveConsumer(v -> cfg.crouchIntensity = fromSlider(v))
             .build());
 
-        // ── Mouse Lead ────────────────────────────────────────────────────────
-        ConfigCategory mouseLead = builder.getOrCreateCategory(Component.literal("Mouse Lead"));
+        // ── Crosshair Drift ───────────────────────────────────────────────────
+        ConfigCategory mouseLead = builder.getOrCreateCategory(Component.literal("Crosshair Drift"));
 
         mouseLead.addEntry(e.startBooleanToggle(Component.literal("Enabled"), cfg.mouseLeadEnabled)
             .setDefaultValue(true)
             .setSaveConsumer(v -> cfg.mouseLeadEnabled = v)
             .build());
         mouseLead.addEntry(e.startIntSlider(
-                Component.literal("Intensity  " + fmt(cfg.mouseLeadIntensity)),
+                Component.literal("Drift Amount  " + fmt(cfg.mouseLeadIntensity)),
                 toSlider(cfg.mouseLeadIntensity), 0, 100)
-            .setDefaultValue(15)
+            .setDefaultValue(30)
             .setSaveConsumer(v -> cfg.mouseLeadIntensity = fromSlider(v))
             .build());
 
