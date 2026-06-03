@@ -27,8 +27,8 @@ public class HandycamConfigScreen {
 
         general.addEntry(e.startIntSlider(
                 Component.literal("Master Intensity  " + fmt(cfg.masterIntensity)),
-                toSlider(cfg.masterIntensity), 0, 500)
-            .setDefaultValue(100)
+                toSlider(cfg.masterIntensity), 0, 600)
+            .setDefaultValue(200)
             .setSaveConsumer(v -> cfg.masterIntensity = fromSlider(v))
             .build());
         general.addEntry(e.startBooleanToggle(
