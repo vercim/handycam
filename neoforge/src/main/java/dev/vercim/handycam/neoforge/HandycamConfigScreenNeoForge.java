@@ -203,8 +203,8 @@ public class HandycamConfigScreenNeoForge {
             .build());
         mouseLead.addEntry(e.startIntSlider(
                 Component.literal("Intensity  " + fmt(cfg.mouseLeadIntensity)),
-                toSlider(cfg.mouseLeadIntensity), 0, 50)
-            .setDefaultValue(8)
+                toSlider(cfg.mouseLeadIntensity), 0, 100)
+            .setDefaultValue(50)
             .setSaveConsumer(v -> cfg.mouseLeadIntensity = fromSlider(v))
             .build());
 
