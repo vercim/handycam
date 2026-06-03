@@ -34,14 +34,10 @@ public class JumpShakeLayer implements ShakeLayer {
         HandycamConfig cfg = HandycamConfig.get();
         if (!cfg.jumpEnabled) return;
 
-        float intensity = cfg.jumpIntensity * cfg.masterIntensity;
-
-        // Upward kick: pitch up (camera looks up slightly)
-        pitchTarget = intensity * 0.6f;
-        // Subtle roll wobble on jump
-        rollTarget  = intensity * 0.2f;
-        // Minor yaw variation
-        yawTarget   = intensity * 0.15f;
+        // Normalized targets — intensity applied each frame in compute()
+        pitchTarget = 0.6f;
+        rollTarget  = 0.2f;
+        yawTarget   = 0.15f;
     }
 
     @Override
@@ -59,7 +55,8 @@ public class JumpShakeLayer implements ShakeLayer {
         rollTarget  *= (float) Math.exp(-dt * decayRate);
         yawTarget   *= (float) Math.exp(-dt * decayRate);
 
-        float m = cfg.masterIntensity;
-        return new CameraOffset(pitch * m, yaw * m, roll * m);
+        // Intensity читается каждый кадр — слайдер применяется мгновенно
+        float intensity = cfg.jumpIntensity * cfg.masterIntensity;
+        return new CameraOffset(pitch * intensity, yaw * intensity, roll * intensity);
     }
 }
