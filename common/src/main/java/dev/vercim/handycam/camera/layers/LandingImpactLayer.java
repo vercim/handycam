@@ -17,6 +17,7 @@ public class LandingImpactLayer implements ShakeLayer {
     private final SpringSimulator rollSpring  = new SpringSimulator(140f, 24f);
     private final SpringSimulator yawSpring   = new SpringSimulator(140f, 24f);
 
+    // Normalized targets (0..1 range), config values applied in compute()
     private float pitchTarget = 0f;
     private float rollTarget  = 0f;
     private float yawTarget   = 0f;
@@ -39,14 +40,15 @@ public class LandingImpactLayer implements ShakeLayer {
         HandycamConfig cfg = HandycamConfig.get();
         if (!cfg.landingEnabled) return;
 
+        // Normalized strength [0..1] — config values applied each frame in compute()
         float strength = 1f - (float) Math.exp(-fallDistance / 7f);
-        strength = Math.min(strength, 1f) * cfg.landingIntensity;
+        strength = Math.min(strength, 1f);
 
         side = -side;
 
-        pitchTarget = -strength * cfg.landingPitchMax;
-        rollTarget  =  side * strength * cfg.landingRollMax;
-        yawTarget   =  side * strength * cfg.landingYawMax * 0.5f;
+        pitchTarget = -strength;
+        rollTarget  =  side * strength;
+        yawTarget   =  side * strength * 0.5f;
     }
 
     @Override
@@ -59,12 +61,16 @@ public class LandingImpactLayer implements ShakeLayer {
         float yaw   = yawSpring  .update(yawTarget,   dt);
 
         // Decay targets toward 0 so springs have a destination to return to.
-        // τ = 0.12 s for pitch (snappy), 0.18 s for roll/yaw (linger a bit).
         pitchTarget *= (float) Math.exp(-dt / 0.12f);
         rollTarget  *= (float) Math.exp(-dt / 0.18f);
         yawTarget   *= (float) Math.exp(-dt / 0.18f);
 
-        float m = cfg.masterIntensity;
-        return new CameraOffset(pitch * m, yaw * m, roll * m);
+        // Config values applied every frame — слайдеры работают мгновенно
+        float i = cfg.landingIntensity * cfg.masterIntensity;
+        return new CameraOffset(
+            pitch * i * cfg.landingPitchMax,
+            yaw   * i * cfg.landingYawMax,
+            roll  * i * cfg.landingRollMax
+        );
     }
 }
