@@ -70,11 +70,11 @@ public class HandycamConfig {
 
     // ── Crouch ─────────────────────────────────────────────────────────────
     public boolean crouchEnabled   = true;
-    public float   crouchIntensity = 1.2f;
+    public float   crouchIntensity = 2.6f;
 
     // ── Mouse Lead ─────────────────────────────────────────────────────────
     public boolean mouseLeadEnabled   = true;
-    public float   mouseLeadIntensity = 0.5f;  // crosshair lead: visible but not overdone
+    public float   mouseLeadIntensity = 1.8f;  // crosshair lead: camera moves ahead of mouse turn
 
     // ── Hit Impact ─────────────────────────────────────────────────────────
     public boolean hitEnabled   = true;

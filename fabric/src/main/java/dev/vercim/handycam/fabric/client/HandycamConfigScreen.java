@@ -176,7 +176,7 @@ public class HandycamConfigScreen {
         crouch.addEntry(e.startIntSlider(
                 Component.literal("Intensity  " + fmt(cfg.crouchIntensity)),
                 toSlider(cfg.crouchIntensity), 0, 400)
-            .setDefaultValue(120)
+            .setDefaultValue(260)
             .setSaveConsumer(v -> cfg.crouchIntensity = fromSlider(v))
             .build());
 
@@ -189,8 +189,8 @@ public class HandycamConfigScreen {
             .build());
         mouseLead.addEntry(e.startIntSlider(
                 Component.literal("Intensity  " + fmt(cfg.mouseLeadIntensity)),
-                toSlider(cfg.mouseLeadIntensity), 0, 100)
-            .setDefaultValue(50)
+                toSlider(cfg.mouseLeadIntensity), 0, 300)
+            .setDefaultValue(180)
             .setSaveConsumer(v -> cfg.mouseLeadIntensity = fromSlider(v))
             .build());
 
