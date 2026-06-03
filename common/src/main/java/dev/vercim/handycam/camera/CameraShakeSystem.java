@@ -13,10 +13,12 @@ public final class CameraShakeSystem {
     // ── Layers ─────────────────────────────────────────────────────────────
     private static final LandingImpactLayer LANDING = new LandingImpactLayer();
     private static final DamageShakeLayer   DAMAGE  = new DamageShakeLayer();
+    private static final JumpShakeLayer     JUMP    = new JumpShakeLayer();
 
     private static final List<ShakeLayer> LAYERS = List.of(
         new IdleShakeLayer(),
         new WalkBobLayer(),
+        JUMP,
         LANDING,
         DAMAGE,
         new SprintSwayLayer()
