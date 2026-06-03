@@ -42,9 +42,9 @@ public class StrafeTiltLayer implements ShakeLayer {
         float sprintMult = state.isSprinting ? 1.4f : 1.0f;
         float i = cfg.strafeTiltIntensity * sprintMult;
 
-        // Strafe right → lean right (negative roll = tilt right in MC camera space)
-        float targetRoll = -smoothStrafe * i;
-        float targetYaw  =  smoothStrafe * i * 0.25f;
+        // Strafe right → lean right (positive roll)
+        float targetRoll =  smoothStrafe * i;
+        float targetYaw  = -smoothStrafe * i * 0.25f;
 
         float roll = rollSpring.update(targetRoll, dt);
         float yaw  = yawSpring .update(targetYaw,  dt);

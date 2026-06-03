@@ -22,10 +22,9 @@ public class WalkBobLayer implements ShakeLayer {
     private final FractalNoise rollNoise2 = new FractalNoise(0xDECAFBADL, 2, 0.8f, 0.5f);
 
     private float bobPhase    = 0f;
-    // Smooth blend factor: 1 = on ground, 0 = in air.
-    // Updated per-frame in compute() with real dt for smooth interpolation at any fps.
-    private float groundBlend  = 1f;
-    private boolean onGround   = true;
+    private float groundBlend = 1f;
+    private float smoothSpeed = 0f;  // low-pass on horizontalSpeed — no 20Hz amplitude steps
+    private boolean onGround  = true;
 
     @Override
     public void tick(PlayerState state) {
@@ -46,14 +45,15 @@ public class WalkBobLayer implements ShakeLayer {
 
         if (!cfg.walkBobEnabled || groundBlend < 0.001f) return CameraOffset.ZERO;
 
-        float speed = state.horizontalSpeed;
-        if (speed < 0.05f) return CameraOffset.ZERO;
+        // Smooth speed — prevents 20Hz amplitude stepping when starting/stopping
+        smoothSpeed += (state.horizontalSpeed - smoothSpeed) * (1f - (float) Math.exp(-dt / 0.05f));
+        if (smoothSpeed < 0.01f) return CameraOffset.ZERO;
 
         float sprintMult = state.isSprinting ? cfg.sprintBobMult : 1.0f;
 
         // Phase advances here at full framerate — no 20Hz stepping
         if (onGround) {
-            bobPhase += speed * (state.isSprinting ? 1.7f : 1.0f)
+            bobPhase += smoothSpeed * (state.isSprinting ? 1.7f : 1.0f)
                         * cfg.walkBobFrequency * TWO_PI * dt;
         }
         int oct = cfg.noiseOctaves;
@@ -63,20 +63,20 @@ public class WalkBobLayer implements ShakeLayer {
         float vn1 = vertNoise1.get(bobPhase * 0.5f,  oct);
         float vn2 = vertNoise2.get(bobPhase * 0.25f, oct);
         float verticalBob = -(baseBob * 0.6f + vn1 * 0.25f + vn2 * 0.15f)
-                            * cfg.walkBobIntensity * cfg.walkBobVerticalMult * speed * sprintMult;
+                            * cfg.walkBobIntensity * cfg.walkBobVerticalMult * smoothSpeed * sprintMult;
 
         // ── Lateral sway ────────────────────────────────────────────────────
         float baseSway = (float) Math.sin(bobPhase * 2f);
         float ln1 = latNoise1.get(bobPhase * 0.7f,  oct);
         float ln2 = latNoise2.get(bobPhase * 0.35f, oct);
         float lateralBob = (baseSway * 0.6f + ln1 * 0.25f + ln2 * 0.15f)
-                           * cfg.walkBobIntensity * speed * sprintMult * 0.45f;
+                           * cfg.walkBobIntensity * smoothSpeed * sprintMult * 0.45f;
 
         // ── Roll ─────────────────────────────────────────────────────────────
         float rn1 = rollNoise1.get(bobPhase * 0.6f, oct);
         float rn2 = rollNoise2.get(bobPhase * 0.4f, oct);
         float rollBob = ((float) Math.sin(bobPhase * 2f) * 0.5f + rn1 * 0.35f + rn2 * 0.15f)
-                        * cfg.walkBobIntensity * speed * sprintMult * 0.25f;
+                        * cfg.walkBobIntensity * smoothSpeed * sprintMult * 0.25f;
 
         float master = cfg.masterIntensity * groundBlend;
         return new CameraOffset(
