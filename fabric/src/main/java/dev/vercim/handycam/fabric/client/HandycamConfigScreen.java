@@ -66,8 +66,8 @@ public class HandycamConfigScreen {
             .build());
         walkBob.addEntry(e.startIntSlider(
                 Component.literal("Intensity  " + fmt(cfg.walkBobIntensity)),
-                toSlider(cfg.walkBobIntensity), 0, 400)
-            .setDefaultValue(140)
+                toSlider(cfg.walkBobIntensity), 0, 500)
+            .setDefaultValue(250)
             .setSaveConsumer(v -> cfg.walkBobIntensity = fromSlider(v))
             .build());
         walkBob.addEntry(e.startIntSlider(
@@ -75,6 +75,12 @@ public class HandycamConfigScreen {
                 toSlider(cfg.walkBobFrequency), 50, 200)
             .setDefaultValue(160)
             .setSaveConsumer(v -> cfg.walkBobFrequency = fromSlider(v))
+            .build());
+        walkBob.addEntry(e.startIntSlider(
+                Component.literal("Sprint Multiplier  " + fmt(cfg.sprintBobMult)),
+                toSlider(cfg.sprintBobMult), 100, 500)
+            .setDefaultValue(220)
+            .setSaveConsumer(v -> cfg.sprintBobMult = fromSlider(v))
             .build());
 
         // ── Landing ───────────────────────────────────────────────────────────
