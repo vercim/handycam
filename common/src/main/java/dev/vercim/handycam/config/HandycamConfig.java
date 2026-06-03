@@ -33,7 +33,7 @@ public class HandycamConfig {
 
     // ── Landing ────────────────────────────────────────────────────────────
     public boolean landingEnabled   = true;
-    public float   landingIntensity = 1.0f;   // overall multiplier
+    public float   landingIntensity = 2.0f;   // overall multiplier
     public float   landingPitchMax  = 9.0f;   // max degrees of downward pitch slam
     public float   landingRollMax   = 3.5f;   // max degrees of sideways roll
     public float   landingYawMax    = 2.5f;   // max degrees of yaw jitter
@@ -53,8 +53,8 @@ public class HandycamConfig {
 
     // ── Jump ───────────────────────────────────────────────────────────────
     public boolean jumpEnabled   = true;
-    public float   jumpIntensity = 1.8f;   // degrees of pitch kick on jump
-    public float   jumpDecay     = 5.0f;   // trauma/sec decay (slower = lingers longer)
+    public float   jumpIntensity = 4.0f;   // degrees of pitch kick on jump
+    public float   jumpDecay     = 4.0f;   // decay rate (lower = longer impulse)
 
     // ── Hit Impact ─────────────────────────────────────────────────────────
     public boolean hitEnabled   = true;
