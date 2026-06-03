@@ -10,102 +10,125 @@ import net.minecraft.network.chat.Component;
 
 public class HandycamConfigScreen {
 
-    // Слайдер для float: значение * 100 -> int, отображаем как float с двумя знаками
     private static int toSlider(float v) { return Math.round(v * 100f); }
     private static float fromSlider(int v) { return v / 100f; }
+    private static String fmt(float v) { return String.format("%.2f", v); }
 
     public static Screen create(Screen parent) {
         ConfigBuilder builder = ConfigBuilder.create()
             .setParentScreen(parent)
             .setTitle(Component.literal("Handycam Settings"));
 
-        HandycamConfig config = HandycamConfig.get();
+        HandycamConfig cfg = HandycamConfig.get();
         ConfigEntryBuilder e = builder.entryBuilder();
 
-        // ── Вкладка General ───────────────────────────────────────────────────
+        // ── General ───────────────────────────────────────────────────────────
         ConfigCategory general = builder.getOrCreateCategory(Component.literal("General"));
 
         general.addEntry(e.startIntSlider(
-                Component.literal("Master Intensity  " + String.format("%.2f", config.masterIntensity)),
-                toSlider(config.masterIntensity), 0, 500)
+                Component.literal("Master Intensity  " + fmt(cfg.masterIntensity)),
+                toSlider(cfg.masterIntensity), 0, 500)
             .setDefaultValue(100)
-            .setSaveConsumer(v -> config.masterIntensity = fromSlider(v))
+            .setSaveConsumer(v -> cfg.masterIntensity = fromSlider(v))
             .build());
-
         general.addEntry(e.startBooleanToggle(
-                Component.literal("Disable Vanilla Bob"), config.disableVanillaBob)
+                Component.literal("Disable Vanilla Bob"), cfg.disableVanillaBob)
             .setDefaultValue(true)
-            .setSaveConsumer(v -> config.disableVanillaBob = v)
+            .setSaveConsumer(v -> cfg.disableVanillaBob = v)
             .build());
 
-        // ── Вкладка Shake ─────────────────────────────────────────────────────
-        ConfigCategory shake = builder.getOrCreateCategory(Component.literal("Shake"));
+        // ── Idle ──────────────────────────────────────────────────────────────
+        ConfigCategory idle = builder.getOrCreateCategory(Component.literal("Idle"));
 
-        shake.addEntry(e.startBooleanToggle(Component.literal("Idle Enabled"), config.idleEnabled)
+        idle.addEntry(e.startBooleanToggle(Component.literal("Enabled"), cfg.idleEnabled)
             .setDefaultValue(true)
-            .setSaveConsumer(v -> config.idleEnabled = v)
+            .setSaveConsumer(v -> cfg.idleEnabled = v)
             .build());
-        shake.addEntry(e.startIntSlider(
-                Component.literal("Idle Intensity  " + String.format("%.2f", config.idleIntensity)),
-                toSlider(config.idleIntensity), 0, 300)
+        idle.addEntry(e.startIntSlider(
+                Component.literal("Intensity  " + fmt(cfg.idleIntensity)),
+                toSlider(cfg.idleIntensity), 0, 300)
             .setDefaultValue(150)
-            .setSaveConsumer(v -> config.idleIntensity = fromSlider(v))
+            .setSaveConsumer(v -> cfg.idleIntensity = fromSlider(v))
             .build());
-        shake.addEntry(e.startIntSlider(
-                Component.literal("Idle Frequency  " + String.format("%.2f", config.idleFrequency)),
-                toSlider(config.idleFrequency), 10, 200)
+        idle.addEntry(e.startIntSlider(
+                Component.literal("Frequency  " + fmt(cfg.idleFrequency)),
+                toSlider(cfg.idleFrequency), 10, 200)
             .setDefaultValue(50)
-            .setSaveConsumer(v -> config.idleFrequency = fromSlider(v))
+            .setSaveConsumer(v -> cfg.idleFrequency = fromSlider(v))
             .build());
 
-        shake.addEntry(e.startBooleanToggle(Component.literal("Walk Bob Enabled"), config.walkBobEnabled)
+        // ── Walk Bob ──────────────────────────────────────────────────────────
+        ConfigCategory walkBob = builder.getOrCreateCategory(Component.literal("Walk Bob"));
+
+        walkBob.addEntry(e.startBooleanToggle(Component.literal("Enabled"), cfg.walkBobEnabled)
             .setDefaultValue(true)
-            .setSaveConsumer(v -> config.walkBobEnabled = v)
+            .setSaveConsumer(v -> cfg.walkBobEnabled = v)
             .build());
-        shake.addEntry(e.startIntSlider(
-                Component.literal("Walk Bob Intensity  " + String.format("%.2f", config.walkBobIntensity)),
-                toSlider(config.walkBobIntensity), 0, 400)
+        walkBob.addEntry(e.startIntSlider(
+                Component.literal("Intensity  " + fmt(cfg.walkBobIntensity)),
+                toSlider(cfg.walkBobIntensity), 0, 400)
             .setDefaultValue(140)
-            .setSaveConsumer(v -> config.walkBobIntensity = fromSlider(v))
+            .setSaveConsumer(v -> cfg.walkBobIntensity = fromSlider(v))
             .build());
-        shake.addEntry(e.startIntSlider(
-                Component.literal("Walk Bob Frequency  " + String.format("%.2f", config.walkBobFrequency)),
-                toSlider(config.walkBobFrequency), 50, 200)
+        walkBob.addEntry(e.startIntSlider(
+                Component.literal("Frequency  " + fmt(cfg.walkBobFrequency)),
+                toSlider(cfg.walkBobFrequency), 50, 200)
             .setDefaultValue(160)
-            .setSaveConsumer(v -> config.walkBobFrequency = fromSlider(v))
+            .setSaveConsumer(v -> cfg.walkBobFrequency = fromSlider(v))
             .build());
 
-        shake.addEntry(e.startBooleanToggle(Component.literal("Landing Enabled"), config.landingEnabled)
+        // ── Landing ───────────────────────────────────────────────────────────
+        ConfigCategory landing = builder.getOrCreateCategory(Component.literal("Landing"));
+
+        landing.addEntry(e.startBooleanToggle(Component.literal("Enabled"), cfg.landingEnabled)
             .setDefaultValue(true)
-            .setSaveConsumer(v -> config.landingEnabled = v)
+            .setSaveConsumer(v -> cfg.landingEnabled = v)
             .build());
-        shake.addEntry(e.startIntSlider(
-                Component.literal("Landing Intensity  " + String.format("%.2f", config.landingIntensity)),
-                toSlider(config.landingIntensity), 0, 300)
+        landing.addEntry(e.startIntSlider(
+                Component.literal("Intensity  " + fmt(cfg.landingIntensity)),
+                toSlider(cfg.landingIntensity), 0, 300)
             .setDefaultValue(100)
-            .setSaveConsumer(v -> config.landingIntensity = fromSlider(v))
+            .setSaveConsumer(v -> cfg.landingIntensity = fromSlider(v))
             .build());
 
-        shake.addEntry(e.startBooleanToggle(Component.literal("Damage Enabled"), config.damageEnabled)
+        // ── Damage ────────────────────────────────────────────────────────────
+        ConfigCategory damage = builder.getOrCreateCategory(Component.literal("Damage"));
+
+        damage.addEntry(e.startBooleanToggle(Component.literal("Enabled"), cfg.damageEnabled)
             .setDefaultValue(true)
-            .setSaveConsumer(v -> config.damageEnabled = v)
+            .setSaveConsumer(v -> cfg.damageEnabled = v)
             .build());
-        shake.addEntry(e.startIntSlider(
-                Component.literal("Damage Intensity  " + String.format("%.2f", config.damageIntensity)),
-                toSlider(config.damageIntensity), 0, 300)
+        damage.addEntry(e.startIntSlider(
+                Component.literal("Intensity  " + fmt(cfg.damageIntensity)),
+                toSlider(cfg.damageIntensity), 0, 300)
             .setDefaultValue(150)
-            .setSaveConsumer(v -> config.damageIntensity = fromSlider(v))
+            .setSaveConsumer(v -> cfg.damageIntensity = fromSlider(v))
+            .build());
+        damage.addEntry(e.startIntSlider(
+                Component.literal("Decay  " + fmt(cfg.damageDecay)),
+                toSlider(cfg.damageDecay), 10, 500)
+            .setDefaultValue(120)
+            .setSaveConsumer(v -> cfg.damageDecay = fromSlider(v))
             .build());
 
-        shake.addEntry(e.startBooleanToggle(Component.literal("Sprint Enabled"), config.sprintEnabled)
+        // ── Sprint ────────────────────────────────────────────────────────────
+        ConfigCategory sprint = builder.getOrCreateCategory(Component.literal("Sprint"));
+
+        sprint.addEntry(e.startBooleanToggle(Component.literal("Enabled"), cfg.sprintEnabled)
             .setDefaultValue(true)
-            .setSaveConsumer(v -> config.sprintEnabled = v)
+            .setSaveConsumer(v -> cfg.sprintEnabled = v)
             .build());
-        shake.addEntry(e.startIntSlider(
-                Component.literal("Turn Sway  " + String.format("%.2f", config.turnSway)),
-                toSlider(config.turnSway), 0, 50)
+        sprint.addEntry(e.startIntSlider(
+                Component.literal("Turn Sway  " + fmt(cfg.turnSway)),
+                toSlider(cfg.turnSway), 0, 50)
             .setDefaultValue(8)
-            .setSaveConsumer(v -> config.turnSway = fromSlider(v))
+            .setSaveConsumer(v -> cfg.turnSway = fromSlider(v))
+            .build());
+        sprint.addEntry(e.startIntSlider(
+                Component.literal("Max Turn Roll  " + fmt(cfg.maxTurnRoll)),
+                toSlider(cfg.maxTurnRoll), 0, 500)
+            .setDefaultValue(250)
+            .setSaveConsumer(v -> cfg.maxTurnRoll = fromSlider(v))
             .build());
 
         builder.setDefaultBackgroundTexture(null);
