@@ -31,6 +31,9 @@ public final class PlayerState {
         float turnRate    = currentYRot - prevYRot;
         while (turnRate >  180f) turnRate -= 360f;
         while (turnRate < -180f) turnRate += 360f;
+        // Clamp to prevent massive spike after alt-tab / focus loss
+        if (turnRate >  20f) turnRate =  20f;
+        if (turnRate < -20f) turnRate = -20f;
         prevYRot = currentYRot;
 
         return new PlayerState(hSpeed, dy, player.isSprinting(), player.onGround(), turnRate);
