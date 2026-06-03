@@ -74,7 +74,7 @@ public class HandycamConfig {
 
     // ── Mouse Lead ─────────────────────────────────────────────────────────
     public boolean mouseLeadEnabled   = true;
-    public float   mouseLeadIntensity = 0.08f; // small — just a subtle pull-ahead
+    public float   mouseLeadIntensity = 0.5f;  // crosshair lead: visible but not overdone
 
     // ── Hit Impact ─────────────────────────────────────────────────────────
     public boolean hitEnabled   = true;
