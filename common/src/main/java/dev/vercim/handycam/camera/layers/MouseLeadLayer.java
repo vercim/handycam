@@ -38,13 +38,13 @@ public class MouseLeadLayer implements ShakeLayer {
             return CameraOffset.ZERO;
         }
 
-        // Low-pass on mouse turn/pitch deltas (τ = 90ms — smooth, no jerkiness)
-        float tauMouse = 0.09f;
+        // Low-pass on mouse turn/pitch deltas — smooth, no jerkiness
+        float tauMouse = cfg.mouseSwaySmoothing;
         float aMouse   = 1f - (float) Math.exp(-dt / tauMouse);
         smoothYaw   += (state.turnRate   - smoothYaw)   * aMouse;
         smoothPitch += (state.pitchDelta - smoothPitch) * aMouse;
 
-        // Low-pass on vertical velocity (τ = 120ms — very smooth for jump/fall)
+        // Low-pass on vertical velocity — very smooth for jump/fall
         // verticalVelocity: positive = up (jump), negative = falling
         // We invert: jumping → crosshair up (-Y), falling → crosshair down (+Y)
         float tauVert = 0.12f;
@@ -54,7 +54,7 @@ public class MouseLeadLayer implements ShakeLayer {
         smoothVertical += (vyDeg - smoothVertical) * aVert;
 
         // Scale to pixels
-        float swayScale   = cfg.mouseLeadIntensity * cfg.masterIntensity;
+        float swayScale   = cfg.mouseSwayScale * cfg.masterIntensity;
         float driftScale  = cfg.verticalDriftIntensity * cfg.masterIntensity;
 
         // Turning right → crosshair drifts right (+X)

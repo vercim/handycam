@@ -21,14 +21,15 @@ public class WalkBobLayer implements ShakeLayer {
     private final FractalNoise rollNoise1 = new FractalNoise(0xBEEFC0DEL, 3, 0.3f, 0.6f);
     private final FractalNoise rollNoise2 = new FractalNoise(0xDECAFBADL, 2, 0.8f, 0.5f);
 
-    private float bobPhase    = 0f;
-    private float groundBlend = 1f;
-    private float smoothSpeed = 0f;  // low-pass on horizontalSpeed — no 20Hz amplitude steps
-    private boolean onGround  = true;
+    private float bobPhase      = 0f;
+    private float groundBlend   = 1f;
+    private float airBlend      = 0f;   // накопленное время в воздухе (для плавного fade-out фазы)
+    private float smoothSpeed   = 0f;
+    private float phaseSpeed    = 0f;   // low-pass на скорости самой фазы — инерция при прыжке
+    private boolean onGround    = true;
 
     @Override
     public void tick(PlayerState state) {
-        // Only track ground state for the blend — phase advances in compute() with real dt
         onGround = state.isOnGround;
     }
 
@@ -36,46 +37,55 @@ public class WalkBobLayer implements ShakeLayer {
     public CameraOffset compute(PlayerState state, float time, float dt) {
         HandycamConfig cfg = HandycamConfig.get();
 
-        // Both groundBlend and bobPhase advance with real frame dt — smooth at any fps
         if (onGround) {
-            groundBlend = Math.min(groundBlend + dt / 0.12f, 1f);
+            groundBlend = Math.min(groundBlend + dt / 0.10f, 1f);
+            airBlend    = 0f;
         } else {
-            groundBlend = Math.max(groundBlend - dt / 0.07f, 0f);
+            // airBlend нарастает — чем дольше в воздухе тем сильнее fade
+            airBlend    = Math.min(airBlend + dt / 0.18f, 1f);
+            groundBlend = Math.max(1f - airBlend, 0f);
         }
 
         if (!cfg.walkBobEnabled || groundBlend < 0.001f) return CameraOffset.ZERO;
 
-        // Smooth speed — prevents 20Hz amplitude stepping when starting/stopping
+        // Smooth speed
         smoothSpeed += (state.horizontalSpeed - smoothSpeed) * (1f - (float) Math.exp(-dt / 0.05f));
-        if (smoothSpeed < 0.01f) return CameraOffset.ZERO;
+
+        float targetPhaseSpeed = smoothSpeed * (state.isSprinting ? 1.7f : 1.0f)
+                                 * cfg.walkBobFrequency * TWO_PI;
+        // Инерция скорости фазы: при прыжке/остановке фаза не рвётся, а плавно тормозит
+        phaseSpeed += (targetPhaseSpeed * groundBlend - phaseSpeed) * (1f - (float) Math.exp(-dt / 0.08f));
+
+        bobPhase += phaseSpeed * dt;
+
+        if (phaseSpeed < 0.01f && groundBlend < 0.01f) return CameraOffset.ZERO;
 
         float sprintMult = state.isSprinting ? cfg.sprintBobMult : 1.0f;
-
-        // Phase advances here at full framerate — no 20Hz stepping
-        if (onGround) {
-            bobPhase += smoothSpeed * (state.isSprinting ? 1.7f : 1.0f)
-                        * cfg.walkBobFrequency * TWO_PI * dt;
-        }
         int oct = cfg.noiseOctaves;
 
-        // ── Vertical bob ────────────────────────────────────────────────────
-        float baseBob = (float) Math.abs(Math.sin(bobPhase));
+        // ── Vertical bob ─────────────────────────────────────────────────────
+        // sin²(phase) = (1 - cos(2·phase)) / 2 — всегда ≥ 0, гладкая, без острых изломов.
+        // Частота двойная относительно lateral → два "толчка" на один шаг влево-вправо.
+        float sinP   = (float) Math.sin(bobPhase);
+        float baseBob = sinP * sinP;  // sin²: гладко, без abs-излома
         float vn1 = vertNoise1.get(bobPhase * 0.5f,  oct);
         float vn2 = vertNoise2.get(bobPhase * 0.25f, oct);
-        float verticalBob = -(baseBob * 0.6f + vn1 * 0.25f + vn2 * 0.15f)
+        float verticalBob = -(baseBob * 0.65f + vn1 * 0.22f + vn2 * 0.13f)
                             * cfg.walkBobIntensity * cfg.walkBobVerticalMult * smoothSpeed * sprintMult;
 
-        // ── Lateral sway ────────────────────────────────────────────────────
-        float baseSway = (float) Math.sin(bobPhase * 2f);
-        float ln1 = latNoise1.get(bobPhase * 0.7f,  oct);
-        float ln2 = latNoise2.get(bobPhase * 0.35f, oct);
-        float lateralBob = (baseSway * 0.6f + ln1 * 0.25f + ln2 * 0.15f)
+        // ── Lateral sway ──────────────────────────────────────────────────────
+        // sin(phase) — половинная частота относительно вертикали → нет кружения.
+        float baseSway = (float) Math.sin(bobPhase * 0.5f);
+        float ln1 = latNoise1.get(bobPhase * 0.35f, oct);
+        float ln2 = latNoise2.get(bobPhase * 0.18f, oct);
+        float lateralBob = (baseSway * 0.65f + ln1 * 0.22f + ln2 * 0.13f)
                            * cfg.walkBobIntensity * smoothSpeed * sprintMult * 0.45f;
 
-        // ── Roll ─────────────────────────────────────────────────────────────
-        float rn1 = rollNoise1.get(bobPhase * 0.6f, oct);
-        float rn2 = rollNoise2.get(bobPhase * 0.4f, oct);
-        float rollBob = ((float) Math.sin(bobPhase * 2f) * 0.5f + rn1 * 0.35f + rn2 * 0.15f)
+        // ── Roll ───────────────────────────────────────────────────────────────
+        // Следует за lateral с тем же знаком — камера "кренится" в сторону шага.
+        float rn1 = rollNoise1.get(bobPhase * 0.3f, oct);
+        float rn2 = rollNoise2.get(bobPhase * 0.2f, oct);
+        float rollBob = (baseSway * 0.55f + rn1 * 0.30f + rn2 * 0.15f)
                         * cfg.walkBobIntensity * smoothSpeed * sprintMult * 0.25f;
 
         float master = cfg.masterIntensity * groundBlend;

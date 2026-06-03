@@ -6,7 +6,7 @@ license = "MIT"
 modId = "handycam"
 version = "${version}"
 displayName = "Handycam"
-displayURL = "https://github.com/vercim/handycam-mod"
+displayURL = "https://modrinth.com/mod/handycam"
 authors = "vercim"
 description = '''
 Cinematic camera shake for Minecraft — idle drift, walk bob, landing impact, damage hit, and sprint sway.
@@ -30,6 +30,13 @@ side = "CLIENT"
 modId = "architectury"
 type = "required"
 versionRange = "[15.0.3,)"
+ordering = "AFTER"
+side = "CLIENT"
+
+[[dependencies.handycam]]
+modId = "cloth_config"
+type = "required"
+versionRange = "[17,)"
 ordering = "AFTER"
 side = "CLIENT"
 

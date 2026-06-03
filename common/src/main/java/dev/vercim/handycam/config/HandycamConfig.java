@@ -19,16 +19,16 @@ public class HandycamConfig {
 
     // ── Master ─────────────────────────────────────────────────────────────
     public float masterIntensity = 2.0f;
-    public int   noiseOctaves    = 3;    // max octave layers for all FractalNoise (1–6)
+    public int   noiseOctaves    = 4;    // max octave layers for all FractalNoise (1–6)
 
     // ── Idle ───────────────────────────────────────────────────────────────
     public boolean idleEnabled      = true;
     public float   idleIntensity    = 1.5f;
     public float   idleFrequency    = 0.5f;
-    public float   idleTremorScale  = 0.8f;  // tremor magnitude relative to breath (1=same)
+    public float   idleTremorScale  = 0.75f;  // tremor magnitude relative to breath (1=same)
 
     // ── Walk Bob ───────────────────────────────────────────────────────────
-    public boolean walkBobEnabled      = true;
+    public boolean walkBobEnabled      = false;
     public float   walkBobIntensity    = 2.5f;  // degrees per axis at full speed
     public float   walkBobFrequency    = 0.9f;  // Hz at speed=1.0
     public float   walkBobVerticalMult = 2.5f;  // vertical scale relative to other axes
@@ -37,50 +37,53 @@ public class HandycamConfig {
 
     // ── Landing ────────────────────────────────────────────────────────────
     public boolean landingEnabled   = true;
-    public float   landingIntensity = 2.0f;   // overall multiplier
+    public float   landingIntensity = 3.85f;   // overall multiplier
     public float   landingPitchMax  = 9.0f;   // max degrees of downward pitch slam
     public float   landingRollMax   = 3.5f;   // max degrees of sideways roll
     public float   landingYawMax    = 2.5f;   // max degrees of yaw jitter
 
     // ── Damage ─────────────────────────────────────────────────────────────
     public boolean damageEnabled   = true;
-    public float   damageIntensity = 1.5f;
-    public float   damageDecay     = 1.2f;
+    public float   damageIntensity = 4.0f;
+    public float   damageDecay     = 2.5f;
 
     // ── Sprint / Sway ──────────────────────────────────────────────────────
-    public boolean sprintEnabled  = true;
-    public float   turnSway       = 0.08f;  // roll per degree/tick of yaw turn
-    public float   maxTurnRoll    = 2.5f;   // clamp on turn-induced roll (degrees)
-    public float   swayYawLag     = 0.06f;  // yaw inertia coefficient
-    public float   swayPitchLag   = 3.0f;   // pitch inertia for vertical movement
-                                             // jump vy ≈ 0.42 → ~1.3° pitch lag
+    public float   turnSway           = 0.08f;  // roll per degree/tick of yaw turn
+    public float   maxTurnRoll        = 2.5f;   // clamp on turn-induced roll (degrees)
+    public boolean cameraSwayEnabled  = true;   // turn roll + yaw/pitch inertia on mouse movement
+    public boolean cameraSwayLead     = true;   // true = lead (опережение), false = lag (отставание)
+    public float   swayYawLag         = 0.08f;  // yaw inertia coefficient
+    public float   swayPitchLag       = 0.14f;  // pitch inertia coefficient
 
     // ── Jump ───────────────────────────────────────────────────────────────
     public boolean jumpEnabled   = true;
-    public float   jumpIntensity = 4.0f;   // degrees of pitch kick on jump
-    public float   jumpDecay     = 4.0f;   // decay rate (lower = longer impulse)
+    public float   jumpIntensity = 4.1f;   // degrees of pitch kick on jump
+    public float   jumpDecay     = 5.1f;   // decay rate (lower = longer impulse)
 
     // ── Strafe Tilt ────────────────────────────────────────────────────────
     public boolean strafeTiltEnabled   = true;
     public float   strafeTiltIntensity = 3.0f;
+    public float   strafeTiltDecay    = 1.0f;
 
     // ── Forward Tilt ───────────────────────────────────────────────────────
     public boolean forwardTiltEnabled   = true;
     public float   forwardTiltIntensity = 3.0f;
+    public float   forwardTiltDecay    = 1.0f;
 
     // ── Crouch ─────────────────────────────────────────────────────────────
     public boolean crouchEnabled   = true;
-    public float   crouchIntensity = 2.6f;
+    public float   crouchIntensity = 3.2f;
 
     // ── Crosshair Drift ────────────────────────────────────────────────────
     public boolean mouseLeadEnabled        = true;
-    public float   mouseLeadIntensity      = 0.30f;  // horizontal sway on mouse turn/pitch
-    public float   verticalDriftIntensity  = 0.40f;  // vertical drift on jump/fall
+    public float   mouseSwayScale          = 0.30f;  // horizontal sway on mouse turn/pitch
+    public float   verticalDriftIntensity  = 0.9f;   // vertical drift on jump/fall
+    public float   mouseSwaySmoothing      = 0.09f;  // lag/smoothing for mouse sway (higher = slower)
 
     // ── Hit Impact ─────────────────────────────────────────────────────────
     public boolean hitEnabled   = true;
-    public float   hitIntensity = 1.2f;   // degrees of pitch kick on attack
-    public float   hitDecay     = 8.0f;   // decay rate (higher = snappier)
+    public float   hitIntensity = 2.0f;   // degrees of pitch kick on attack
+    public float   hitDecay     = 20.0f;   // decay rate (higher = snappier)
 
     public static HandycamConfig get() {
         if (instance == null) instance = new HandycamConfig();

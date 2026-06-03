@@ -35,8 +35,8 @@ public class StrafeTiltLayer implements ShakeLayer {
             return CameraOffset.ZERO;
         }
 
-        // Smooth the raw 20Hz strafe signal at full framerate (τ ≈ 40ms)
-        float tau = 0.04f;
+        // Smooth the raw 20Hz strafe signal at full framerate; speed scales τ
+        float tau = 0.04f / Math.max(cfg.strafeTiltDecay, 0.1f);
         smoothStrafe += (state.strafeSpeed - smoothStrafe) * (1f - (float) Math.exp(-dt / tau));
 
         float sprintMult = state.isSprinting ? 1.4f : 1.0f;
@@ -46,8 +46,9 @@ public class StrafeTiltLayer implements ShakeLayer {
         float targetRoll =  smoothStrafe * i;
         float targetYaw  = -smoothStrafe * i * 0.25f;
 
-        float roll = rollSpring.update(targetRoll, dt);
-        float yaw  = yawSpring .update(targetYaw,  dt);
+        float speed = cfg.strafeTiltDecay;
+        float roll = rollSpring.update(targetRoll, dt, speed);
+        float yaw  = yawSpring .update(targetYaw,  dt, speed);
 
         // Noise amplitude gated by smoothStrafe — no 20Hz stepping
         int oct = cfg.noiseOctaves;

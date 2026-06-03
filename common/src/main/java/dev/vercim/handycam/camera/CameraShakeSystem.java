@@ -28,7 +28,7 @@ public final class CameraShakeSystem {
         LANDING,
         DAMAGE,
         HIT,
-        new SprintSwayLayer()
+        new CameraSwayLayer()
     );
 
     // ── Shared state ────────────────────────────────────────────────────────
@@ -45,6 +45,7 @@ public final class CameraShakeSystem {
     private static float   prevHealth   = -1f;
 
     private static boolean wasPaused = false;
+    private static CameraOffset lastComputedOffset = CameraOffset.ZERO;
 
     private CameraShakeSystem() {}
 
@@ -106,7 +107,7 @@ public final class CameraShakeSystem {
         Minecraft mc2 = Minecraft.getInstance();
         if (mc2.isPaused() || !mc2.isWindowActive()) {
             lastFrameNano = -1L;
-            return CameraOffset.ZERO;
+            return lastComputedOffset;
         }
 
         long now = System.nanoTime();
@@ -134,6 +135,7 @@ public final class CameraShakeSystem {
         // creating a double-spring with layers that already self-smooth.
         // Each layer is responsible for its own spring/decay.
         currentRoll = sum.roll;
+        lastComputedOffset = sum;
         return sum;
     }
 

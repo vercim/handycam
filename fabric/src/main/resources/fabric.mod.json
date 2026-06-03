@@ -8,8 +8,9 @@
     "vercim"
   ],
   "contact": {
-    "homepage": "https://github.com/vercim/handycam-mod",
-    "sources": "https://github.com/vercim/handycam-mod"
+    "homepage": "https://modrinth.com/mod/handycam",
+    "sources": "https://github.com/vercim/handycam",
+    "issues": "https://github.com/vercim/handycam/issues"
   },
   "license": "MIT",
   "icon": "icon.png",

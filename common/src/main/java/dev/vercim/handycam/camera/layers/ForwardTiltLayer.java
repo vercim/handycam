@@ -34,8 +34,9 @@ public class ForwardTiltLayer implements ShakeLayer {
             return CameraOffset.ZERO;
         }
 
-        // Smooth the 20Hz forward signal at full framerate (τ ≈ 50ms)
-        smoothForward += (state.forwardSpeed - smoothForward) * (1f - (float) Math.exp(-dt / 0.05f));
+        // Smooth the 20Hz forward signal at full framerate; speed scales τ
+        float tau = 0.05f / Math.max(cfg.forwardTiltDecay, 0.1f);
+        smoothForward += (state.forwardSpeed - smoothForward) * (1f - (float) Math.exp(-dt / tau));
 
         float sprintMult = state.isSprinting ? 1.3f : 1.0f;
         // ForwardTilt weaker than StrafeTilt — multiply by 0.6
@@ -46,8 +47,9 @@ public class ForwardTiltLayer implements ShakeLayer {
         // Subtle roll: lean slightly in direction of travel
         float targetRoll  =  smoothForward * i * 0.3f;
 
-        float pitch = pitchSpring.update(targetPitch, dt);
-        float roll  = rollSpring .update(targetRoll,  dt);
+        float speed = cfg.forwardTiltDecay;
+        float pitch = pitchSpring.update(targetPitch, dt, speed);
+        float roll  = rollSpring .update(targetRoll,  dt, speed);
 
         int oct = cfg.noiseOctaves;
         float nAbs = Math.abs(smoothForward);

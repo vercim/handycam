@@ -1,19 +1,52 @@
 # Handycam
 
-Client-side Minecraft mod (1.21.4) that adds procedural camera motion. Built with Architectury, targets Fabric and NeoForge.
+> Procedural camera motion for Minecraft 1.21.4 — Fabric & NeoForge
 
-## Features
+Handycam adds subtle, physics-inspired camera movement that makes Minecraft feel like it's being filmed with a real handheld camera. Every step, sprint, hit, and landing is reflected in the camera with spring-simulated, noise-driven motion.
 
-**Walk bob** — vertical and lateral camera oscillation tied to player footstep frequency and speed.
+## Effects
 
-**Sprint sway** — additional roll and lateral drift applied while sprinting, using fractal Perlin noise for organic variation.
+| Effect | Description |
+|---|---|
+| **Walk bob** | Vertical and lateral oscillation tied to footstep frequency and speed |
+| **Sprint sway** | Roll and lateral drift while sprinting, driven by fractal Perlin noise |
+| **Strafe tilt** | Camera rolls slightly when strafing left or right |
+| **Forward tilt** | Subtle pitch forward while moving |
+| **Mouse lead** | Camera shifts slightly toward the look direction |
+| **Idle shake** | Low-amplitude micro-movement when standing still |
+| **Damage shake** | Spring-simulated camera jolt on incoming damage |
+| **Landing impact** | Brief downward pitch proportional to fall height |
+| **Crouch shake** | Small camera dip when crouching |
 
-**Idle shake** — low-amplitude continuous camera micro-movement when the player is stationary, simulating handheld camera noise.
+All effects are independently configurable or can be disabled entirely.
 
-**Damage shake** — impulsive camera displacement on damage events, decayed via a spring simulator.
+## Requirements
 
-**Landing impact** — brief downward pitch on landing, magnitude proportional to fall velocity.
+- Minecraft 1.21.4
+- [Architectury API](https://modrinth.com/mod/architectury-api)
+- [Cloth Config](https://modrinth.com/mod/cloth-config)
+- [ModMenu](https://modrinth.com/mod/modmenu) *(Fabric only)*
 
-## Architecture
+## Configuration
 
-Each effect is a `ShakeLayer` that contributes a `CameraOffset` (pitch, yaw, roll, x, y, z) per frame. Offsets are composed by `CameraShakeSystem` and injected into the vanilla camera via Mixin. Motion primitives: `PerlinNoise`, `FractalNoise`, `SpringSimulator`.
+Open the config screen via ModMenu (Fabric) or the in-game mod list (NeoForge). Settings are saved to `config/handycam-config.json`.
+
+## Building
+
+```bash
+./gradlew build
+# Fabric:   fabric/build/libs/
+# NeoForge: neoforge/build/libs/
+```
+
+Requires JDK 21. See [CLAUDE.md](CLAUDE.md) for development notes.
+
+## Links
+
+- [Modrinth](https://modrinth.com/mod/handycam)
+- [Source](https://github.com/vercim/handycam)
+- [Issues](https://github.com/vercim/handycam/issues)
+
+## License
+
+MIT

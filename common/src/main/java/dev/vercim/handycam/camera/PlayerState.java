@@ -66,10 +66,10 @@ public final class PlayerState {
         // Wait: in MC yaw 0 = south (+z), yaw 90 = west (-x)
         // forward vec: (-sin(yaw), -cos(yaw)) in xz
         // right vec:   ( cos(yaw), -sin(yaw)) in xz ... let's verify:
-        // yaw=0 (south): forward=(0,-1) in xz → dz negative when moving forward ✓
+        // yaw=0 (south, look +z): forward = cosYaw*dz - sinYaw*dx = dz > 0 when moving forward ✓
         // right at yaw=0: (1, 0) → dx positive when strafing right ✓
-        float forward = -(sinYaw * dx + cosYaw * dz);
-        float strafe  =   cosYaw * dx - sinYaw * dz;
+        float forward = cosYaw * dz - sinYaw * dx;
+        float strafe  =   cosYaw * dx + sinYaw * dz;
         // Normalize to ~[-1, 1] using same walk speed divisor
         float norm    = 0.3f;
         forward = Math.max(-1f, Math.min(1f, forward / norm));

@@ -20,6 +20,15 @@ public final class SpringSimulator {
         return position;
     }
 
+    /** speedMult scales response speed: 2.0 = twice as fast, 0.5 = twice as slow. */
+    public float update(float target, float dt, float speedMult) {
+        float sm = speedMult * speedMult;
+        float acceleration = (target - position) * stiffness * sm - velocity * damping * speedMult;
+        velocity += acceleration * dt;
+        position += velocity * dt;
+        return position;
+    }
+
     public void reset() {
         position = 0f;
         velocity = 0f;
