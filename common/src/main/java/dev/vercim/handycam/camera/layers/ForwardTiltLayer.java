@@ -12,10 +12,10 @@ import net.fabricmc.api.Environment;
 @Environment(EnvType.CLIENT)
 public class ForwardTiltLayer implements ShakeLayer {
 
-    // Pitch: lean forward when moving forward, back when moving back
-    private final SpringSimulator pitchSpring = new SpringSimulator(180f, 26f);
-    // Subtle roll: slight lean into movement
-    private final SpringSimulator rollSpring  = new SpringSimulator(140f, 23f);
+    // Pitch: snappy response to movement direction
+    private final SpringSimulator pitchSpring = new SpringSimulator(450f, 42f);
+    // Subtle roll: slightly softer
+    private final SpringSimulator rollSpring  = new SpringSimulator(350f, 37f);
 
     // Low-pass filtered forward signal — eliminates 20Hz PlayerState stepping
     private float smoothForward = 0f;

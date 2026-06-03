@@ -12,10 +12,10 @@ import net.fabricmc.api.Environment;
 @Environment(EnvType.CLIENT)
 public class StrafeTiltLayer implements ShakeLayer {
 
-    // Roll spring: lean into strafe direction — high stiffness for quick response
-    private final SpringSimulator rollSpring = new SpringSimulator(200f, 28f);
-    // Yaw spring: subtle counter-yaw inertia
-    private final SpringSimulator yawSpring  = new SpringSimulator(150f, 24f);
+    // Roll spring: snappy — responds immediately to strafe input
+    private final SpringSimulator rollSpring = new SpringSimulator(500f, 44f);
+    // Yaw spring: slightly softer
+    private final SpringSimulator yawSpring  = new SpringSimulator(400f, 40f);
 
     // Low-pass filter on strafe input — smooths the 20Hz PlayerState stepping
     // to a continuous signal at full framerate before feeding into springs/noise.

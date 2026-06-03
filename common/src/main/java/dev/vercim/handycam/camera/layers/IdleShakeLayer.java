@@ -19,10 +19,10 @@ public class IdleShakeLayer implements ShakeLayer {
     private final FractalNoise noiseYaw   = new FractalNoise(0x5E6F7A8BL, 4, 0.3f, 0.5f);
     private final FractalNoise noiseRoll  = new FractalNoise(0x9C0D1E2FL, 3, 0.2f, 0.4f);
 
-    // ── Hand tremor (rare, sudden spring impulse) ───────────────────────────
-    private final SpringSimulator tremorPitch = new SpringSimulator(80f, 17f);
-    private final SpringSimulator tremorYaw   = new SpringSimulator(70f, 15f);
-    private final SpringSimulator tremorRoll  = new SpringSimulator(60f, 14f);
+    // ── Hand tremor — soft, slow springs for gentle drift feel ─────────────
+    private final SpringSimulator tremorPitch = new SpringSimulator(25f, 9f);
+    private final SpringSimulator tremorYaw   = new SpringSimulator(20f, 8f);
+    private final SpringSimulator tremorRoll  = new SpringSimulator(18f, 8f);
 
     private float tremorPitchTarget = 0f;
     private float tremorYawTarget   = 0f;
@@ -49,23 +49,22 @@ public class IdleShakeLayer implements ShakeLayer {
         // ── Hand tremor ────────────────────────────────────────────────────
         tremorTimer -= dt;
         if (tremorTimer <= 0f) {
-            // Fire a tremor: random direction, 4–8× breath intensity
-            float mag = intensity * (cfg.idleTremorScale * (0.7f + rng.nextFloat() * 0.6f));
+            float mag = intensity * (cfg.idleTremorScale * (0.6f + rng.nextFloat() * 0.4f));
             tremorPitchTarget = (rng.nextFloat() * 2f - 1f) * mag;
             tremorYawTarget   = (rng.nextFloat() * 2f - 1f) * mag * 0.8f;
             tremorRollTarget  = (rng.nextFloat() * 2f - 1f) * mag * 0.5f;
-            // Next tremor in 3–8 seconds
-            tremorTimer = 3f + rng.nextFloat() * 5f;
+            // Next tremor in 1.5–4 seconds
+            tremorTimer = 1.5f + rng.nextFloat() * 2.5f;
         }
 
         float tp = tremorPitch.update(tremorPitchTarget, dt);
         float ty = tremorYaw  .update(tremorYawTarget,   dt);
         float tr = tremorRoll .update(tremorRollTarget,  dt);
 
-        // Decay tremor targets so spring returns to zero
-        tremorPitchTarget *= (float) Math.exp(-dt / 0.18f);
-        tremorYawTarget   *= (float) Math.exp(-dt / 0.18f);
-        tremorRollTarget  *= (float) Math.exp(-dt / 0.18f);
+        // Slow decay — tremor lingers before returning to zero (τ = 0.6s)
+        tremorPitchTarget *= (float) Math.exp(-dt / 0.6f);
+        tremorYawTarget   *= (float) Math.exp(-dt / 0.6f);
+        tremorRollTarget  *= (float) Math.exp(-dt / 0.6f);
 
         return new CameraOffset(
             breathP + tp,
