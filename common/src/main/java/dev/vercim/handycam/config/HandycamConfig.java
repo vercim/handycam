@@ -18,7 +18,7 @@ public class HandycamConfig {
     private static HandycamConfig instance;
 
     // ── Master ─────────────────────────────────────────────────────────────
-    public float masterIntensity = 1.0f;
+    public float masterIntensity = 2.0f;
 
     // ── Idle ───────────────────────────────────────────────────────────────
     public boolean idleEnabled   = true;
