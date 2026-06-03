@@ -14,6 +14,7 @@ public final class CameraShakeSystem {
     private static final LandingImpactLayer LANDING = new LandingImpactLayer();
     private static final DamageShakeLayer   DAMAGE  = new DamageShakeLayer();
     private static final JumpShakeLayer     JUMP    = new JumpShakeLayer();
+    private static final HitImpactLayer     HIT     = new HitImpactLayer();
 
     private static final List<ShakeLayer> LAYERS = List.of(
         new IdleShakeLayer(),
@@ -21,6 +22,7 @@ public final class CameraShakeSystem {
         JUMP,
         LANDING,
         DAMAGE,
+        HIT,
         new SprintSwayLayer()
     );
 
@@ -91,5 +93,9 @@ public final class CameraShakeSystem {
 
     public static void onDamage(float amount, float maxHealth) {
         DAMAGE.onDamage(amount, maxHealth);
+    }
+
+    public static void onHit() {
+        HIT.onHit();
     }
 }
