@@ -41,6 +41,8 @@ public final class CameraShakeSystem {
     private static boolean wasOnGround  = true;
     private static float   peakY        = 0f;
     private static boolean wasSwinging  = false;
+    private static int     prevHurtTime = 0;
+    private static float   prevHealth   = -1f;
 
     private static boolean wasPaused = false;
 
@@ -73,6 +75,18 @@ public final class CameraShakeSystem {
             float fallDist = peakY - currentY;
             if (fallDist > 0.15f) LANDING.onLand(fallDist);
         }
+
+        // Damage detection: hurtTime jumps to hurtDuration when player is hit
+        int   hurtTime = player.hurtTime;
+        float health   = player.getHealth();
+        if (hurtTime > prevHurtTime) {
+            // Player was just hurt — estimate damage from health delta
+            float delta = (prevHealth > 0f) ? Math.max(prevHealth - health, 0f) : 1f;
+            float maxHp = player.getMaxHealth();
+            DAMAGE.onDamage(Math.max(delta, 1f), maxHp > 0f ? maxHp : 20f);
+        }
+        prevHurtTime = hurtTime;
+        prevHealth   = health;
 
         // swingTime resets to 0 on every new swing — catches rapid clicks and block breaking
         boolean isSwinging = player.swinging;
@@ -124,9 +138,5 @@ public final class CameraShakeSystem {
     }
 
     public static float getCurrentRoll() { return currentRoll; }
-
-    public static void onDamage(float amount, float maxHealth) {
-        DAMAGE.onDamage(amount, maxHealth);
-    }
 
 }
