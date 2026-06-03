@@ -54,9 +54,9 @@ public final class CameraShakeSystem {
             if (fallDist > 0.15f) LANDING.onLand(fallDist);
         }
 
-        // Arm swing covers all left-click types: attack, block break, air click
+        // swingTime resets to 0 on every new swing — catches rapid clicks and block breaking
         boolean isSwinging = player.swinging;
-        if (isSwinging && !wasSwinging) {
+        if (isSwinging && player.swingTime == 0) {
             HIT.onHit();
         }
         wasSwinging = isSwinging;
