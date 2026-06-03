@@ -190,7 +190,7 @@ public class HandycamConfigScreen {
         mouseLead.addEntry(e.startIntSlider(
                 Component.literal("Vertical Drift  " + fmt(cfg.verticalDriftIntensity)),
                 toSlider(cfg.verticalDriftIntensity), 0, 100)
-            .setDefaultValue(20)
+            .setDefaultValue(40)
             .setSaveConsumer(v -> cfg.verticalDriftIntensity = fromSlider(v))
             .build());
 

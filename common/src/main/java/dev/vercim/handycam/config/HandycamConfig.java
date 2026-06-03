@@ -75,7 +75,7 @@ public class HandycamConfig {
     // ── Crosshair Drift ────────────────────────────────────────────────────
     public boolean mouseLeadEnabled        = true;
     public float   mouseLeadIntensity      = 0.30f;  // horizontal sway on mouse turn/pitch
-    public float   verticalDriftIntensity  = 0.20f;  // vertical drift on jump/fall
+    public float   verticalDriftIntensity  = 0.40f;  // vertical drift on jump/fall
 
     // ── Hit Impact ─────────────────────────────────────────────────────────
     public boolean hitEnabled   = true;
