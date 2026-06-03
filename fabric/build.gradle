@@ -34,10 +34,10 @@ dependencies {
     modImplementation "dev.architectury:architectury-fabric:$rootProject.architectury_api_version"
 
     // Cloth Config
-    modImplementation "me.shedaniel.cloth:cloth-config-fabric:13.0.121"
+    modImplementation "me.shedaniel.cloth:cloth-config-fabric:17.0.144"
 
     // ModMenu
-    modImplementation "com.terraformersmc:modmenu:10.0.0"
+    modImplementation "com.terraformersmc:modmenu:13.0.4"
 
     common(project(path: ':common', configuration: 'namedElements')) { transitive = false }
     shadowBundle project(path: ':common', configuration: 'transformProductionFabric')
