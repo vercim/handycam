@@ -183,6 +183,34 @@ public class HandycamConfigScreenNeoForge {
             .setSaveConsumer(v -> cfg.strafeTiltIntensity = fromSlider(v))
             .build());
 
+        // ── Crouch ────────────────────────────────────────────────────────────
+        ConfigCategory crouch = builder.getOrCreateCategory(Component.literal("Crouch"));
+
+        crouch.addEntry(e.startBooleanToggle(Component.literal("Enabled"), cfg.crouchEnabled)
+            .setDefaultValue(true)
+            .setSaveConsumer(v -> cfg.crouchEnabled = v)
+            .build());
+        crouch.addEntry(e.startIntSlider(
+                Component.literal("Intensity  " + fmt(cfg.crouchIntensity)),
+                toSlider(cfg.crouchIntensity), 0, 400)
+            .setDefaultValue(120)
+            .setSaveConsumer(v -> cfg.crouchIntensity = fromSlider(v))
+            .build());
+
+        // ── Mouse Lead ────────────────────────────────────────────────────────
+        ConfigCategory mouseLead = builder.getOrCreateCategory(Component.literal("Mouse Lead"));
+
+        mouseLead.addEntry(e.startBooleanToggle(Component.literal("Enabled"), cfg.mouseLeadEnabled)
+            .setDefaultValue(true)
+            .setSaveConsumer(v -> cfg.mouseLeadEnabled = v)
+            .build());
+        mouseLead.addEntry(e.startIntSlider(
+                Component.literal("Intensity  " + fmt(cfg.mouseLeadIntensity)),
+                toSlider(cfg.mouseLeadIntensity), 0, 50)
+            .setDefaultValue(8)
+            .setSaveConsumer(v -> cfg.mouseLeadIntensity = fromSlider(v))
+            .build());
+
         // ── Hit Impact ────────────────────────────────────────────────────────
         ConfigCategory hit = builder.getOrCreateCategory(Component.literal("Hit Impact"));
 

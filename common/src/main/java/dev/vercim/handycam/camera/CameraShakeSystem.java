@@ -21,6 +21,8 @@ public final class CameraShakeSystem {
         new WalkBobLayer(),
         new StrafeTiltLayer(),
         new ForwardTiltLayer(),
+        new CrouchShakeLayer(),
+        new MouseLeadLayer(),
         JUMP,
         LANDING,
         DAMAGE,

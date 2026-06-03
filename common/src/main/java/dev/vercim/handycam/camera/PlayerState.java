@@ -8,23 +8,29 @@ public final class PlayerState {
     public final float   verticalVelocity; // blocks/tick, positive = moving up
     public final boolean isSprinting;
     public final boolean isOnGround;
+    public final boolean isCrouching;
     public final float   turnRate;         // delta yaw per tick (degrees)
+    public final float   pitchDelta;       // delta pitch per tick (degrees)
     public final float   strafeSpeed;      // -1.0 (left) .. +1.0 (right), relative to look dir
     public final float   forwardSpeed;     // -1.0 (back) .. +1.0 (forward), relative to look dir
 
     private PlayerState(float horizontalSpeed, float verticalVelocity,
-                        boolean isSprinting, boolean isOnGround, float turnRate,
+                        boolean isSprinting, boolean isOnGround, boolean isCrouching,
+                        float turnRate, float pitchDelta,
                         float strafeSpeed, float forwardSpeed) {
         this.horizontalSpeed  = horizontalSpeed;
         this.verticalVelocity = verticalVelocity;
         this.isSprinting      = isSprinting;
         this.isOnGround       = isOnGround;
+        this.isCrouching      = isCrouching;
         this.turnRate         = turnRate;
+        this.pitchDelta       = pitchDelta;
         this.strafeSpeed      = strafeSpeed;
         this.forwardSpeed     = forwardSpeed;
     }
 
-    private static float prevYRot = 0f;
+    private static float prevYRot  = 0f;
+    private static float prevXRot  = 0f;
 
     public static PlayerState from(LocalPlayer player) {
         float dx = (float) player.getDeltaMovement().x;
@@ -39,6 +45,12 @@ public final class PlayerState {
         if (turnRate >  20f) turnRate =  20f;
         if (turnRate < -20f) turnRate = -20f;
         prevYRot = currentYRot;
+
+        float currentXRot = player.getXRot();
+        float pitchDelta  = currentXRot - prevXRot;
+        if (pitchDelta >  20f) pitchDelta =  20f;
+        if (pitchDelta < -20f) pitchDelta = -20f;
+        prevXRot = currentXRot;
 
         // Decompose velocity into forward/strafe relative to player's look direction
         float yawRad   = (float) Math.toRadians(currentYRot);
@@ -58,6 +70,6 @@ public final class PlayerState {
         strafe  = Math.max(-1f, Math.min(1f, strafe  / norm));
 
         return new PlayerState(hSpeed, dy, player.isSprinting(), player.onGround(),
-                               turnRate, strafe, forward);
+                               player.isCrouching(), turnRate, pitchDelta, strafe, forward);
     }
 }

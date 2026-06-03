@@ -68,6 +68,14 @@ public class HandycamConfig {
     public boolean forwardTiltEnabled   = true;
     public float   forwardTiltIntensity = 3.0f;
 
+    // ── Crouch ─────────────────────────────────────────────────────────────
+    public boolean crouchEnabled   = true;
+    public float   crouchIntensity = 1.2f;
+
+    // ── Mouse Lead ─────────────────────────────────────────────────────────
+    public boolean mouseLeadEnabled   = true;
+    public float   mouseLeadIntensity = 0.08f; // small — just a subtle pull-ahead
+
     // ── Hit Impact ─────────────────────────────────────────────────────────
     public boolean hitEnabled   = true;
     public float   hitIntensity = 1.2f;   // degrees of pitch kick on attack
