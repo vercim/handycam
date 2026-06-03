@@ -61,7 +61,11 @@ public class HandycamConfig {
 
     // ── Strafe Tilt ────────────────────────────────────────────────────────
     public boolean strafeTiltEnabled   = true;
-    public float   strafeTiltIntensity = 3.0f;  // max roll degrees at full strafe
+    public float   strafeTiltIntensity = 3.0f;
+
+    // ── Forward Tilt ───────────────────────────────────────────────────────
+    public boolean forwardTiltEnabled   = true;
+    public float   forwardTiltIntensity = 3.0f;
 
     // ── Hit Impact ─────────────────────────────────────────────────────────
     public boolean hitEnabled   = true;

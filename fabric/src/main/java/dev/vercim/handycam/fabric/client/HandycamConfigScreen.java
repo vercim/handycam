@@ -135,6 +135,20 @@ public class HandycamConfigScreen {
             .setSaveConsumer(v -> cfg.maxTurnRoll = fromSlider(v))
             .build());
 
+        // ── Forward Tilt ──────────────────────────────────────────────────────
+        ConfigCategory forward = builder.getOrCreateCategory(Component.literal("Forward Tilt"));
+
+        forward.addEntry(e.startBooleanToggle(Component.literal("Enabled"), cfg.forwardTiltEnabled)
+            .setDefaultValue(true)
+            .setSaveConsumer(v -> cfg.forwardTiltEnabled = v)
+            .build());
+        forward.addEntry(e.startIntSlider(
+                Component.literal("Intensity  " + fmt(cfg.forwardTiltIntensity)),
+                toSlider(cfg.forwardTiltIntensity), 0, 600)
+            .setDefaultValue(300)
+            .setSaveConsumer(v -> cfg.forwardTiltIntensity = fromSlider(v))
+            .build());
+
         // ── Strafe Tilt ───────────────────────────────────────────────────────
         ConfigCategory strafe = builder.getOrCreateCategory(Component.literal("Strafe Tilt"));
 
