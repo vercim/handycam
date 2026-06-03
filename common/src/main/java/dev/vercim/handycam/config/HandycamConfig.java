@@ -19,6 +19,7 @@ public class HandycamConfig {
 
     // ── Master ─────────────────────────────────────────────────────────────
     public float masterIntensity = 2.0f;
+    public int   noiseOctaves    = 3;    // max octave layers for all FractalNoise (1–6)
 
     // ── Idle ───────────────────────────────────────────────────────────────
     public boolean idleEnabled   = true;

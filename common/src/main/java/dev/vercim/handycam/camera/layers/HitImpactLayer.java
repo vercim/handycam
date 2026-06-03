@@ -63,10 +63,11 @@ public class HitImpactLayer implements ShakeLayer {
         rollTarget  *= (float) Math.exp(-dt * decay);
 
         // Noise layer: trauma² for nonlinear falloff (same as DamageShakeLayer)
+        int oct = cfg.noiseOctaves;
         float shake = trauma * trauma;
-        float np = noiseP.get(time) * shake * 0.4f;
-        float ny = noiseY.get(time + 33f) * shake * 0.4f;
-        float nr = noiseR.get(time + 66f) * shake * 0.25f;
+        float np = noiseP.get(time,       oct) * shake * 0.4f;
+        float ny = noiseY.get(time + 33f, oct) * shake * 0.4f;
+        float nr = noiseR.get(time + 66f, oct) * shake * 0.25f;
 
         trauma -= cfg.hitDecay * 0.5f * dt;
         if (trauma < 0f) trauma = 0f;

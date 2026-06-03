@@ -2,153 +2,161 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Overview
+## Project Overview
 
-Handycam is a client-side Minecraft 1.21.4 mod that adds procedural camera motion. Built with Architectury to target both Fabric and NeoForge platforms from a shared codebase.
+**Handycam** is a client-side Minecraft mod (1.21.4) that adds procedural camera motion effects. Built with Architectury, it targets both Fabric and NeoForge with a shared codebase.
 
-**Key Features:**
-- Walk bob (footstep-synchronized vertical/lateral camera movement)
-- Sprint sway (organic rolling and lateral drift with fractal Perlin noise)
-- Idle shake (handheld camera micro-movement when stationary)
-- Damage shake (impulsive camera displacement on damage, decayed via spring simulator)
-- Landing impact (brief downward pitch proportional to fall velocity)
-
-## Architecture
-
-### Three-Module Structure
-
-- **`common/`** — Shared Java code across all platforms. Contains all effects logic, math primitives, and core mixins.
-- **`fabric/`** — Fabric-specific setup and initialization (fabric.mod.json, Fabric Loader integration).
-- **`neoforge/`** — NeoForge-specific setup (neoforge.mods.toml, NeoForge integration).
-
-Both platform modules inherit common code via Architectury's configuration system.
-
-### Core Concepts
-
-**Shake Layers** (`camera/layers/`)
-- Each effect is a `ShakeLayer` that computes a per-frame `CameraOffset` (pitch, yaw, roll, x, y, z).
-- All layers contribute to the final offset, which is smoothed via spring simulators and injected into the camera via Mixin.
-- Available layers: `IdleShakeLayer`, `WalkBobLayer`, `SprintSwayLayer`, `DamageShakeLayer`, `LandingImpactLayer`.
-
-**CameraShakeSystem** (`camera/CameraShakeSystem.java`)
-- Orchestrates all layers.
-- `tick()` — called once per game tick (20 Hz) to update player state and advance each layer.
-- `computeFrame()` — called every render frame to compute final camera offset using real frame dt (not game tick).
-- Applies final spring smoothing to pitch, yaw, and roll before returning to mixin.
-- Tracks fall distance by measuring peak Y while airborne and computing delta on landing.
-
-**PlayerState** (`camera/PlayerState.java`)
-- Snapshot of player position, velocity, and movement state (walking, sprinting, falling, etc.).
-- Created once per tick and passed to all layers so they operate on consistent state.
-
-**Spring Simulator** (`camera/math/SpringSimulator.java`)
-- Critically damped spring for smooth animation.
-- Used for final pitch/yaw/roll smoothing (not real physics, tuned for aesthetic feel).
-- Stiffness/damping values chosen to be stable at real frame dt (8–33 ms).
-
-**Math Primitives** (`camera/math/`)
-- `PerlinNoise` — single-octave Perlin noise (idle shake, base for fractal).
-- `FractalNoise` — multi-octave fractal Brownian motion (organic variation in sprint sway).
-
-### Mixin Integration
-
-Two mixins inject camera offsets into the vanilla camera:
-- `CameraMixin` — overrides final camera rotation to apply computed offsets.
-- `GameRendererMixin` — modifies roll (camera tilt) by transforming the view matrix.
-- `CameraAccessor` — accessor mixin to expose private camera fields.
-
-Mixins are registered in `common/src/main/resources/handycam.mixins.json`.
-
-### Event Lifecycle
-
-1. **Client initialization** (`HandycamMod.initClient()`)
-   - Called by platform-specific init on mod load.
-   - Loads config and registers tick/damage events.
-
-2. **Tick loop** (20 Hz)
-   - Architectury `ClientTickEvent.CLIENT_POST` triggers `CameraShakeSystem.tick()`.
-   - Updates player state, advances all layers, tracks fall distance.
-
-3. **Damage event**
-   - Architectury `EntityEvent.LIVING_HURT` triggers `CameraShakeSystem.onDamage()`.
-   - Feeds damage amount/health ratio to `DamageShakeLayer`.
-
-4. **Render frame**
-   - Mixin `CameraMixin.setupCamera()` calls `CameraShakeSystem.computeFrame()`.
-   - Applies spring smoothing to accumulated offsets.
-   - Mixes result into camera rotation.
+The mod implements multiple independent camera shake effects composed together: walk bob, sprint sway, idle shake, damage shake, landing impact, and jump/landing impact detection.
 
 ## Build Commands
 
+### Building the mod
 ```bash
-# Build all platforms (Fabric + NeoForge)
 ./gradlew build
+```
 
-# Build Fabric only
-./gradlew :fabric:build
+Outputs to `fabric/build/libs/` and `neoforge/build/libs/`.
 
-# Build NeoForge only
-./gradlew :neoforge:build
+### Running in development (Fabric)
+```bash
+./gradlew runClient
+```
 
-# Clean build artifacts
-./gradlew clean
+Opens Minecraft with the mod loaded. Fabric is the primary dev target.
 
-# Run Fabric dev server (requires IDE setup via Loom)
-./gradlew :fabric:runClient
-
-# Run NeoForge dev server (requires IDE setup via Loom)
+### Running in development (NeoForge)
+```bash
 ./gradlew :neoforge:runClient
 ```
 
-Output jars appear in `fabric/build/libs/` and `neoforge/build/libs/`.
+### Cleaning build artifacts
+```bash
+./gradlew clean
+```
+
+### Refreshing IDE (IntelliJ IDEA)
+```bash
+./gradlew idea
+```
+
+## Project Structure
+
+```
+handycam/
+├── common/                          # Shared cross-platform code
+│   └── src/main/java/dev/vercim/handycam/
+│       ├── camera/
+│       │   ├── CameraShakeSystem.java       # Main orchestrator for all layers
+│       │   ├── ShakeLayer.java             # Abstract base for effect layers
+│       │   ├── CameraOffset.java           # Immutable offset (pitch, yaw, roll, x, y, z)
+│       │   ├── PlayerState.java            # Snapshot of player state (velocity, etc.)
+│       │   ├── layers/                     # Individual effect implementations
+│       │   │   ├── WalkBobLayer.java       # Footstep-driven vertical/lateral sway
+│       │   │   ├── SprintSwayLayer.java    # Sprint-only roll and drift
+│       │   │   ├── IdleShakeLayer.java     # Low-amplitude micro-movement at rest
+│       │   │   ├── DamageShakeLayer.java   # Spring-damped impact on damage
+│       │   │   ├── HitImpactLayer.java     # Multi-axis impact on hit
+│       │   │   ├── JumpShakeLayer.java     # Jump detection and landing fade
+│       │   │   └── LandingImpactLayer.java # Downward pitch on land
+│       │   └── math/
+│       │       ├── PerlinNoise.java        # 2D Perlin noise implementation
+│       │       ├── FractalNoise.java       # Multi-octave Perlin (brownian motion)
+│       │       └── SpringSimulator.java    # Spring + damping for impact decay
+│       ├── config/
+│       │   └── HandycamConfig.java         # Loads/stores config from disk
+│       ├── mixin/
+│       │   ├── CameraMixin.java            # Injects shake into camera via Mixin
+│       │   ├── CameraAccessor.java         # Accessor for Camera fields
+│       │   └── GameRendererMixin.java      # Additional GameRenderer hooks (if needed)
+│       └── HandycamMod.java                # Client initialization, event registration
+├── fabric/                          # Fabric-specific entry point
+│   └── src/main/java/dev/vercim/handycam/fabric/client/
+│       ├── HandycamFabricClient.java       # Fabric entry point (calls HandycamMod.initClient)
+│       ├── HandycamConfigScreen.java       # Config UI screen
+│       └── HandycamModMenuIntegration.java # ModMenu integration
+├── neoforge/                        # NeoForge-specific entry point
+│   └── src/main/java/dev/vercim/handycam/neoforge/
+│       ├── HandycamNeoForge.java           # NeoForge entry point
+│       └── HandycamNeoForgeClient.java     # NeoForge client-side setup
+├── build.gradle                     # Root build config (Architectury + Loom)
+├── settings.gradle                  # Project includes (common, fabric, neoforge)
+└── gradle.properties                # Versions: MC 1.21.4, Java 21, Architectury 15.0.3
+```
+
+## Architecture & Key Patterns
+
+### CameraShakeSystem
+Central orchestrator that:
+1. Maintains a list of `ShakeLayer` instances (order matters — later layers overlay earlier ones)
+2. Calls `tick()` on each layer every client tick with current player state
+3. Composes all returned `CameraOffset` objects into a single offset
+4. Tracks shared state: player position delta, airtime, landing detection, etc.
+
+The system uses frame-rate independent timing via nanosecond precision tracking.
+
+### ShakeLayer
+Abstract base class for each effect. Implements:
+- `tick(PlayerState, float gameTime)` → returns a `CameraOffset` (or zero if inactive)
+- Maintains its own state (timers, oscillation phase, decay parameters)
+- Reads from configuration for intensity/range parameters
+
+Layers are intentionally independent; they don't directly interact. Composition happens in `CameraShakeSystem`.
+
+### CameraOffset
+Immutable record holding (pitch, yaw, roll, x, y, z) camera displacement in radians/blocks.
+
+### Motion Primitives
+
+**PerlinNoise**: Classic 2D Perlin implementation used directly by some layers for smooth, continuous variation.
+
+**FractalNoise**: Multi-octave Perlin (Brownian motion). Used by `SprintSwayLayer` for natural-looking fractal variation. Combine multiple scales: low freq for broad sway, high freq for jitter.
+
+**SpringSimulator**: Models a damped spring. Given a target displacement and velocity, decays exponentially. Used by `DamageShakeLayer` and `HitImpactLayer` for realistic impact recovery.
+
+### Configuration
+`HandycamConfig` is a static configuration holder loaded from `handycam-config.json` in the config directory at client startup. Platform-specific entry points call `HandycamMod.initClient(configDir)` to load it. Each layer reads config values as needed (e.g., `HandycamConfig.walkBobIntensity`).
+
+### Mixin Integration
+`CameraMixin` hooks into the vanilla `Camera` class's position-setting method to apply the composed offset before the camera is used for rendering. `CameraAccessor` provides reflection-based read access to internal Camera fields if needed.
+
+### Event-Driven Triggers
+- **Client Tick**: Every tick, `CameraShakeSystem.tick()` is called via `ClientTickEvent.CLIENT_POST`
+- **Damage Event**: On `EntityEvent.LIVING_HURT`, `CameraShakeSystem.onDamage()` activates damage shake
+- **Landing Detection**: Tracked in `CameraShakeSystem` by monitoring airtime and Y-position peaks
 
 ## Development Notes
 
 ### Adding a New Shake Layer
+1. Create a new class extending `ShakeLayer` in `common/src/main/java/dev/vercim/handycam/camera/layers/`
+2. Implement `tick(PlayerState, float gameTime)` → return `CameraOffset`
+3. Add config parameters to `HandycamConfig.java` if needed
+4. Register the layer in `CameraShakeSystem.LAYERS` list (order of composition matters)
 
-1. Create a new class in `common/src/main/java/dev/vercim/handycam/camera/layers/` extending `ShakeLayer`.
-2. Implement `tick(PlayerState)` (called 20 Hz) and `compute(PlayerState, float time, float dt)` (called every frame).
-3. Register in `CameraShakeSystem.LAYERS` list.
-4. Tune parameters in the layer's constructor for feel (amplitude, frequency, spring constants, etc.).
+### Tweaking Motion Parameters
+- **Walk bob frequency**: Tied to player footstep frequency (gait). Increase `WalkBobLayer`'s amplitude multiplier for exaggeration.
+- **Sprint sway chaos**: Tune `SprintSwayLayer`'s fractal noise octaves and frequency scaling.
+- **Spring decay**: Adjust damping coefficient in `SpringSimulator` for faster/slower impact recovery.
 
-### Tuning Camera Motion
+### Java 21 Toolchain
+The project targets Java 21 (official Mojang mappings). Build failures due to "transparent world in dev" are typically fixed by ensuring Gradle uses the correct JDK 21 toolchain. Check `gradle.properties` and IntelliJ's Project Structure settings if this occurs.
 
-- **Amplitude/magnitude** — adjust in individual layer constructors (e.g., `new WalkBobLayer()` parameters).
-- **Smoothness** — adjust final spring constants in `CameraShakeSystem` (pitch/yaw/roll springs at 120/22, roll at 80/18).
-- **Frequency/timing** — adjust noise scale or phase factors in layer `compute()` methods.
-- **Global on/off** — modify `HandycamConfig` to add user-facing toggles per layer if needed.
+### Testing Changes
+1. Run `./gradlew runClient` (Fabric) or `./gradlew :neoforge:runClient` (NeoForge)
+2. Join a world and test movement, sprinting, damage events, jumping, and landing
+3. Adjust config values in `handycam-config.json` (in the game's config directory) and reload the world to test without rebuilding
 
-### Platform Differences
+### Common Build Issues
+- **Java version mismatch**: Ensure `JAVA_HOME` points to JDK 21+. Gradle often inherits an older JDK from the system PATH.
+- **Gradle sync fails in IDE**: Run `./gradlew idea` to refresh IntelliJ project files.
+- **"Cannot find symbol" in common code**: Clear IDE caches and re-sync Gradle; `common/` sources are compiled differently per platform.
 
-Both Fabric and NeoForge build from the same common codebase. Architectury abstracts event registration:
-- Fabric uses `Fabric Loader` and `@Environment` annotations.
-- NeoForge uses `NeoForge API`.
-- Architectury re-exports both as a unified API.
+## Dependencies & Licenses
 
-No platform-specific logic exists in common code (verified by `@Environment(EnvType.CLIENT)` annotations on all classes).
+- **Architectury**: Cross-platform abstraction (used for events, client tick hooks)
+- **Fabric Loader & Fabric API**: Fabric-specific mod loading and utilities
+- **NeoForge**: Forge successor for NeoForge users
+- **Cloth Config**: Configuration UI library (Fabric + NeoForge)
+- **ModMenu**: Fabric mod menu integration
+- **Loom**: Gradle plugin for Minecraft remapping and mod development
 
-### Configuration
-
-`HandycamConfig` loads from config file (path provided by `initClient()`). Currently no user-facing config UI; extend if needed.
-
-## Key Files
-
-- `HandycamMod.java` — entry point, event registration.
-- `CameraShakeSystem.java` — orchestration, layer composition, spring smoothing.
-- `common/build.gradle` — dependencies (Architectury, Fabric Loader for annotations).
-- `fabric/build.gradle`, `neoforge/build.gradle` — platform-specific setup.
-- `handycam.mixins.json` — mixin registration.
-
-## Java Version
-
-Java 21 (specified in `build.gradle` with `sourceCompatibility = JavaVersion.VERSION_21`).
-
-## Dependencies
-
-- **Minecraft** 1.21.4
-- **Architectury API** 15.0.3
-- **Fabric Loader** 0.19.3 (for annotations only in common code)
-- **Fabric API** 0.119.4+1.21.4 (Fabric platform)
-- **NeoForge** 21.4.155 (NeoForge platform)
-
-All mod JARs are built with the common code shadowed/bundled into each platform's JAR.
+All are declared in `build.gradle` files or `gradle.properties`.
