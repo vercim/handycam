@@ -83,20 +83,6 @@ public class HandycamConfigScreen {
             .setSaveConsumer(v -> cfg.sprintBobMult = fromSlider(v))
             .build());
 
-        // ── Landing ───────────────────────────────────────────────────────────
-        ConfigCategory landing = builder.getOrCreateCategory(Component.literal("Landing"));
-
-        landing.addEntry(e.startBooleanToggle(Component.literal("Enabled"), cfg.landingEnabled)
-            .setDefaultValue(true)
-            .setSaveConsumer(v -> cfg.landingEnabled = v)
-            .build());
-        landing.addEntry(e.startIntSlider(
-                Component.literal("Intensity  " + fmt(cfg.landingIntensity)),
-                toSlider(cfg.landingIntensity), 0, 400)
-            .setDefaultValue(200)
-            .setSaveConsumer(v -> cfg.landingIntensity = fromSlider(v))
-            .build());
-
         // ── Damage ────────────────────────────────────────────────────────────
         ConfigCategory damage = builder.getOrCreateCategory(Component.literal("Damage"));
 
@@ -157,24 +143,34 @@ public class HandycamConfigScreen {
             .setSaveConsumer(v -> cfg.hitDecay = fromSlider(v))
             .build());
 
-        // ── Jump ──────────────────────────────────────────────────────────────
+        // ── Jump & Landing ────────────────────────────────────────────────────
         ConfigCategory jump = builder.getOrCreateCategory(Component.literal("Jump"));
 
-        jump.addEntry(e.startBooleanToggle(Component.literal("Enabled"), cfg.jumpEnabled)
+        jump.addEntry(e.startBooleanToggle(Component.literal("Jump Enabled"), cfg.jumpEnabled)
             .setDefaultValue(true)
             .setSaveConsumer(v -> cfg.jumpEnabled = v)
             .build());
         jump.addEntry(e.startIntSlider(
-                Component.literal("Intensity  " + fmt(cfg.jumpIntensity)),
+                Component.literal("Jump Intensity  " + fmt(cfg.jumpIntensity)),
                 toSlider(cfg.jumpIntensity), 0, 500)
             .setDefaultValue(400)
             .setSaveConsumer(v -> cfg.jumpIntensity = fromSlider(v))
             .build());
         jump.addEntry(e.startIntSlider(
-                Component.literal("Decay  " + fmt(cfg.jumpDecay)),
+                Component.literal("Jump Decay  " + fmt(cfg.jumpDecay)),
                 toSlider(cfg.jumpDecay), 10, 1000)
             .setDefaultValue(400)
             .setSaveConsumer(v -> cfg.jumpDecay = fromSlider(v))
+            .build());
+        jump.addEntry(e.startBooleanToggle(Component.literal("Landing Enabled"), cfg.landingEnabled)
+            .setDefaultValue(true)
+            .setSaveConsumer(v -> cfg.landingEnabled = v)
+            .build());
+        jump.addEntry(e.startIntSlider(
+                Component.literal("Landing Intensity  " + fmt(cfg.landingIntensity)),
+                toSlider(cfg.landingIntensity), 0, 400)
+            .setDefaultValue(200)
+            .setSaveConsumer(v -> cfg.landingIntensity = fromSlider(v))
             .build());
 
         builder.setDefaultBackgroundTexture(null);
