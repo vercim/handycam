@@ -145,6 +145,26 @@ public class HandycamConfigScreenNeoForge {
             .setSaveConsumer(v -> cfg.maxTurnRoll = fromSlider(v))
             .build());
 
+        // ── Hit Impact ────────────────────────────────────────────────────────
+        ConfigCategory hit = builder.getOrCreateCategory(Component.literal("Hit Impact"));
+
+        hit.addEntry(e.startBooleanToggle(Component.literal("Enabled"), cfg.hitEnabled)
+            .setDefaultValue(true)
+            .setSaveConsumer(v -> cfg.hitEnabled = v)
+            .build());
+        hit.addEntry(e.startIntSlider(
+                Component.literal("Intensity  " + fmt(cfg.hitIntensity)),
+                toSlider(cfg.hitIntensity), 0, 400)
+            .setDefaultValue(120)
+            .setSaveConsumer(v -> cfg.hitIntensity = fromSlider(v))
+            .build());
+        hit.addEntry(e.startIntSlider(
+                Component.literal("Decay  " + fmt(cfg.hitDecay)),
+                toSlider(cfg.hitDecay), 10, 2000)
+            .setDefaultValue(800)
+            .setSaveConsumer(v -> cfg.hitDecay = fromSlider(v))
+            .build());
+
         // ── Jump ──────────────────────────────────────────────────────────────
         ConfigCategory jump = builder.getOrCreateCategory(Component.literal("Jump"));
 

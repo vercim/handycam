@@ -56,6 +56,11 @@ public class HandycamConfig {
     public float   jumpIntensity = 1.8f;   // degrees of pitch kick on jump
     public float   jumpDecay     = 5.0f;   // trauma/sec decay (slower = lingers longer)
 
+    // ── Hit Impact ─────────────────────────────────────────────────────────
+    public boolean hitEnabled   = true;
+    public float   hitIntensity = 1.2f;   // degrees of pitch kick on attack
+    public float   hitDecay     = 8.0f;   // decay rate (higher = snappier)
+
     // ── Misc ───────────────────────────────────────────────────────────────
     public boolean disableVanillaBob = true;
 
