@@ -11,9 +11,10 @@ import net.fabricmc.api.Environment;
 @Environment(EnvType.CLIENT)
 public class JumpShakeLayer implements ShakeLayer {
 
-    private final SpringSimulator pitchSpring = new SpringSimulator(120f, 22f);
-    private final SpringSimulator rollSpring  = new SpringSimulator(80f, 18f);
-    private final SpringSimulator yawSpring   = new SpringSimulator(80f, 18f);
+    // Высокий stiffness чтобы пружина успевала за быстро затухающей целью
+    private final SpringSimulator pitchSpring = new SpringSimulator(300f, 34f);
+    private final SpringSimulator rollSpring  = new SpringSimulator(200f, 28f);
+    private final SpringSimulator yawSpring   = new SpringSimulator(200f, 28f);
 
     private float pitchTarget = 0f;
     private float rollTarget  = 0f;
@@ -35,9 +36,9 @@ public class JumpShakeLayer implements ShakeLayer {
         if (!cfg.jumpEnabled) return;
 
         // Normalized targets — intensity applied each frame in compute()
-        pitchTarget = 0.6f;
-        rollTarget  = 0.2f;
-        yawTarget   = 0.15f;
+        pitchTarget = 1.0f;
+        rollTarget  = 0.35f;
+        yawTarget   = 0.25f;
     }
 
     @Override

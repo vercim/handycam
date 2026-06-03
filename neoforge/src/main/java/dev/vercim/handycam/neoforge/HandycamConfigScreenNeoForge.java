@@ -100,8 +100,8 @@ public class HandycamConfigScreenNeoForge {
             .build());
         landing.addEntry(e.startIntSlider(
                 Component.literal("Intensity  " + fmt(cfg.landingIntensity)),
-                toSlider(cfg.landingIntensity), 0, 300)
-            .setDefaultValue(100)
+                toSlider(cfg.landingIntensity), 0, 400)
+            .setDefaultValue(200)
             .setSaveConsumer(v -> cfg.landingIntensity = fromSlider(v))
             .build());
 
@@ -174,14 +174,14 @@ public class HandycamConfigScreenNeoForge {
             .build());
         jump.addEntry(e.startIntSlider(
                 Component.literal("Intensity  " + fmt(cfg.jumpIntensity)),
-                toSlider(cfg.jumpIntensity), 0, 400)
-            .setDefaultValue(180)
+                toSlider(cfg.jumpIntensity), 0, 500)
+            .setDefaultValue(400)
             .setSaveConsumer(v -> cfg.jumpIntensity = fromSlider(v))
             .build());
         jump.addEntry(e.startIntSlider(
                 Component.literal("Decay  " + fmt(cfg.jumpDecay)),
                 toSlider(cfg.jumpDecay), 10, 1000)
-            .setDefaultValue(500)
+            .setDefaultValue(400)
             .setSaveConsumer(v -> cfg.jumpDecay = fromSlider(v))
             .build());
 
