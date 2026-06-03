@@ -53,14 +53,15 @@ public class MouseLeadLayer implements ShakeLayer {
         float vyDeg = state.verticalVelocity * 12f; // падение (vy<0) → курсор вверх (-Y), прыжок (vy>0) → вниз (+Y)
         smoothVertical += (vyDeg - smoothVertical) * aVert;
 
-        // Scale to pixels: intensity * master → pixels per (degree/tick)
-        float scale = cfg.mouseLeadIntensity * cfg.masterIntensity;
+        // Scale to pixels
+        float swayScale   = cfg.mouseLeadIntensity * cfg.masterIntensity;
+        float driftScale  = cfg.verticalDriftIntensity * cfg.masterIntensity;
 
         // Turning right → crosshair drifts right (+X)
         // Looking down  → crosshair drifts down  (+Y)
         // Jumping up    → crosshair drifts up     (-Y), falling → down (+Y)
-        CrosshairSwaySystem.offsetX = smoothYaw   * scale;
-        CrosshairSwaySystem.offsetY = smoothPitch * scale + smoothVertical * scale * 0.5f;
+        CrosshairSwaySystem.offsetX = smoothYaw   * swayScale;
+        CrosshairSwaySystem.offsetY = smoothPitch * swayScale + smoothVertical * driftScale;
 
         return CameraOffset.ZERO; // camera stays still
     }
