@@ -63,7 +63,7 @@ public class WalkBobLayer implements ShakeLayer {
         float vn1 = vertNoise1.get(bobPhase * 0.5f,  oct);
         float vn2 = vertNoise2.get(bobPhase * 0.25f, oct);
         float verticalBob = -(baseBob * 0.6f + vn1 * 0.25f + vn2 * 0.15f)
-                            * cfg.walkBobIntensity * speed * sprintMult;
+                            * cfg.walkBobIntensity * cfg.walkBobVerticalMult * speed * sprintMult;
 
         // ── Lateral sway ────────────────────────────────────────────────────
         float baseSway = (float) Math.sin(bobPhase * 2f);

@@ -92,9 +92,15 @@ public class HandycamConfigScreenNeoForge {
             .build());
         walkBob.addEntry(e.startIntSlider(
                 Component.literal("Frequency  " + fmt(cfg.walkBobFrequency)),
-                toSlider(cfg.walkBobFrequency), 50, 200)
-            .setDefaultValue(160)
+                toSlider(cfg.walkBobFrequency), 20, 200)
+            .setDefaultValue(90)
             .setSaveConsumer(v -> cfg.walkBobFrequency = fromSlider(v))
+            .build());
+        walkBob.addEntry(e.startIntSlider(
+                Component.literal("Vertical Scale  " + fmt(cfg.walkBobVerticalMult)),
+                toSlider(cfg.walkBobVerticalMult), 50, 600)
+            .setDefaultValue(250)
+            .setSaveConsumer(v -> cfg.walkBobVerticalMult = fromSlider(v))
             .build());
         walkBob.addEntry(e.startIntSlider(
                 Component.literal("Sprint Multiplier  " + fmt(cfg.sprintBobMult)),
