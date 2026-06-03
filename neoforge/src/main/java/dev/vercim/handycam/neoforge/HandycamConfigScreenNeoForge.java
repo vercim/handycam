@@ -145,6 +145,26 @@ public class HandycamConfigScreenNeoForge {
             .setSaveConsumer(v -> cfg.maxTurnRoll = fromSlider(v))
             .build());
 
+        // ── Jump ──────────────────────────────────────────────────────────────
+        ConfigCategory jump = builder.getOrCreateCategory(Component.literal("Jump"));
+
+        jump.addEntry(e.startBooleanToggle(Component.literal("Enabled"), cfg.jumpEnabled)
+            .setDefaultValue(true)
+            .setSaveConsumer(v -> cfg.jumpEnabled = v)
+            .build());
+        jump.addEntry(e.startIntSlider(
+                Component.literal("Intensity  " + fmt(cfg.jumpIntensity)),
+                toSlider(cfg.jumpIntensity), 0, 400)
+            .setDefaultValue(180)
+            .setSaveConsumer(v -> cfg.jumpIntensity = fromSlider(v))
+            .build());
+        jump.addEntry(e.startIntSlider(
+                Component.literal("Decay  " + fmt(cfg.jumpDecay)),
+                toSlider(cfg.jumpDecay), 10, 1000)
+            .setDefaultValue(500)
+            .setSaveConsumer(v -> cfg.jumpDecay = fromSlider(v))
+            .build());
+
         builder.setDefaultBackgroundTexture(null);
         builder.setSavingRunnable(() ->
             HandycamConfig.save(FMLPaths.CONFIGDIR.get())
