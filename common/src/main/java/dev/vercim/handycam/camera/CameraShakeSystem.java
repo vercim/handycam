@@ -33,8 +33,9 @@ public final class CameraShakeSystem {
 
     private static long   lastFrameNano = -1L;
 
-    private static boolean wasOnGround = true;
-    private static float   peakY       = 0f;
+    private static boolean wasOnGround  = true;
+    private static float   peakY        = 0f;
+    private static boolean wasSwinging  = false;
 
     private CameraShakeSystem() {}
 
@@ -52,6 +53,13 @@ public final class CameraShakeSystem {
             float fallDist = peakY - currentY;
             if (fallDist > 0.15f) LANDING.onLand(fallDist);
         }
+
+        // Arm swing covers all left-click types: attack, block break, air click
+        boolean isSwinging = player.swinging;
+        if (isSwinging && !wasSwinging) {
+            HIT.onHit();
+        }
+        wasSwinging = isSwinging;
 
         wasOnGround = onGround;
         gameTime   += 1f / 20f;
@@ -95,7 +103,4 @@ public final class CameraShakeSystem {
         DAMAGE.onDamage(amount, maxHealth);
     }
 
-    public static void onHit() {
-        HIT.onHit();
-    }
 }

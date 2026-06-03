@@ -2,7 +2,6 @@ package dev.vercim.handycam;
 
 import dev.architectury.event.events.client.ClientTickEvent;
 import dev.architectury.event.events.common.EntityEvent;
-import dev.architectury.event.events.common.PlayerEvent;
 import dev.vercim.handycam.camera.CameraShakeSystem;
 import dev.vercim.handycam.config.HandycamConfig;
 import net.fabricmc.api.EnvType;
@@ -38,13 +37,5 @@ public final class HandycamMod {
             return dev.architectury.event.EventResult.pass();
         });
 
-        // Hit Impact — trigger recoil when local player attacks an entity
-        PlayerEvent.ATTACK_ENTITY.register((player, world, target, hand, result) -> {
-            Minecraft mc = Minecraft.getInstance();
-            if (player == mc.player) {
-                CameraShakeSystem.onHit();
-            }
-            return dev.architectury.event.EventResult.pass();
-        });
     }
 }
