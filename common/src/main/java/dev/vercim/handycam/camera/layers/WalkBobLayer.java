@@ -23,19 +23,15 @@ public class WalkBobLayer implements ShakeLayer {
     private final FractalNoise rollNoise2 = new FractalNoise(0xDECAFBADL, 2, 0.8f, 0.5f);
 
     private float bobPhase    = 0f;
-    // Smooth blend factor: 1 = on ground, 0 = in air. Fades quickly on jump, slowly on land.
-    private float groundBlend = 1f;
+    // Smooth blend factor: 1 = on ground, 0 = in air.
+    // Updated per-frame in compute() with real dt for smooth interpolation at any fps.
+    private float groundBlend  = 1f;
+    private boolean onGround   = true;
 
     @Override
     public void tick(PlayerState state) {
         HandycamConfig cfg = HandycamConfig.get();
-
-        // Fade out fast when leaving ground, fade in slightly slower on landing
-        if (state.isOnGround) {
-            groundBlend = Math.min(groundBlend + TICK_DT / 0.12f, 1f);
-        } else {
-            groundBlend = Math.max(groundBlend - TICK_DT / 0.07f, 0f);
-        }
+        onGround = state.isOnGround;
 
         if (!cfg.walkBobEnabled) return;
 
@@ -50,6 +46,14 @@ public class WalkBobLayer implements ShakeLayer {
     @Override
     public CameraOffset compute(PlayerState state, float time, float dt) {
         HandycamConfig cfg = HandycamConfig.get();
+
+        // Smooth ground blend at full framerate — no more 20Hz stepping
+        if (onGround) {
+            groundBlend = Math.min(groundBlend + dt / 0.12f, 1f);
+        } else {
+            groundBlend = Math.max(groundBlend - dt / 0.07f, 0f);
+        }
+
         if (!cfg.walkBobEnabled || groundBlend < 0.001f) return CameraOffset.ZERO;
 
         float speed = state.horizontalSpeed;
