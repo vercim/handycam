@@ -50,7 +50,7 @@ public class MouseLeadLayer implements ShakeLayer {
         float tauVert = 0.12f;
         float aVert   = 1f - (float) Math.exp(-dt / tauVert);
         // Scale vy to degrees-equivalent: vy ~0.42 at jump peak → map to ~5 deg
-        float vyDeg = -state.verticalVelocity * 12f; // invert: up = negative Y on screen
+        float vyDeg = state.verticalVelocity * 12f; // падение (vy<0) → курсор вверх (-Y), прыжок (vy>0) → вниз (+Y)
         smoothVertical += (vyDeg - smoothVertical) * aVert;
 
         // Scale to pixels: intensity * master → pixels per (degree/tick)
