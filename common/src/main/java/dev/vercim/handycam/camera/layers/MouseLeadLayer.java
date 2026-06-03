@@ -22,33 +22,45 @@ public class MouseLeadLayer implements ShakeLayer {
     // Smoothed mouse deltas (degrees/tick)
     private float smoothYaw   = 0f;
     private float smoothPitch = 0f;
+    // Smoothed vertical velocity for jump/fall crosshair shift
+    private float smoothVertical = 0f;
 
     @Override
     public CameraOffset compute(PlayerState state, float time, float dt) {
         HandycamConfig cfg = HandycamConfig.get();
 
         if (!cfg.mouseLeadEnabled) {
-            smoothYaw   = 0f;
-            smoothPitch = 0f;
+            smoothYaw      = 0f;
+            smoothPitch    = 0f;
+            smoothVertical = 0f;
             CrosshairSwaySystem.offsetX = 0f;
             CrosshairSwaySystem.offsetY = 0f;
             return CameraOffset.ZERO;
         }
 
-        // Low-pass on 20Hz turn/pitch deltas (τ = 40ms)
-        float tau   = 0.04f;
-        float alpha = 1f - (float) Math.exp(-dt / tau);
-        smoothYaw   += (state.turnRate   - smoothYaw)   * alpha;
-        smoothPitch += (state.pitchDelta - smoothPitch) * alpha;
+        // Low-pass on mouse turn/pitch deltas (τ = 90ms — smooth, no jerkiness)
+        float tauMouse = 0.09f;
+        float aMouse   = 1f - (float) Math.exp(-dt / tauMouse);
+        smoothYaw   += (state.turnRate   - smoothYaw)   * aMouse;
+        smoothPitch += (state.pitchDelta - smoothPitch) * aMouse;
+
+        // Low-pass on vertical velocity (τ = 120ms — very smooth for jump/fall)
+        // verticalVelocity: positive = up (jump), negative = falling
+        // We invert: jumping → crosshair up (-Y), falling → crosshair down (+Y)
+        float tauVert = 0.12f;
+        float aVert   = 1f - (float) Math.exp(-dt / tauVert);
+        // Scale vy to degrees-equivalent: vy ~0.42 at jump peak → map to ~5 deg
+        float vyDeg = -state.verticalVelocity * 12f; // invert: up = negative Y on screen
+        smoothVertical += (vyDeg - smoothVertical) * aVert;
 
         // Scale to pixels: intensity * master → pixels per (degree/tick)
-        // Default 0.15 * 2.0 = 0.30 → ~3px at a moderate mouse swipe
         float scale = cfg.mouseLeadIntensity * cfg.masterIntensity;
 
-        // Turning right → crosshair drifts right (+X on screen)
-        // Looking down  → crosshair drifts down  (+Y on screen)
+        // Turning right → crosshair drifts right (+X)
+        // Looking down  → crosshair drifts down  (+Y)
+        // Jumping up    → crosshair drifts up     (-Y), falling → down (+Y)
         CrosshairSwaySystem.offsetX = smoothYaw   * scale;
-        CrosshairSwaySystem.offsetY = smoothPitch * scale;
+        CrosshairSwaySystem.offsetY = smoothPitch * scale + smoothVertical * scale * 0.5f;
 
         return CameraOffset.ZERO; // camera stays still
     }
