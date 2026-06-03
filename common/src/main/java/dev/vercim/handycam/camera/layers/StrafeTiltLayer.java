@@ -12,12 +12,16 @@ import net.fabricmc.api.Environment;
 @Environment(EnvType.CLIENT)
 public class StrafeTiltLayer implements ShakeLayer {
 
-    // Roll: lean into the strafe direction
-    private final SpringSimulator rollSpring  = new SpringSimulator(60f, 14f);
-    // Yaw: subtle lag opposite to strafe (camera inertia)
-    private final SpringSimulator yawSpring   = new SpringSimulator(50f, 13f);
+    // Roll spring: lean into strafe direction — high stiffness for quick response
+    private final SpringSimulator rollSpring = new SpringSimulator(200f, 28f);
+    // Yaw spring: subtle counter-yaw inertia
+    private final SpringSimulator yawSpring  = new SpringSimulator(150f, 24f);
 
-    // Organic noise layered on top of the tilt for a handheld feel
+    // Low-pass filter on strafe input — smooths the 20Hz PlayerState stepping
+    // to a continuous signal at full framerate before feeding into springs/noise.
+    private float smoothStrafe = 0f;
+
+    // Noise layered on top of tilt for organic feel
     private final FractalNoise rollNoise = new FractalNoise(0xA1B2C3D4L, 4, 0.4f, 0.5f);
     private final FractalNoise yawNoise  = new FractalNoise(0xD4C3B2A1L, 3, 0.3f, 0.5f);
 
@@ -27,24 +31,29 @@ public class StrafeTiltLayer implements ShakeLayer {
         if (!cfg.strafeTiltEnabled) {
             rollSpring.reset();
             yawSpring.reset();
+            smoothStrafe = 0f;
             return CameraOffset.ZERO;
         }
 
-        float strafe = state.strafeSpeed;
-        float sprintMult = state.isSprinting ? 1.4f : 1.0f;
+        // Smooth the raw 20Hz strafe signal at full framerate (τ ≈ 40ms)
+        float tau = 0.04f;
+        smoothStrafe += (state.strafeSpeed - smoothStrafe) * (1f - (float) Math.exp(-dt / tau));
 
-        // Strafe right → positive roll (lean right), strafe left → negative roll
-        float targetRoll = strafe * cfg.strafeTiltIntensity * sprintMult;
-        // Subtle counter-yaw: camera lags slightly opposite to movement direction
-        float targetYaw  = -strafe * cfg.strafeTiltIntensity * 0.3f * sprintMult;
+        float sprintMult = state.isSprinting ? 1.4f : 1.0f;
+        float i = cfg.strafeTiltIntensity * sprintMult;
+
+        // Strafe right → lean right (negative roll = tilt right in MC camera space)
+        float targetRoll = -smoothStrafe * i;
+        float targetYaw  =  smoothStrafe * i * 0.25f;
 
         float roll = rollSpring.update(targetRoll, dt);
         float yaw  = yawSpring .update(targetYaw,  dt);
 
-        // Noise adds organic micro-variation on top of the lean
+        // Noise amplitude gated by smoothStrafe — no 20Hz stepping
         int oct = cfg.noiseOctaves;
-        float nRoll = rollNoise.get(time, oct) * Math.abs(strafe) * cfg.strafeTiltIntensity * 0.15f;
-        float nYaw  = yawNoise .get(time + 50f, oct) * Math.abs(strafe) * cfg.strafeTiltIntensity * 0.1f;
+        float nAbs = Math.abs(smoothStrafe);
+        float nRoll = rollNoise.get(time,       oct) * nAbs * i * 0.15f;
+        float nYaw  = yawNoise .get(time + 50f, oct) * nAbs * i * 0.10f;
 
         float m = cfg.masterIntensity;
         return new CameraOffset(0f, (yaw + nYaw) * m, (roll + nRoll) * m);
