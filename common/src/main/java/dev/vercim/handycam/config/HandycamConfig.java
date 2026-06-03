@@ -82,7 +82,7 @@ public class HandycamConfig {
     public float   hitDecay     = 8.0f;   // decay rate (higher = snappier)
 
     // ── Misc ───────────────────────────────────────────────────────────────
-    public boolean disableVanillaBob = true;
+    public boolean disableVanillaBob = false;
 
     public static HandycamConfig get() {
         if (instance == null) instance = new HandycamConfig();

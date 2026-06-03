@@ -53,7 +53,7 @@ public class HandycamConfigScreenNeoForge {
             .build());
         general.addEntry(e.startBooleanToggle(
                 Component.literal("Disable Vanilla Bob"), cfg.disableVanillaBob)
-            .setDefaultValue(true)
+            .setDefaultValue(false)
             .setSaveConsumer(v -> cfg.disableVanillaBob = v)
             .build());
 
