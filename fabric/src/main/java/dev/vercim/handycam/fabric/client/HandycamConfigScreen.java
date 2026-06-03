@@ -182,10 +182,16 @@ public class HandycamConfigScreen {
             .setSaveConsumer(v -> cfg.mouseLeadEnabled = v)
             .build());
         mouseLead.addEntry(e.startIntSlider(
-                Component.literal("Drift Amount  " + fmt(cfg.mouseLeadIntensity)),
+                Component.literal("Mouse Sway  " + fmt(cfg.mouseLeadIntensity)),
                 toSlider(cfg.mouseLeadIntensity), 0, 100)
             .setDefaultValue(30)
             .setSaveConsumer(v -> cfg.mouseLeadIntensity = fromSlider(v))
+            .build());
+        mouseLead.addEntry(e.startIntSlider(
+                Component.literal("Vertical Drift  " + fmt(cfg.verticalDriftIntensity)),
+                toSlider(cfg.verticalDriftIntensity), 0, 100)
+            .setDefaultValue(20)
+            .setSaveConsumer(v -> cfg.verticalDriftIntensity = fromSlider(v))
             .build());
 
         // ── Hit Impact ────────────────────────────────────────────────────────
