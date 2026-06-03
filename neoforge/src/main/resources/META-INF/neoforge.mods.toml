@@ -15,7 +15,7 @@ Cinematic camera shake for Minecraft — idle drift, walk bob, landing impact, d
 [[dependencies.handycam]]
 modId = "neoforge"
 type = "required"
-versionRange = "[21.4,)"
+versionRange = "[21.4.0,)"
 ordering = "NONE"
 side = "CLIENT"
 

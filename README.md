@@ -31,22 +31,8 @@ All effects are independently configurable or can be disabled entirely.
 
 Open the config screen via ModMenu (Fabric) or the in-game mod list (NeoForge). Settings are saved to `config/handycam-config.json`.
 
-## Building
-
-```bash
-./gradlew build
-# Fabric:   fabric/build/libs/
-# NeoForge: neoforge/build/libs/
-```
-
-Requires JDK 21. See [CLAUDE.md](CLAUDE.md) for development notes.
-
 ## Links
 
 - [Modrinth](https://modrinth.com/mod/handycam)
 - [Source](https://github.com/vercim/handycam)
 - [Issues](https://github.com/vercim/handycam/issues)
-
-## License
-
-MIT
