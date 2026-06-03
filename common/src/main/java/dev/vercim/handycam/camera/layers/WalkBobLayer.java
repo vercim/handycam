@@ -11,8 +11,7 @@ import net.fabricmc.api.Environment;
 @Environment(EnvType.CLIENT)
 public class WalkBobLayer implements ShakeLayer {
 
-    private static final float TWO_PI  = (float) (2.0 * Math.PI);
-    private static final float TICK_DT = 1f / 20f;
+    private static final float TWO_PI = (float) (2.0 * Math.PI);
 
     // Three independent noise layers per axis for organic, chaotic feel
     private final FractalNoise vertNoise1 = new FractalNoise(0xDEADBEEFL, 4, 0.5f, 0.5f);
@@ -30,24 +29,15 @@ public class WalkBobLayer implements ShakeLayer {
 
     @Override
     public void tick(PlayerState state) {
-        HandycamConfig cfg = HandycamConfig.get();
+        // Only track ground state for the blend — phase advances in compute() with real dt
         onGround = state.isOnGround;
-
-        if (!cfg.walkBobEnabled) return;
-
-        float speed = state.horizontalSpeed;
-        if (!state.isOnGround || speed < 0.05f) return;
-
-        // Sprint advances phase faster and with greater stride amplitude feel
-        float sprintMult = state.isSprinting ? 1.7f : 1.0f;
-        bobPhase += speed * sprintMult * cfg.walkBobFrequency * TWO_PI * TICK_DT;
     }
 
     @Override
     public CameraOffset compute(PlayerState state, float time, float dt) {
         HandycamConfig cfg = HandycamConfig.get();
 
-        // Smooth ground blend at full framerate — no more 20Hz stepping
+        // Both groundBlend and bobPhase advance with real frame dt — smooth at any fps
         if (onGround) {
             groundBlend = Math.min(groundBlend + dt / 0.12f, 1f);
         } else {
@@ -60,6 +50,12 @@ public class WalkBobLayer implements ShakeLayer {
         if (speed < 0.05f) return CameraOffset.ZERO;
 
         float sprintMult = state.isSprinting ? cfg.sprintBobMult : 1.0f;
+
+        // Phase advances here at full framerate — no 20Hz stepping
+        if (onGround) {
+            bobPhase += speed * (state.isSprinting ? 1.7f : 1.0f)
+                        * cfg.walkBobFrequency * TWO_PI * dt;
+        }
         int oct = cfg.noiseOctaves;
 
         // ── Vertical bob ────────────────────────────────────────────────────
