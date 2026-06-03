@@ -22,9 +22,10 @@ public class HandycamConfig {
     public int   noiseOctaves    = 3;    // max octave layers for all FractalNoise (1–6)
 
     // ── Idle ───────────────────────────────────────────────────────────────
-    public boolean idleEnabled   = true;
-    public float   idleIntensity = 1.5f;
-    public float   idleFrequency = 0.5f;
+    public boolean idleEnabled      = true;
+    public float   idleIntensity    = 1.5f;
+    public float   idleFrequency    = 0.5f;
+    public float   idleTremorScale  = 5.0f;  // tremor magnitude relative to breath (1=same)
 
     // ── Walk Bob ───────────────────────────────────────────────────────────
     public boolean walkBobEnabled      = true;

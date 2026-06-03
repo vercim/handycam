@@ -76,6 +76,12 @@ public class HandycamConfigScreenNeoForge {
             .setDefaultValue(50)
             .setSaveConsumer(v -> cfg.idleFrequency = fromSlider(v))
             .build());
+        idle.addEntry(e.startIntSlider(
+                Component.literal("Tremor Scale  " + fmt(cfg.idleTremorScale)),
+                toSlider(cfg.idleTremorScale), 0, 1000)
+            .setDefaultValue(500)
+            .setSaveConsumer(v -> cfg.idleTremorScale = fromSlider(v))
+            .build());
 
         // ── Walk Bob ──────────────────────────────────────────────────────────
         ConfigCategory walkBob = builder.getOrCreateCategory(Component.literal("Walk Bob"));
