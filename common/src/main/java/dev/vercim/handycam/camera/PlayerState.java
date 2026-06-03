@@ -32,6 +32,12 @@ public final class PlayerState {
     private static float prevYRot  = 0f;
     private static float prevXRot  = 0f;
 
+    /** Call after a pause/alt-tab to resync rotation without generating a delta spike. */
+    public static void sync(LocalPlayer player) {
+        prevYRot = player.getYRot();
+        prevXRot = player.getXRot();
+    }
+
     public static PlayerState from(LocalPlayer player) {
         float dx = (float) player.getDeltaMovement().x;
         float dz = (float) player.getDeltaMovement().z;

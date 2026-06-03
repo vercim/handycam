@@ -3,6 +3,7 @@ package dev.vercim.handycam.camera;
 import dev.vercim.handycam.camera.layers.*;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 
 import java.util.List;
@@ -41,9 +42,24 @@ public final class CameraShakeSystem {
     private static float   peakY        = 0f;
     private static boolean wasSwinging  = false;
 
+    private static boolean wasPaused = false;
+
     private CameraShakeSystem() {}
 
     public static void tick(LocalPlayer player) {
+        Minecraft mc = Minecraft.getInstance();
+        boolean paused = mc.isPaused() || !mc.isWindowActive();
+        if (paused) {
+            wasPaused = true;
+            return;
+        }
+        if (wasPaused) {
+            // First tick after pause — resync rotations so turnRate/pitchDelta don't spike
+            PlayerState.sync(player);
+            lastFrameNano = -1L;
+            wasPaused = false;
+        }
+
         boolean onGround = player.onGround();
         float   currentY = (float) player.getY();
 
@@ -73,6 +89,12 @@ public final class CameraShakeSystem {
     }
 
     public static CameraOffset computeFrame(LocalPlayer player, float partialTick) {
+        Minecraft mc2 = Minecraft.getInstance();
+        if (mc2.isPaused() || !mc2.isWindowActive()) {
+            lastFrameNano = -1L;
+            return CameraOffset.ZERO;
+        }
+
         long now = System.nanoTime();
         float dt;
         if (lastFrameNano < 0L) {
