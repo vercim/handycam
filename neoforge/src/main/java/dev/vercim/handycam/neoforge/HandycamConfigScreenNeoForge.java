@@ -149,6 +149,20 @@ public class HandycamConfigScreenNeoForge {
             .setSaveConsumer(v -> cfg.maxTurnRoll = fromSlider(v))
             .build());
 
+        // ── Strafe Tilt ───────────────────────────────────────────────────────
+        ConfigCategory strafe = builder.getOrCreateCategory(Component.literal("Strafe Tilt"));
+
+        strafe.addEntry(e.startBooleanToggle(Component.literal("Enabled"), cfg.strafeTiltEnabled)
+            .setDefaultValue(true)
+            .setSaveConsumer(v -> cfg.strafeTiltEnabled = v)
+            .build());
+        strafe.addEntry(e.startIntSlider(
+                Component.literal("Intensity  " + fmt(cfg.strafeTiltIntensity)),
+                toSlider(cfg.strafeTiltIntensity), 0, 600)
+            .setDefaultValue(300)
+            .setSaveConsumer(v -> cfg.strafeTiltIntensity = fromSlider(v))
+            .build());
+
         // ── Hit Impact ────────────────────────────────────────────────────────
         ConfigCategory hit = builder.getOrCreateCategory(Component.literal("Hit Impact"));
 

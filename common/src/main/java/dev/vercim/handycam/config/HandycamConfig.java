@@ -59,6 +59,10 @@ public class HandycamConfig {
     public float   jumpIntensity = 4.0f;   // degrees of pitch kick on jump
     public float   jumpDecay     = 4.0f;   // decay rate (lower = longer impulse)
 
+    // ── Strafe Tilt ────────────────────────────────────────────────────────
+    public boolean strafeTiltEnabled   = true;
+    public float   strafeTiltIntensity = 3.0f;  // max roll degrees at full strafe
+
     // ── Hit Impact ─────────────────────────────────────────────────────────
     public boolean hitEnabled   = true;
     public float   hitIntensity = 1.2f;   // degrees of pitch kick on attack

@@ -19,6 +19,7 @@ public final class CameraShakeSystem {
     private static final List<ShakeLayer> LAYERS = List.of(
         new IdleShakeLayer(),
         new WalkBobLayer(),
+        new StrafeTiltLayer(),
         JUMP,
         LANDING,
         DAMAGE,
