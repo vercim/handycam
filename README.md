@@ -22,7 +22,6 @@ All effects are independently configurable or can be disabled entirely.
 
 ## Requirements
 
-- Minecraft 1.21.4
 - [Architectury API](https://modrinth.com/mod/architectury-api)
 - [Cloth Config](https://modrinth.com/mod/cloth-config)
 - [ModMenu](https://modrinth.com/mod/modmenu) *(Fabric only)*
