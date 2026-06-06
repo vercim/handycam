@@ -29,6 +29,10 @@ public final class SpringSimulator {
         return position;
     }
 
+    public void addVelocity(float v) {
+        velocity += v;
+    }
+
     public void reset() {
         position = 0f;
         velocity = 0f;

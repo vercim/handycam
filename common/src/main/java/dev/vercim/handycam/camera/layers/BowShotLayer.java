@@ -103,8 +103,10 @@ public class BowShotLayer implements ShakeLayer {
 
         // Draw-tilt: плавное смещение при натяжении (масштаб фиксирован, не конфигурируется).
         float drawScale = cfg.masterIntensity;
-        float yawDraw   = bowYawDraw      .update(state.bowDrawProgress       * 1.5f,  dt);
-        float pitchDraw = crossbowPitchDraw.update(state.crossbowDrawProgress * (-1.2f), dt);
+        float bowProgress = cfg.bowDrawTiltEnabled ? state.bowDrawProgress : 0f;
+        float xbowProgress = cfg.bowDrawTiltEnabled ? state.crossbowDrawProgress : 0f;
+        float yawDraw   = bowYawDraw      .update(bowProgress       * 1.5f,  dt);
+        float pitchDraw = crossbowPitchDraw.update(xbowProgress * (-1.2f), dt);
 
         // Crosshair compensation: противоположное смещение чтобы прицел оставался
         // на реальной точке прицеливания, несмотря на визуальный крен камеры.
