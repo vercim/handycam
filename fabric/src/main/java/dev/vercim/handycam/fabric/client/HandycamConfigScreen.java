@@ -238,6 +238,11 @@ public class HandycamConfigScreen {
             .setTooltip(Component.literal("Idle shake suppression when bow fully drawn"))
             .setSaveConsumer(v -> cfg.bowConcentration = fromSlider(v))
             .build());
+        bow.addEntry(e.startBooleanToggle(Component.literal("Draw Tilt Enabled"), cfg.bowDrawTiltEnabled)
+            .setDefaultValue(true)
+            .setTooltip(Component.literal("Camera lean when drawing bow / loading crossbow"))
+            .setSaveConsumer(v -> cfg.bowDrawTiltEnabled = v)
+            .build());
         bow.addEntry(e.startIntSlider(
                 Component.literal("Crosshair Shrink  " + fmt(cfg.bowCrosshairShrink)),
                 toSlider(cfg.bowCrosshairShrink), 0, 40)
