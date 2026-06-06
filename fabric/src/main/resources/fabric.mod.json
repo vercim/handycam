@@ -12,7 +12,7 @@
     "sources": "https://github.com/vercim/handycam",
     "issues": "https://github.com/vercim/handycam/issues"
   },
-  "license": "MIT",
+  "license": "LGPL-3.0",
   "icon": "icon.png",
   "environment": "client",
   "entrypoints": {
