@@ -17,14 +17,14 @@ import net.fabricmc.api.Environment;
 @Environment(EnvType.CLIENT)
 public class BowShotLayer implements ShakeLayer {
 
-    // Жёсткая пружина: резкий рывок вверх, быстрый возврат.
-    private final SpringSimulator pitchSpring = new SpringSimulator(260f, 30f);
-    private final SpringSimulator yawSpring   = new SpringSimulator(200f, 28f);
+    // Мягкая пружина: плавный дугообразный подъём, медленный возврат.
+    private final SpringSimulator pitchSpring = new SpringSimulator(80f, 14f);
+    private final SpringSimulator yawSpring   = new SpringSimulator(60f, 12f);
 
-    // Шум поверх импульса — хаотичное дрожание (как у HitImpactLayer).
-    private final FractalNoise noiseP = new FractalNoise(0xB0501A1FL, 3, 22f, 0.6f);
-    private final FractalNoise noiseY = new FractalNoise(0xB0502B2EL, 3, 20f, 0.6f);
-    private final FractalNoise noiseR = new FractalNoise(0xB0503C3DL, 3, 18f, 0.5f);
+    // Низкочастотный шум — плавное покачивание, не дробление.
+    private final FractalNoise noiseP = new FractalNoise(0xB0501A1FL, 2, 8f, 0.5f);
+    private final FractalNoise noiseY = new FractalNoise(0xB0502B2EL, 2, 7f, 0.5f);
+    private final FractalNoise noiseR = new FractalNoise(0xB0503C3DL, 2, 6f, 0.4f);
 
     private float pitchTarget = 0f;
     private float yawTarget   = 0f;
@@ -76,14 +76,13 @@ public class BowShotLayer implements ShakeLayer {
         pitchTarget *= (float) Math.exp(-dt * decay);
         yawTarget   *= (float) Math.exp(-dt * decay);
 
-        // Шум: trauma² для нелинейного спада — хаос право/лево + дрожь по вертикали.
-        int oct = cfg.noiseOctaves;
-        float shake = trauma * trauma;
-        float np = noiseP.get(time,       oct) * shake * 0.25f;
-        float ny = noiseY.get(time + 33f, oct) * shake * 0.4f;
-        float nr = noiseR.get(time + 66f, oct) * shake * 0.3f;
+        // Плавный шум: линейный спад trauma, приглушённые амплитуды.
+        float shake = trauma;
+        float np = noiseP.get(time,       2) * shake * 0.15f;
+        float ny = noiseY.get(time + 33f, 2) * shake * 0.25f;
+        float nr = noiseR.get(time + 66f, 2) * shake * 0.18f;
 
-        trauma -= cfg.bowRecoilDecay * 0.5f * dt;
+        trauma -= cfg.bowRecoilDecay * 0.35f * dt;
         if (trauma < 0f) trauma = 0f;
 
         float i = cfg.bowRecoilIntensity * cfg.masterIntensity;
