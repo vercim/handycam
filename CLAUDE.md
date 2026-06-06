@@ -19,28 +19,30 @@ Handycam — client-side Minecraft mod (1.21.4), процедурная каме
 ```
 common/src/main/java/dev/vercim/handycam/
   camera/
-    CameraShakeSystem.java   — оркестратор всех слоёв
-    ShakeLayer.java          — абстрактный базовый класс
-    CameraOffset.java        — иммутабельный оффсет (pitch, yaw, roll, x, y, z)
-    PlayerState.java         — снимок состояния игрока за тик
+    CameraShakeSystem.java     — оркестратор всех слоёв
+    ShakeLayer.java            — абстрактный базовый класс
+    CameraOffset.java          — иммутабельный оффсет (pitch, yaw, roll, x, y, z)
+    PlayerState.java           — снимок состояния игрока за тик
+    CrosshairSwaySystem.java   — компенсация прицела при draw-tilt
     layers/
-      WalkBobLayer.java      — вертикальный/боковой боб при ходьбе
-      CameraSwayLayer.java   — roll + drift при спринте (fractal noise)
-      IdleShakeLayer.java    — микродвижение в покое
-      DamageShakeLayer.java  — импульс при получении урона (spring)
-      HitImpactLayer.java    — многоосевой удар при хите
-      LandingImpactLayer.java — pitch вниз при приземлении
-      JumpShakeLayer.java    — обнаружение прыжка и приземления
-      StrafeTiltLayer.java   — крен при страйфе
-      ForwardTiltLayer.java  — наклон вперёд при движении
-      MouseLeadLayer.java    — смещение по направлению взгляда
-      CrouchShakeLayer.java  — эффект при приседании
+      WalkBobLayer.java        — вертикальный/боковой боб при ходьбе
+      CameraSwayLayer.java     — roll + drift при спринте (fractal noise)
+      IdleShakeLayer.java      — микродвижение в покое
+      DamageShakeLayer.java    — импульс при получении урона (spring)
+      HitImpactLayer.java      — многоосевой удар при хите
+      LandingImpactLayer.java  — pitch вниз при приземлении
+      JumpShakeLayer.java      — обнаружение прыжка и приземления
+      StrafeTiltLayer.java     — крен при страйфе
+      ForwardTiltLayer.java    — наклон вперёд при движении
+      MouseLeadLayer.java      — смещение по направлению взгляда
+      CrouchShakeLayer.java    — эффект при приседании
+      BowShotLayer.java        — отдача при выстреле из лука/арбалета + draw-tilt
     math/
-      PerlinNoise.java       — 2D Perlin noise
-      FractalNoise.java      — мультиоктавный Perlin
-      SpringSimulator.java   — затухающая пружина для impact-эффектов
-  config/HandycamConfig.java — загрузка/хранение конфига (handycam-config.json)
-  mixin/CameraMixin.java     — внедрение оффсета в ванильную камеру
+      PerlinNoise.java         — 2D Perlin noise
+      FractalNoise.java        — мультиоктавный Perlin
+      SpringSimulator.java     — затухающая пружина для impact-эффектов
+  config/HandycamConfig.java   — загрузка/хранение конфига (handycam-config.json)
+  mixin/CameraMixin.java       — внедрение оффсета в ванильную камеру
 ```
 
 ## Архитектура
