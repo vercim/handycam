@@ -307,6 +307,13 @@ public class HandycamConfigScreen {
             .setTooltip(Component.literal("Steadiness when bow fully drawn"))
             .setSaveConsumer(v -> cfg.bowConcentration = fromSlider(v))
             .build());
+        hit.addEntry(e.startIntSlider(
+                Component.literal("Draw Tilt  " + fmt(cfg.bowDrawTilt)),
+                toSlider(cfg.bowDrawTilt), 0, 200)
+            .setDefaultValue(100)
+            .setTooltip(Component.literal("Camera drift while drawing bow / loading crossbow"))
+            .setSaveConsumer(v -> cfg.bowDrawTilt = fromSlider(v))
+            .build());
 
         // ── Jump & Landing ────────────────────────────────────────────────────
         ConfigCategory jump = builder.getOrCreateCategory(Component.literal("Jump"));
