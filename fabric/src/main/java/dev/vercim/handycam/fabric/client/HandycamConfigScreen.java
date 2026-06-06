@@ -72,6 +72,7 @@ public class HandycamConfigScreen {
 
         // ── Movement ─────────────────────────────────────────────────────────
         ConfigCategory movement = builder.getOrCreateCategory(Component.literal("Movement"));
+        movement.addDescription(Component.literal("⚠ Walk Bob feature is still in development"));
 
         movement.addEntry(e.startBooleanToggle(Component.literal("Walk Bob Enabled"), cfg.walkBobEnabled)
             .setDefaultValue(false)
