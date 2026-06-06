@@ -16,6 +16,7 @@ public final class CameraShakeSystem {
     private static final DamageShakeLayer   DAMAGE  = new DamageShakeLayer();
     private static final JumpShakeLayer     JUMP    = new JumpShakeLayer();
     private static final HitImpactLayer     HIT     = new HitImpactLayer();
+    private static final BowShotLayer       BOW     = new BowShotLayer();
 
     private static final List<ShakeLayer> LAYERS = List.of(
         new IdleShakeLayer(),
@@ -28,6 +29,7 @@ public final class CameraShakeSystem {
         LANDING,
         DAMAGE,
         HIT,
+        BOW,
         new CameraSwayLayer()
     );
 

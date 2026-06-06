@@ -37,7 +37,11 @@ public class IdleShakeLayer implements ShakeLayer {
         HandycamConfig cfg = HandycamConfig.get();
         if (!cfg.idleEnabled) return CameraOffset.ZERO;
 
-        float intensity = cfg.idleIntensity * cfg.masterIntensity;
+        // Концентрация: при натяжении лука idle-дрожь гасится (steady aim).
+        float concentration = 1f - state.bowDrawProgress * cfg.bowConcentration;
+        if (concentration < 0f) concentration = 0f;
+
+        float intensity = cfg.idleIntensity * cfg.masterIntensity * concentration;
         float t = time * cfg.idleFrequency;
         int oct = cfg.noiseOctaves;
 

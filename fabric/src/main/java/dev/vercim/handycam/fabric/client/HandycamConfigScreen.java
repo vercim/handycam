@@ -27,7 +27,7 @@ public class HandycamConfigScreen {
 
         general.addEntry(e.startIntSlider(
                 Component.literal("Global Intensity  " + fmt(cfg.masterIntensity)),
-                toSlider(cfg.masterIntensity), 100, 400)
+                toSlider(cfg.masterIntensity), 0, 500)
             .setDefaultValue(200)
             .setSaveConsumer(v -> cfg.masterIntensity = fromSlider(v))
             .build());
@@ -227,24 +227,49 @@ public class HandycamConfigScreen {
             .setSaveConsumer(v -> cfg.mouseSwaySmoothing = fromSlider(v))
             .build());
 
-        // ── Hit Impact ────────────────────────────────────────────────────────
-        ConfigCategory hit = builder.getOrCreateCategory(Component.literal("Hit Impact"));
+        // ── Impact (Hit + Bow) ──────────────────────────────────────────────────
+        ConfigCategory hit = builder.getOrCreateCategory(Component.literal("Impact"));
 
-        hit.addEntry(e.startBooleanToggle(Component.literal("Enabled"), cfg.hitEnabled)
+        // Hit — удар рукой
+        hit.addEntry(e.startBooleanToggle(Component.literal("Hit Enabled"), cfg.hitEnabled)
             .setDefaultValue(true)
             .setSaveConsumer(v -> cfg.hitEnabled = v)
             .build());
         hit.addEntry(e.startIntSlider(
-                Component.literal("Intensity  " + fmt(cfg.hitIntensity)),
+                Component.literal("Hit Intensity  " + fmt(cfg.hitIntensity)),
                 toSlider(cfg.hitIntensity), 100, 300)
             .setDefaultValue(200)
             .setSaveConsumer(v -> cfg.hitIntensity = fromSlider(v))
             .build());
         hit.addEntry(e.startIntSlider(
-                Component.literal("Decay  " + fmt(cfg.hitDecay)),
+                Component.literal("Hit Decay  " + fmt(cfg.hitDecay)),
                 toSlider(cfg.hitDecay), 1005, 2000)
             .setDefaultValue(2000)
             .setSaveConsumer(v -> cfg.hitDecay = fromSlider(v))
+            .build());
+
+        // Bow — выстрел из лука
+        hit.addEntry(e.startBooleanToggle(Component.literal("Bow Enabled"), cfg.bowEnabled)
+            .setDefaultValue(true)
+            .setSaveConsumer(v -> cfg.bowEnabled = v)
+            .build());
+        hit.addEntry(e.startIntSlider(
+                Component.literal("Bow Recoil Intensity  " + fmt(cfg.bowRecoilIntensity)),
+                toSlider(cfg.bowRecoilIntensity), 0, 800)
+            .setDefaultValue(400)
+            .setSaveConsumer(v -> cfg.bowRecoilIntensity = fromSlider(v))
+            .build());
+        hit.addEntry(e.startIntSlider(
+                Component.literal("Bow Recoil Decay  " + fmt(cfg.bowRecoilDecay)),
+                toSlider(cfg.bowRecoilDecay), 100, 1000)
+            .setDefaultValue(400)
+            .setSaveConsumer(v -> cfg.bowRecoilDecay = fromSlider(v))
+            .build());
+        hit.addEntry(e.startIntSlider(
+                Component.literal("Bow Concentration  " + fmt(cfg.bowConcentration)),
+                toSlider(cfg.bowConcentration), 0, 100)
+            .setDefaultValue(100)
+            .setSaveConsumer(v -> cfg.bowConcentration = fromSlider(v))
             .build());
 
         // ── Jump & Landing ────────────────────────────────────────────────────

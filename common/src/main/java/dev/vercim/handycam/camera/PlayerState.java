@@ -1,6 +1,8 @@
 package dev.vercim.handycam.camera;
 
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.world.item.BowItem;
+import net.minecraft.world.item.ItemStack;
 
 public final class PlayerState {
 
@@ -13,11 +15,13 @@ public final class PlayerState {
     public final float   pitchDelta;       // delta pitch per tick (degrees)
     public final float   strafeSpeed;      // -1.0 (left) .. +1.0 (right), relative to look dir
     public final float   forwardSpeed;     // -1.0 (back) .. +1.0 (forward), relative to look dir
+    public final float   bowDrawProgress;  // 0.0–1.0, бесконечность натяжения лука (концентрация)
 
     private PlayerState(float horizontalSpeed, float verticalVelocity,
                         boolean isSprinting, boolean isOnGround, boolean isCrouching,
                         float turnRate, float pitchDelta,
-                        float strafeSpeed, float forwardSpeed) {
+                        float strafeSpeed, float forwardSpeed,
+                        float bowDrawProgress) {
         this.horizontalSpeed  = horizontalSpeed;
         this.verticalVelocity = verticalVelocity;
         this.isSprinting      = isSprinting;
@@ -27,6 +31,7 @@ public final class PlayerState {
         this.pitchDelta       = pitchDelta;
         this.strafeSpeed      = strafeSpeed;
         this.forwardSpeed     = forwardSpeed;
+        this.bowDrawProgress  = bowDrawProgress;
     }
 
     private static float prevYRot  = 0f;
@@ -75,7 +80,17 @@ public final class PlayerState {
         forward = Math.max(-1f, Math.min(1f, forward / norm));
         strafe  = Math.max(-1f, Math.min(1f, strafe  / norm));
 
+        // Bow draw progress: 0..1 over the first 20 ticks of holding a bow.
+        float bowDraw = 0f;
+        if (player.isUsingItem()) {
+            ItemStack use = player.getUseItem();
+            if (use.getItem() instanceof BowItem) {
+                bowDraw = Math.min(player.getTicksUsingItem() / 20f, 1f);
+            }
+        }
+
         return new PlayerState(hSpeed, dy, player.isSprinting(), player.onGround(),
-                               player.isCrouching(), turnRate, pitchDelta, strafe, forward);
+                               player.isCrouching(), turnRate, pitchDelta, strafe, forward,
+                               bowDraw);
     }
 }

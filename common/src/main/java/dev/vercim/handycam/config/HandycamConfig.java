@@ -80,10 +80,16 @@ public class HandycamConfig {
     public float   verticalDriftIntensity  = 0.9f;   // vertical drift on jump/fall
     public float   mouseSwaySmoothing      = 0.09f;  // lag/smoothing for mouse sway (higher = slower)
 
-    // ── Hit Impact ─────────────────────────────────────────────────────────
+    // ── Impact: Hit (рукой) ──────────────────────────────────────────────────
     public boolean hitEnabled   = true;
     public float   hitIntensity = 2.0f;   // degrees of pitch kick on attack
     public float   hitDecay     = 20.0f;   // decay rate (higher = snappier)
+
+    // ── Impact: Bow (выстрел из лука) ─────────────────────────────────────────
+    public boolean bowEnabled        = true;
+    public float   bowRecoilIntensity = 4.0f;  // сила отдачи вверх при выстреле
+    public float   bowRecoilDecay     = 4.0f;  // скорость затухания отдачи
+    public float   bowConcentration   = 1.0f;  // 0..1 — насколько гасится idle-дрожь при макс. натяжении
 
     public static HandycamConfig get() {
         if (instance == null) instance = new HandycamConfig();
