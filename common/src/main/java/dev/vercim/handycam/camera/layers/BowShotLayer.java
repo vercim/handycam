@@ -17,9 +17,13 @@ import net.fabricmc.api.Environment;
 @Environment(EnvType.CLIENT)
 public class BowShotLayer implements ShakeLayer {
 
-    // Мягкая пружина: плавный дугообразный подъём, медленный возврат.
+    // Мягкая пружина для отдачи при выстреле.
     private final SpringSimulator pitchSpring = new SpringSimulator(80f, 14f);
     private final SpringSimulator yawSpring   = new SpringSimulator(60f, 12f);
+
+    // Плавные пружины для draw-tilt (следят за прогрессом натяжения).
+    private final SpringSimulator bowYawDraw      = new SpringSimulator(30f, 8f);  // лук: вправо
+    private final SpringSimulator crossbowPitchDraw = new SpringSimulator(30f, 8f); // арбалет: вниз
 
     // Низкочастотный шум — плавное покачивание, не дробление.
     private final FractalNoise noiseP = new FractalNoise(0xB0501A1FL, 2, 8f, 0.5f);
@@ -86,6 +90,14 @@ public class BowShotLayer implements ShakeLayer {
         if (trauma < 0f) trauma = 0f;
 
         float i = cfg.bowRecoilIntensity * cfg.masterIntensity;
-        return new CameraOffset((pitch + np) * i, (yaw + ny) * i, nr * i);
+
+        // Draw-tilt: плавное смещение при натяжении — независимо от cfg.bowRecoilIntensity.
+        float drawScale = cfg.masterIntensity;
+        float yawDraw   = bowYawDraw      .update(state.bowDrawProgress       * 1.5f,  dt);
+        float pitchDraw = crossbowPitchDraw.update(state.crossbowDrawProgress * (-1.2f), dt);
+
+        return new CameraOffset((pitch + np) * i + pitchDraw * drawScale,
+                                (yaw   + ny) * i + yawDraw   * drawScale,
+                                nr * i);
     }
 }

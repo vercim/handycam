@@ -87,9 +87,9 @@ public class HandycamConfig {
 
     // ── Impact: Bow (выстрел из лука) ─────────────────────────────────────────
     public boolean bowEnabled        = true;
-    public float   bowRecoilIntensity = 5.0f;  // сила отдачи вверх при выстреле
-    public float   bowRecoilDecay     = 4.0f;  // скорость затухания отдачи
-    public float   bowConcentration   = 1.0f;  // 0..1 — насколько гасится idle-дрожь при макс. натяжении
+    public float   bowRecoilIntensity = 2.5f;  // сила отдачи при выстреле
+    public float   bowRecoilDecay     = 9.0f;  // скорость затухания отдачи
+    public float   bowConcentration   = 0.95f; // 0..1 — насколько гасится idle-дрожь при макс. натяжении
 
     public static HandycamConfig get() {
         if (instance == null) instance = new HandycamConfig();

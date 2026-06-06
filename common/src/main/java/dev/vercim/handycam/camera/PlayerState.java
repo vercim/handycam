@@ -16,14 +16,15 @@ public final class PlayerState {
     public final float   pitchDelta;       // delta pitch per tick (degrees)
     public final float   strafeSpeed;      // -1.0 (left) .. +1.0 (right), relative to look dir
     public final float   forwardSpeed;     // -1.0 (back) .. +1.0 (forward), relative to look dir
-    public final float   bowDrawProgress;  // 0.0–1.0, натяжение лука (для концентрации)
-    public final boolean crossbowFired;   // true ровно в тик выстрела из арбалета
+    public final float   bowDrawProgress;      // 0.0–1.0, натяжение лука (для концентрации)
+    public final boolean crossbowFired;       // true ровно в тик выстрела из арбалета
+    public final float   crossbowDrawProgress; // 0.0–1.0, прогресс заряжания арбалета (0 когда заряжен)
 
     private PlayerState(float horizontalSpeed, float verticalVelocity,
                         boolean isSprinting, boolean isOnGround, boolean isCrouching,
                         float turnRate, float pitchDelta,
                         float strafeSpeed, float forwardSpeed,
-                        float bowDrawProgress, boolean crossbowFired) {
+                        float bowDrawProgress, boolean crossbowFired, float crossbowDrawProgress) {
         this.horizontalSpeed  = horizontalSpeed;
         this.verticalVelocity = verticalVelocity;
         this.isSprinting      = isSprinting;
@@ -33,8 +34,9 @@ public final class PlayerState {
         this.pitchDelta       = pitchDelta;
         this.strafeSpeed      = strafeSpeed;
         this.forwardSpeed     = forwardSpeed;
-        this.bowDrawProgress  = bowDrawProgress;
-        this.crossbowFired    = crossbowFired;
+        this.bowDrawProgress      = bowDrawProgress;
+        this.crossbowFired        = crossbowFired;
+        this.crossbowDrawProgress = crossbowDrawProgress;
     }
 
     private static float   prevYRot         = 0f;
@@ -93,7 +95,7 @@ public final class PlayerState {
             }
         }
 
-        // Crossbow fire: detect charged → not-charged transition.
+        // Crossbow: заряжание и детект выстрела.
         ItemStack main = player.getMainHandItem();
         ItemStack off  = player.getOffhandItem();
         boolean nowCharged = (main.getItem() instanceof CrossbowItem && CrossbowItem.isCharged(main))
@@ -101,8 +103,17 @@ public final class PlayerState {
         boolean crossbowFired = prevCrossbowCharged && !nowCharged;
         prevCrossbowCharged = nowCharged;
 
+        // Прогресс заряжания: 0 когда заряжен или не заряжается (арбалет берёт ~25 тиков).
+        float crossbowDraw = 0f;
+        if (player.isUsingItem()) {
+            ItemStack use = player.getUseItem();
+            if (use.getItem() instanceof CrossbowItem && !CrossbowItem.isCharged(use)) {
+                crossbowDraw = Math.min(player.getTicksUsingItem() / 25f, 1f);
+            }
+        }
+
         return new PlayerState(hSpeed, dy, player.isSprinting(), player.onGround(),
                                player.isCrouching(), turnRate, pitchDelta, strafe, forward,
-                               bowDraw, crossbowFired);
+                               bowDraw, crossbowFired, crossbowDraw);
     }
 }
