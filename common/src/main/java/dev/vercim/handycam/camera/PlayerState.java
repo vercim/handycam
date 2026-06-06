@@ -2,6 +2,7 @@ package dev.vercim.handycam.camera;
 
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.item.BowItem;
+import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.ItemStack;
 
 public final class PlayerState {
@@ -15,13 +16,14 @@ public final class PlayerState {
     public final float   pitchDelta;       // delta pitch per tick (degrees)
     public final float   strafeSpeed;      // -1.0 (left) .. +1.0 (right), relative to look dir
     public final float   forwardSpeed;     // -1.0 (back) .. +1.0 (forward), relative to look dir
-    public final float   bowDrawProgress;  // 0.0–1.0, бесконечность натяжения лука (концентрация)
+    public final float   bowDrawProgress;  // 0.0–1.0, натяжение лука (для концентрации)
+    public final boolean crossbowFired;   // true ровно в тик выстрела из арбалета
 
     private PlayerState(float horizontalSpeed, float verticalVelocity,
                         boolean isSprinting, boolean isOnGround, boolean isCrouching,
                         float turnRate, float pitchDelta,
                         float strafeSpeed, float forwardSpeed,
-                        float bowDrawProgress) {
+                        float bowDrawProgress, boolean crossbowFired) {
         this.horizontalSpeed  = horizontalSpeed;
         this.verticalVelocity = verticalVelocity;
         this.isSprinting      = isSprinting;
@@ -32,10 +34,12 @@ public final class PlayerState {
         this.strafeSpeed      = strafeSpeed;
         this.forwardSpeed     = forwardSpeed;
         this.bowDrawProgress  = bowDrawProgress;
+        this.crossbowFired    = crossbowFired;
     }
 
-    private static float prevYRot  = 0f;
-    private static float prevXRot  = 0f;
+    private static float   prevYRot         = 0f;
+    private static float   prevXRot         = 0f;
+    private static boolean prevCrossbowCharged = false;
 
     /** Call after a pause/alt-tab to resync rotation without generating a delta spike. */
     public static void sync(LocalPlayer player) {
@@ -89,8 +93,16 @@ public final class PlayerState {
             }
         }
 
+        // Crossbow fire: detect charged → not-charged transition.
+        ItemStack main = player.getMainHandItem();
+        ItemStack off  = player.getOffhandItem();
+        boolean nowCharged = (main.getItem() instanceof CrossbowItem && CrossbowItem.isCharged(main))
+                          || (off .getItem() instanceof CrossbowItem && CrossbowItem.isCharged(off));
+        boolean crossbowFired = prevCrossbowCharged && !nowCharged;
+        prevCrossbowCharged = nowCharged;
+
         return new PlayerState(hSpeed, dy, player.isSprinting(), player.onGround(),
                                player.isCrouching(), turnRate, pitchDelta, strafe, forward,
-                               bowDraw);
+                               bowDraw, crossbowFired);
     }
 }

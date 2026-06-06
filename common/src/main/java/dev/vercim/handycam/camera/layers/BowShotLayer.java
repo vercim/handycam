@@ -38,12 +38,17 @@ public class BowShotLayer implements ShakeLayer {
 
     @Override
     public void tick(PlayerState state) {
+        // Обычный лук: отпустили натянутую тетиву.
         float draw = state.bowDrawProgress;
-        // Отпустили натянутый лук → выстрел. Порог 0.1 отсекает случайные клики.
         if (prevDraw >= 0.1f && draw == 0f) {
             onShot(prevDraw);
         }
         prevDraw = draw;
+
+        // Арбалет: переход charged → not-charged.
+        if (state.crossbowFired) {
+            onShot(1.0f);  // арбалет всегда стреляет с полной силой
+        }
     }
 
     private void onShot(float power) {
