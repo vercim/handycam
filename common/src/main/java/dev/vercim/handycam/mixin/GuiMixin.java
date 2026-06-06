@@ -19,9 +19,11 @@ public abstract class GuiMixin {
 
     @Inject(method = "renderCrosshair", at = @At("HEAD"))
     private void handycam$crosshairPush(GuiGraphics graphics, DeltaTracker tracker, CallbackInfo ci) {
-        if (!HandycamConfig.get().mouseLeadEnabled) return;
-        float ox = CrosshairSwaySystem.offsetX;
-        float oy = CrosshairSwaySystem.offsetY;
+        HandycamConfig cfg = HandycamConfig.get();
+        float ox = cfg.mouseLeadEnabled ? CrosshairSwaySystem.offsetX : 0f;
+        float oy = cfg.mouseLeadEnabled ? CrosshairSwaySystem.offsetY : 0f;
+        ox += CrosshairSwaySystem.drawCompX;
+        oy += CrosshairSwaySystem.drawCompY;
         if (ox == 0f && oy == 0f) return;
         graphics.pose().pushPose();
         graphics.pose().translate(ox, oy, 0f);
@@ -29,9 +31,11 @@ public abstract class GuiMixin {
 
     @Inject(method = "renderCrosshair", at = @At("TAIL"))
     private void handycam$crosshairPop(GuiGraphics graphics, DeltaTracker tracker, CallbackInfo ci) {
-        if (!HandycamConfig.get().mouseLeadEnabled) return;
-        float ox = CrosshairSwaySystem.offsetX;
-        float oy = CrosshairSwaySystem.offsetY;
+        HandycamConfig cfg = HandycamConfig.get();
+        float ox = cfg.mouseLeadEnabled ? CrosshairSwaySystem.offsetX : 0f;
+        float oy = cfg.mouseLeadEnabled ? CrosshairSwaySystem.offsetY : 0f;
+        ox += CrosshairSwaySystem.drawCompX;
+        oy += CrosshairSwaySystem.drawCompY;
         if (ox == 0f && oy == 0f) return;
         graphics.pose().popPose();
     }

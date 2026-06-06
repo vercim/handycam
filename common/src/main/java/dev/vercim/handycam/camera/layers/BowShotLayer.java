@@ -1,6 +1,7 @@
 package dev.vercim.handycam.camera.layers;
 
 import dev.vercim.handycam.camera.CameraOffset;
+import dev.vercim.handycam.camera.CrosshairSwaySystem;
 import dev.vercim.handycam.camera.PlayerState;
 import dev.vercim.handycam.camera.ShakeLayer;
 import dev.vercim.handycam.camera.math.FractalNoise;
@@ -8,6 +9,7 @@ import dev.vercim.handycam.camera.math.SpringSimulator;
 import dev.vercim.handycam.config.HandycamConfig;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.Minecraft;
 
 /**
  * Сильная отдача камеры вверх при выстреле из лука + наложение шума для хаоса.
@@ -70,7 +72,11 @@ public class BowShotLayer implements ShakeLayer {
     @Override
     public CameraOffset compute(PlayerState state, float time, float dt) {
         HandycamConfig cfg = HandycamConfig.get();
-        if (!cfg.bowEnabled) return CameraOffset.ZERO;
+        if (!cfg.bowEnabled) {
+            CrosshairSwaySystem.drawCompX = 0f;
+            CrosshairSwaySystem.drawCompY = 0f;
+            return CameraOffset.ZERO;
+        }
 
         // Пружинный импульс — рывок вверх + небольшой увод по yaw.
         float pitch = pitchSpring.update(pitchTarget, dt);
@@ -95,6 +101,18 @@ public class BowShotLayer implements ShakeLayer {
         float drawScale = cfg.masterIntensity * cfg.bowDrawTilt;
         float yawDraw   = bowYawDraw      .update(state.bowDrawProgress       * 1.5f,  dt);
         float pitchDraw = crossbowPitchDraw.update(state.crossbowDrawProgress * (-1.2f), dt);
+
+        // Crosshair compensation: противоположное смещение чтобы прицел оставался
+        // на реальной точке прицеливания, несмотря на визуальный крен камеры.
+        // Перевод градусов → GUI-пиксели через ширину экрана и FOV.
+        Minecraft mc = Minecraft.getInstance();
+        float guiW   = mc.getWindow().getGuiScaledWidth();
+        float fovDeg = mc.options.fov().get();
+        float pixPerDeg = (float) ((guiW / 2.0) / Math.tan(Math.toRadians(fovDeg / 2.0))
+                                   * Math.toRadians(1.0));
+        // Знаки: камера вправо (yaw+) → прицел влево (-X); камера вниз (pitch+) → прицел вверх (-Y)
+        CrosshairSwaySystem.drawCompX = -yawDraw   * drawScale * pixPerDeg;
+        CrosshairSwaySystem.drawCompY = -pitchDraw * drawScale * pixPerDeg;
 
         return new CameraOffset((pitch + np) * i + pitchDraw * drawScale,
                                 (yaw   + ny) * i + yawDraw   * drawScale,
