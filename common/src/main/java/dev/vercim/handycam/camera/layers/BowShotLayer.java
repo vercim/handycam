@@ -73,10 +73,14 @@ public class BowShotLayer implements ShakeLayer {
     public CameraOffset compute(PlayerState state, float time, float dt) {
         HandycamConfig cfg = HandycamConfig.get();
         if (!cfg.bowEnabled) {
-            CrosshairSwaySystem.drawCompX = 0f;
-            CrosshairSwaySystem.drawCompY = 0f;
+            CrosshairSwaySystem.drawCompX    = 0f;
+            CrosshairSwaySystem.drawCompY    = 0f;
+            CrosshairSwaySystem.bowDrawProgress = 0f;
             return CameraOffset.ZERO;
         }
+
+        // Прогресс натяжения для масштабирования прицела в GuiMixin.
+        CrosshairSwaySystem.bowDrawProgress = state.bowDrawProgress;
 
         // Пружинный импульс — рывок вверх + небольшой увод по yaw.
         float pitch = pitchSpring.update(pitchTarget, dt);

@@ -24,9 +24,24 @@ public abstract class GuiMixin {
         float oy = cfg.mouseLeadEnabled ? CrosshairSwaySystem.offsetY : 0f;
         ox += CrosshairSwaySystem.drawCompX;
         oy += CrosshairSwaySystem.drawCompY;
-        if (ox == 0f && oy == 0f) return;
+        float scale = 1f - CrosshairSwaySystem.bowDrawProgress * cfg.bowCrosshairShrink;
+
+        boolean hasTranslate = ox != 0f || oy != 0f;
+        boolean hasScale     = scale < 0.9999f;
+        if (!hasTranslate && !hasScale) return;
+
+        net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();
+        float cx = mc.getWindow().getGuiScaledWidth()  / 2f;
+        float cy = mc.getWindow().getGuiScaledHeight() / 2f;
+
         graphics.pose().pushPose();
-        graphics.pose().translate(ox, oy, 0f);
+        if (hasTranslate) graphics.pose().translate(ox, oy, 0f);
+        if (hasScale) {
+            // Скейлить вокруг центра прицела (с учётом смещения).
+            graphics.pose().translate( cx, cy, 0f);
+            graphics.pose().scale(scale, scale, 1f);
+            graphics.pose().translate(-cx, -cy, 0f);
+        }
     }
 
     @Inject(method = "renderCrosshair", at = @At("TAIL"))
@@ -36,7 +51,12 @@ public abstract class GuiMixin {
         float oy = cfg.mouseLeadEnabled ? CrosshairSwaySystem.offsetY : 0f;
         ox += CrosshairSwaySystem.drawCompX;
         oy += CrosshairSwaySystem.drawCompY;
-        if (ox == 0f && oy == 0f) return;
+        float scale = 1f - CrosshairSwaySystem.bowDrawProgress * cfg.bowCrosshairShrink;
+
+        boolean hasTranslate = ox != 0f || oy != 0f;
+        boolean hasScale     = scale < 0.9999f;
+        if (!hasTranslate && !hasScale) return;
+
         graphics.pose().popPose();
     }
 }

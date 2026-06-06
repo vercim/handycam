@@ -238,6 +238,13 @@ public class HandycamConfigScreen {
             .setTooltip(Component.literal("Idle shake suppression when bow fully drawn"))
             .setSaveConsumer(v -> cfg.bowConcentration = fromSlider(v))
             .build());
+        bow.addEntry(e.startIntSlider(
+                Component.literal("Crosshair Shrink  " + fmt(cfg.bowCrosshairShrink)),
+                toSlider(cfg.bowCrosshairShrink), 0, 60)
+            .setDefaultValue(20)
+            .setTooltip(Component.literal("How much the crosshair shrinks at full draw (0 = off)"))
+            .setSaveConsumer(v -> cfg.bowCrosshairShrink = fromSlider(v))
+            .build());
 
         // ── Crouch ────────────────────────────────────────────────────────────
         ConfigCategory crouch = builder.getOrCreateCategory(Component.literal("Crouch"));

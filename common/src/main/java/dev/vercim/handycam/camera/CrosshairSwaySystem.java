@@ -20,4 +20,7 @@ public final class CrosshairSwaySystem {
     // stays on the true aim point. Written by BowShotLayer, read by GuiMixin.
     public static float drawCompX = 0f;
     public static float drawCompY = 0f;
+
+    // Current bow draw progress [0..1]. Written by BowShotLayer, read by GuiMixin for crosshair scaling.
+    public static float bowDrawProgress = 0f;
 }
