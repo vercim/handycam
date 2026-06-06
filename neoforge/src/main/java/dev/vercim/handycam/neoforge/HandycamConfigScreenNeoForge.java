@@ -234,41 +234,41 @@ public class HandycamConfigScreenNeoForge {
                 Component.literal("Yaw Sway  " + fmt(cfg.swayYawLag)),
                 toSlider(cfg.swayYawLag), 4, 29)
             .setDefaultValue(8)
-            .setTooltip(Component.literal("Inertia strength for horizontal (left/right) camera movement. Higher = more lag when turning."))
+            .setTooltip(Component.literal("Horizontal (left/right) inertia"))
             .setSaveConsumer(v -> cfg.swayYawLag = fromSlider(v))
             .build());
         mouse.addEntry(e.startIntSlider(
                 Component.literal("Pitch Sway  " + fmt(cfg.swayPitchLag)),
                 toSlider(cfg.swayPitchLag), 7, 32)
             .setDefaultValue(14)
-            .setTooltip(Component.literal("Inertia strength for vertical (up/down) camera movement. Higher = more lag when looking up or down."))
+            .setTooltip(Component.literal("Vertical (up/down) inertia"))
             .setSaveConsumer(v -> cfg.swayPitchLag = fromSlider(v))
             .build());
 
         mouse.addEntry(e.startBooleanToggle(Component.literal("Crosshair Drift Enabled"), cfg.mouseLeadEnabled)
             .setDefaultValue(true)
-            .setTooltip(Component.literal("The crosshair drifts slightly in the direction you are looking or moving. Makes aiming feel more physical."))
+            .setTooltip(Component.literal("Crosshair drifts while moving"))
             .setSaveConsumer(v -> cfg.mouseLeadEnabled = v)
             .build());
         mouse.addEntry(e.startIntSlider(
                 Component.literal("Mouse Sway Scale  " + fmt(cfg.mouseSwayScale)),
                 toSlider(cfg.mouseSwayScale), 15, 65)
             .setDefaultValue(30)
-            .setTooltip(Component.literal("How much the crosshair shifts sideways when you turn your view."))
+            .setTooltip(Component.literal("Amount of sideways drift"))
             .setSaveConsumer(v -> cfg.mouseSwayScale = fromSlider(v))
             .build());
         mouse.addEntry(e.startIntSlider(
                 Component.literal("Crosshair Vertical Drift  " + fmt(cfg.verticalDriftIntensity)),
                 toSlider(cfg.verticalDriftIntensity), 45, 95)
             .setDefaultValue(90)
-            .setTooltip(Component.literal("How much the crosshair drifts up or down when jumping or falling."))
+            .setTooltip(Component.literal("Amount of up/down drift"))
             .setSaveConsumer(v -> cfg.verticalDriftIntensity = fromSlider(v))
             .build());
         mouse.addEntry(e.startIntSlider(
                 Component.literal("Mouse Sway Smoothness  " + fmt(cfg.mouseSwaySmoothing)),
                 toSlider(cfg.mouseSwaySmoothing), 1, 30)
             .setDefaultValue(9)
-            .setTooltip(Component.literal("How smoothly the crosshair drift follows the mouse. Higher = slower, floatier drift."))
+            .setTooltip(Component.literal("Smoothness of drift motion"))
             .setSaveConsumer(v -> cfg.mouseSwaySmoothing = fromSlider(v))
             .build());
 
@@ -277,48 +277,48 @@ public class HandycamConfigScreenNeoForge {
 
         hit.addEntry(e.startBooleanToggle(Component.literal("Hit Enabled"), cfg.hitEnabled)
             .setDefaultValue(true)
-            .setTooltip(Component.literal("Camera kicks slightly every time you swing and hit something."))
+            .setTooltip(Component.literal("Camera kick when hitting"))
             .setSaveConsumer(v -> cfg.hitEnabled = v)
             .build());
         hit.addEntry(e.startIntSlider(
                 Component.literal("Hit Intensity  " + fmt(cfg.hitIntensity)),
                 toSlider(cfg.hitIntensity), 100, 300)
             .setDefaultValue(200)
-            .setTooltip(Component.literal("Strength of the camera kick when you land a hit."))
+            .setTooltip(Component.literal("Strength of hit kick"))
             .setSaveConsumer(v -> cfg.hitIntensity = fromSlider(v))
             .build());
         hit.addEntry(e.startIntSlider(
                 Component.literal("Hit Decay  " + fmt(cfg.hitDecay)),
                 toSlider(cfg.hitDecay), 1005, 2000)
             .setDefaultValue(2000)
-            .setTooltip(Component.literal("How fast the hit kick snaps back. Higher = very snappy and brief."))
+            .setTooltip(Component.literal("How fast hit kick fades"))
             .setSaveConsumer(v -> cfg.hitDecay = fromSlider(v))
             .build());
 
         hit.addEntry(e.startBooleanToggle(Component.literal("Bow Enabled"), cfg.bowEnabled)
             .setDefaultValue(true)
-            .setTooltip(Component.literal("Camera recoils upward when you release a bow shot."))
+            .setTooltip(Component.literal("Camera recoil when shooting bow"))
             .setSaveConsumer(v -> cfg.bowEnabled = v)
             .build());
         hit.addEntry(e.startIntSlider(
                 Component.literal("Bow Recoil Intensity  " + fmt(cfg.bowRecoilIntensity)),
                 toSlider(cfg.bowRecoilIntensity), 0, 800)
-            .setDefaultValue(600)
-            .setTooltip(Component.literal("How strong the upward kick is when firing the bow."))
+            .setDefaultValue(500)
+            .setTooltip(Component.literal("Strength of bow recoil"))
             .setSaveConsumer(v -> cfg.bowRecoilIntensity = fromSlider(v))
             .build());
         hit.addEntry(e.startIntSlider(
                 Component.literal("Bow Recoil Decay  " + fmt(cfg.bowRecoilDecay)),
                 toSlider(cfg.bowRecoilDecay), 100, 1000)
             .setDefaultValue(400)
-            .setTooltip(Component.literal("How quickly the bow recoil fades. Higher = snappier recovery."))
+            .setTooltip(Component.literal("How fast recoil fades"))
             .setSaveConsumer(v -> cfg.bowRecoilDecay = fromSlider(v))
             .build());
         hit.addEntry(e.startIntSlider(
                 Component.literal("Bow Concentration  " + fmt(cfg.bowConcentration)),
                 toSlider(cfg.bowConcentration), 0, 100)
             .setDefaultValue(100)
-            .setTooltip(Component.literal("How much idle hand-tremor is suppressed when the bow is fully drawn. 1.0 = fully steady at full draw."))
+            .setTooltip(Component.literal("Steadiness when bow fully drawn"))
             .setSaveConsumer(v -> cfg.bowConcentration = fromSlider(v))
             .build());
 
@@ -327,33 +327,33 @@ public class HandycamConfigScreenNeoForge {
 
         jump.addEntry(e.startBooleanToggle(Component.literal("Jump Enabled"), cfg.jumpEnabled)
             .setDefaultValue(true)
-            .setTooltip(Component.literal("Camera pitches upward briefly when you jump."))
+            .setTooltip(Component.literal("Camera tilt when jumping"))
             .setSaveConsumer(v -> cfg.jumpEnabled = v)
             .build());
         jump.addEntry(e.startIntSlider(
                 Component.literal("Jump Intensity  " + fmt(cfg.jumpIntensity)),
                 toSlider(cfg.jumpIntensity), 205, 455)
             .setDefaultValue(410)
-            .setTooltip(Component.literal("How much the camera tilts up on jump."))
+            .setTooltip(Component.literal("Amount of jump tilt"))
             .setSaveConsumer(v -> cfg.jumpIntensity = fromSlider(v))
             .build());
         jump.addEntry(e.startIntSlider(
                 Component.literal("Jump Decay  " + fmt(cfg.jumpDecay)),
                 toSlider(cfg.jumpDecay), 260, 755)
             .setDefaultValue(510)
-            .setTooltip(Component.literal("How fast the jump tilt returns to normal. Lower = floaty arc, Higher = quick snap."))
+            .setTooltip(Component.literal("How fast jump tilt fades"))
             .setSaveConsumer(v -> cfg.jumpDecay = fromSlider(v))
             .build());
         jump.addEntry(e.startBooleanToggle(Component.literal("Landing Enabled"), cfg.landingEnabled)
             .setDefaultValue(true)
-            .setTooltip(Component.literal("Camera slams downward when you land after a fall."))
+            .setTooltip(Component.literal("Camera slam when landing"))
             .setSaveConsumer(v -> cfg.landingEnabled = v)
             .build());
         jump.addEntry(e.startIntSlider(
                 Component.literal("Landing Intensity  " + fmt(cfg.landingIntensity)),
                 toSlider(cfg.landingIntensity), 190, 395)
             .setDefaultValue(385)
-            .setTooltip(Component.literal("How hard the camera hits on landing. Scales with fall distance."))
+            .setTooltip(Component.literal("Strength of landing impact"))
             .setSaveConsumer(v -> cfg.landingIntensity = fromSlider(v))
             .build());
 
