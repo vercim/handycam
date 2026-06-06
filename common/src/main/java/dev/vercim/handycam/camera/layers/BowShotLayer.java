@@ -91,8 +91,8 @@ public class BowShotLayer implements ShakeLayer {
 
         float i = cfg.bowRecoilIntensity * cfg.masterIntensity;
 
-        // Draw-tilt: плавное смещение при натяжении — независимо от cfg.bowRecoilIntensity.
-        float drawScale = cfg.masterIntensity;
+        // Draw-tilt: плавное смещение при натяжении.
+        float drawScale = cfg.masterIntensity * cfg.bowDrawTilt;
         float yawDraw   = bowYawDraw      .update(state.bowDrawProgress       * 1.5f,  dt);
         float pitchDraw = crossbowPitchDraw.update(state.crossbowDrawProgress * (-1.2f), dt);
 
