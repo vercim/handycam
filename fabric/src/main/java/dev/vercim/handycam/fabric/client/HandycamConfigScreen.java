@@ -122,7 +122,7 @@ public class HandycamConfigScreen {
             .build());
 
         // ── Tilt ─────────────────────────────────────────────────────────────
-        ConfigCategory tilt = builder.getOrCreateCategory(Component.literal("Tilt"));
+        ConfigCategory tilt = builder.getOrCreateCategory(Component.literal("Directional Tilt"));
 
         tilt.addEntry(e.startBooleanToggle(Component.literal("Forward/Back Lean"), cfg.forwardTiltEnabled)
             .setDefaultValue(true)
@@ -187,7 +187,7 @@ public class HandycamConfigScreen {
             .build());
 
         // ── Hit ───────────────────────────────────────────────────────────────
-        ConfigCategory hit = builder.getOrCreateCategory(Component.literal("Hit"));
+        ConfigCategory hit = builder.getOrCreateCategory(Component.literal("Hit Impact"));
 
         hit.addEntry(e.startBooleanToggle(Component.literal("Enabled"), cfg.hitEnabled)
             .setDefaultValue(true)
@@ -210,7 +210,7 @@ public class HandycamConfigScreen {
             .build());
 
         // ── Bow ───────────────────────────────────────────────────────────────
-        ConfigCategory bow = builder.getOrCreateCategory(Component.literal("Bow"));
+        ConfigCategory bow = builder.getOrCreateCategory(Component.literal("Bow Impact"));
 
         bow.addEntry(e.startBooleanToggle(Component.literal("Enabled"), cfg.bowEnabled)
             .setDefaultValue(true)
