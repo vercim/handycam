@@ -12,10 +12,11 @@ import net.fabricmc.api.Environment;
 @Environment(EnvType.CLIENT)
 public class DamageShakeLayer implements ShakeLayer {
 
-    // Underdamped springs — низкое затухание даёт bounce (отскок)
-    private final SpringSimulator pitchSpring = new SpringSimulator(120f, 14f);
-    private final SpringSimulator yawSpring   = new SpringSimulator(100f, 12f);
-    private final SpringSimulator rollSpring  = new SpringSimulator(100f, 12f);
+    // Underdamped springs — низкое затухание даёт чёткий bounce (отскок + перелёт)
+    // stiffness=60, damping=8 → ζ≈0.52 (underdamped), пик ~0.155s после удара
+    private final SpringSimulator pitchSpring = new SpringSimulator(60f, 8f);
+    private final SpringSimulator yawSpring   = new SpringSimulator(60f, 8f);
+    private final SpringSimulator rollSpring  = new SpringSimulator(60f, 8f);
 
     // Fractal noise — хаотичная тряска после удара
     private final FractalNoise pitchA = new FractalNoise(0x11223344L, 4, 8f,  0.55f);
@@ -35,13 +36,14 @@ public class DamageShakeLayer implements ShakeLayer {
         float severity = (float) Math.sqrt(damageAmount / maxHealth);
         traumaAmount = Math.min(traumaAmount + severity, 1f);
 
-        // Velocity impulse — камера резко пинается назад, затем пружина возвращает с bounce
+        // Velocity impulse — камера резко пинается назад, пружина возвращает с bounce
+        // kickStrength * 40 → пик ~5° для 1/20hp, ~22° для летального удара
         hitCounter++;
         int side = (hitCounter % 2 == 0) ? 1 : -1;
-        float kickStrength = severity * 18f;
-        pitchSpring.addVelocity(-kickStrength);             // назад по pitch
-        yawSpring  .addVelocity( side * kickStrength * 0.4f);
-        rollSpring .addVelocity( side * kickStrength * 0.3f);
+        float kick = severity * 40f;
+        pitchSpring.addVelocity(-kick);                    // назад по pitch
+        yawSpring  .addVelocity( side * kick * 0.45f);    // боковое смещение
+        rollSpring .addVelocity( side * kick * 0.35f);    // крен
     }
 
     @Override
