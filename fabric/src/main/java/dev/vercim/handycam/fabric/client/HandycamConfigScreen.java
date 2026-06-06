@@ -70,7 +70,7 @@ public class HandycamConfigScreen {
             .setSaveConsumer(v -> cfg.idleTremorScale = fromSlider(v))
             .build());
 
-        // ── Movement (Walk Bob + Sprint Sway) ────────────────────────────────
+        // ── Movement ─────────────────────────────────────────────────────────
         ConfigCategory movement = builder.getOrCreateCategory(Component.literal("Movement"));
 
         movement.addEntry(e.startBooleanToggle(Component.literal("Walk Bob Enabled"), cfg.walkBobEnabled)
@@ -121,6 +121,48 @@ public class HandycamConfigScreen {
             .setSaveConsumer(v -> cfg.maxTurnRoll = fromSlider(v))
             .build());
 
+        // ── Tilt ─────────────────────────────────────────────────────────────
+        ConfigCategory tilt = builder.getOrCreateCategory(Component.literal("Tilt"));
+
+        tilt.addEntry(e.startBooleanToggle(Component.literal("Forward/Back Lean"), cfg.forwardTiltEnabled)
+            .setDefaultValue(true)
+            .setTooltip(Component.literal("Tilt when accelerating/stopping"))
+            .setSaveConsumer(v -> cfg.forwardTiltEnabled = v)
+            .build());
+        tilt.addEntry(e.startIntSlider(
+                Component.literal("Forward/Back Intensity  " + fmt(cfg.forwardTiltIntensity)),
+                toSlider(cfg.forwardTiltIntensity), 0, 600)
+            .setDefaultValue(300)
+            .setTooltip(Component.literal("Amount of forward/back tilt"))
+            .setSaveConsumer(v -> cfg.forwardTiltIntensity = fromSlider(v))
+            .build());
+        tilt.addEntry(e.startIntSlider(
+                Component.literal("Forward/Back Decay  " + fmt(cfg.forwardTiltDecay)),
+                toSlider(cfg.forwardTiltDecay), 20, 300)
+            .setDefaultValue(100)
+            .setTooltip(Component.literal("How fast tilt returns to neutral"))
+            .setSaveConsumer(v -> cfg.forwardTiltDecay = fromSlider(v))
+            .build());
+        tilt.addEntry(e.startBooleanToggle(Component.literal("Left/Right Lean"), cfg.strafeTiltEnabled)
+            .setDefaultValue(true)
+            .setTooltip(Component.literal("Lean when strafing sideways"))
+            .setSaveConsumer(v -> cfg.strafeTiltEnabled = v)
+            .build());
+        tilt.addEntry(e.startIntSlider(
+                Component.literal("Left/Right Intensity  " + fmt(cfg.strafeTiltIntensity)),
+                toSlider(cfg.strafeTiltIntensity), 0, 600)
+            .setDefaultValue(300)
+            .setTooltip(Component.literal("Amount of strafe lean"))
+            .setSaveConsumer(v -> cfg.strafeTiltIntensity = fromSlider(v))
+            .build());
+        tilt.addEntry(e.startIntSlider(
+                Component.literal("Left/Right Decay  " + fmt(cfg.strafeTiltDecay)),
+                toSlider(cfg.strafeTiltDecay), 20, 300)
+            .setDefaultValue(100)
+            .setTooltip(Component.literal("How fast lean returns to straight"))
+            .setSaveConsumer(v -> cfg.strafeTiltDecay = fromSlider(v))
+            .build());
+
         // ── Damage ────────────────────────────────────────────────────────────
         ConfigCategory damage = builder.getOrCreateCategory(Component.literal("Damage"));
 
@@ -144,47 +186,57 @@ public class HandycamConfigScreen {
             .setSaveConsumer(v -> cfg.damageDecay = fromSlider(v))
             .build());
 
-        // ── Movement Tilt ─────────────────────────────────────────────────────
-        ConfigCategory moveTilt = builder.getOrCreateCategory(Component.literal("Movement Tilt"));
+        // ── Hit ───────────────────────────────────────────────────────────────
+        ConfigCategory hit = builder.getOrCreateCategory(Component.literal("Hit"));
 
-        moveTilt.addEntry(e.startBooleanToggle(Component.literal("Forward/Back Lean"), cfg.forwardTiltEnabled)
+        hit.addEntry(e.startBooleanToggle(Component.literal("Enabled"), cfg.hitEnabled)
             .setDefaultValue(true)
-            .setTooltip(Component.literal("Tilt when accelerating/stopping"))
-            .setSaveConsumer(v -> cfg.forwardTiltEnabled = v)
+            .setTooltip(Component.literal("Camera kick when hitting"))
+            .setSaveConsumer(v -> cfg.hitEnabled = v)
             .build());
-        moveTilt.addEntry(e.startIntSlider(
-                Component.literal("Forward/Back Intensity  " + fmt(cfg.forwardTiltIntensity)),
-                toSlider(cfg.forwardTiltIntensity), 0, 600)
-            .setDefaultValue(300)
-            .setTooltip(Component.literal("Amount of forward/back tilt"))
-            .setSaveConsumer(v -> cfg.forwardTiltIntensity = fromSlider(v))
+        hit.addEntry(e.startIntSlider(
+                Component.literal("Intensity  " + fmt(cfg.hitIntensity)),
+                toSlider(cfg.hitIntensity), 100, 300)
+            .setDefaultValue(200)
+            .setTooltip(Component.literal("Strength of hit kick"))
+            .setSaveConsumer(v -> cfg.hitIntensity = fromSlider(v))
             .build());
-        moveTilt.addEntry(e.startIntSlider(
-                Component.literal("Forward/Back Decay  " + fmt(cfg.forwardTiltDecay)),
-                toSlider(cfg.forwardTiltDecay), 20, 300)
-            .setDefaultValue(100)
-            .setTooltip(Component.literal("How fast tilt returns to neutral"))
-            .setSaveConsumer(v -> cfg.forwardTiltDecay = fromSlider(v))
+        hit.addEntry(e.startIntSlider(
+                Component.literal("Decay  " + fmt(cfg.hitDecay)),
+                toSlider(cfg.hitDecay), 1005, 2000)
+            .setDefaultValue(2000)
+            .setTooltip(Component.literal("How fast hit kick fades"))
+            .setSaveConsumer(v -> cfg.hitDecay = fromSlider(v))
             .build());
 
-        moveTilt.addEntry(e.startBooleanToggle(Component.literal("Left/Right Lean"), cfg.strafeTiltEnabled)
+        // ── Bow ───────────────────────────────────────────────────────────────
+        ConfigCategory bow = builder.getOrCreateCategory(Component.literal("Bow"));
+
+        bow.addEntry(e.startBooleanToggle(Component.literal("Enabled"), cfg.bowEnabled)
             .setDefaultValue(true)
-            .setTooltip(Component.literal("Lean when strafing sideways"))
-            .setSaveConsumer(v -> cfg.strafeTiltEnabled = v)
+            .setTooltip(Component.literal("Camera recoil when shooting bow/crossbow"))
+            .setSaveConsumer(v -> cfg.bowEnabled = v)
             .build());
-        moveTilt.addEntry(e.startIntSlider(
-                Component.literal("Left/Right Intensity  " + fmt(cfg.strafeTiltIntensity)),
-                toSlider(cfg.strafeTiltIntensity), 0, 600)
-            .setDefaultValue(300)
-            .setTooltip(Component.literal("Amount of strafe lean"))
-            .setSaveConsumer(v -> cfg.strafeTiltIntensity = fromSlider(v))
+        bow.addEntry(e.startIntSlider(
+                Component.literal("Recoil Intensity  " + fmt(cfg.bowRecoilIntensity)),
+                toSlider(cfg.bowRecoilIntensity), 0, 800)
+            .setDefaultValue(250)
+            .setTooltip(Component.literal("Strength of bow/crossbow recoil"))
+            .setSaveConsumer(v -> cfg.bowRecoilIntensity = fromSlider(v))
             .build());
-        moveTilt.addEntry(e.startIntSlider(
-                Component.literal("Left/Right Decay  " + fmt(cfg.strafeTiltDecay)),
-                toSlider(cfg.strafeTiltDecay), 20, 300)
-            .setDefaultValue(100)
-            .setTooltip(Component.literal("How fast lean returns to straight"))
-            .setSaveConsumer(v -> cfg.strafeTiltDecay = fromSlider(v))
+        bow.addEntry(e.startIntSlider(
+                Component.literal("Recoil Decay  " + fmt(cfg.bowRecoilDecay)),
+                toSlider(cfg.bowRecoilDecay), 100, 1000)
+            .setDefaultValue(900)
+            .setTooltip(Component.literal("How fast recoil fades"))
+            .setSaveConsumer(v -> cfg.bowRecoilDecay = fromSlider(v))
+            .build());
+        bow.addEntry(e.startIntSlider(
+                Component.literal("Concentration  " + fmt(cfg.bowConcentration)),
+                toSlider(cfg.bowConcentration), 0, 100)
+            .setDefaultValue(90)
+            .setTooltip(Component.literal("Idle shake suppression when bow fully drawn"))
+            .setSaveConsumer(v -> cfg.bowConcentration = fromSlider(v))
             .build());
 
         // ── Crouch ────────────────────────────────────────────────────────────
@@ -230,7 +282,6 @@ public class HandycamConfigScreen {
             .setTooltip(Component.literal("Vertical (up/down) inertia"))
             .setSaveConsumer(v -> cfg.swayPitchLag = fromSlider(v))
             .build());
-
         mouse.addEntry(e.startBooleanToggle(Component.literal("Crosshair Drift Enabled"), cfg.mouseLeadEnabled)
             .setDefaultValue(true)
             .setTooltip(Component.literal("Crosshair drifts while moving"))
@@ -256,63 +307,6 @@ public class HandycamConfigScreen {
             .setDefaultValue(9)
             .setTooltip(Component.literal("Smoothness of drift motion"))
             .setSaveConsumer(v -> cfg.mouseSwaySmoothing = fromSlider(v))
-            .build());
-
-        // ── Impact (Hit + Bow) ──────────────────────────────────────────────────
-        ConfigCategory hit = builder.getOrCreateCategory(Component.literal("Impact"));
-
-        hit.addEntry(e.startBooleanToggle(Component.literal("Hit Enabled"), cfg.hitEnabled)
-            .setDefaultValue(true)
-            .setTooltip(Component.literal("Camera kick when hitting"))
-            .setSaveConsumer(v -> cfg.hitEnabled = v)
-            .build());
-        hit.addEntry(e.startIntSlider(
-                Component.literal("Hit Intensity  " + fmt(cfg.hitIntensity)),
-                toSlider(cfg.hitIntensity), 100, 300)
-            .setDefaultValue(200)
-            .setTooltip(Component.literal("Strength of hit kick"))
-            .setSaveConsumer(v -> cfg.hitIntensity = fromSlider(v))
-            .build());
-        hit.addEntry(e.startIntSlider(
-                Component.literal("Hit Decay  " + fmt(cfg.hitDecay)),
-                toSlider(cfg.hitDecay), 1005, 2000)
-            .setDefaultValue(2000)
-            .setTooltip(Component.literal("How fast hit kick fades"))
-            .setSaveConsumer(v -> cfg.hitDecay = fromSlider(v))
-            .build());
-
-        hit.addEntry(e.startBooleanToggle(Component.literal("Bow Enabled"), cfg.bowEnabled)
-            .setDefaultValue(true)
-            .setTooltip(Component.literal("Camera recoil when shooting bow"))
-            .setSaveConsumer(v -> cfg.bowEnabled = v)
-            .build());
-        hit.addEntry(e.startIntSlider(
-                Component.literal("Bow Recoil Intensity  " + fmt(cfg.bowRecoilIntensity)),
-                toSlider(cfg.bowRecoilIntensity), 0, 800)
-            .setDefaultValue(250)
-            .setTooltip(Component.literal("Strength of bow recoil"))
-            .setSaveConsumer(v -> cfg.bowRecoilIntensity = fromSlider(v))
-            .build());
-        hit.addEntry(e.startIntSlider(
-                Component.literal("Bow Recoil Decay  " + fmt(cfg.bowRecoilDecay)),
-                toSlider(cfg.bowRecoilDecay), 100, 1000)
-            .setDefaultValue(900)
-            .setTooltip(Component.literal("How fast recoil fades"))
-            .setSaveConsumer(v -> cfg.bowRecoilDecay = fromSlider(v))
-            .build());
-        hit.addEntry(e.startIntSlider(
-                Component.literal("Bow Concentration  " + fmt(cfg.bowConcentration)),
-                toSlider(cfg.bowConcentration), 0, 100)
-            .setDefaultValue(95)
-            .setTooltip(Component.literal("Steadiness when bow fully drawn"))
-            .setSaveConsumer(v -> cfg.bowConcentration = fromSlider(v))
-            .build());
-        hit.addEntry(e.startIntSlider(
-                Component.literal("Draw Tilt  " + fmt(cfg.bowDrawTilt)),
-                toSlider(cfg.bowDrawTilt), 0, 200)
-            .setDefaultValue(100)
-            .setTooltip(Component.literal("Camera drift while drawing bow / loading crossbow"))
-            .setSaveConsumer(v -> cfg.bowDrawTilt = fromSlider(v))
             .build());
 
         // ── Jump & Landing ────────────────────────────────────────────────────

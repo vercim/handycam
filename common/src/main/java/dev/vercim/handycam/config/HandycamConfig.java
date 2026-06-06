@@ -89,8 +89,7 @@ public class HandycamConfig {
     public boolean bowEnabled        = true;
     public float   bowRecoilIntensity = 2.5f;  // сила отдачи при выстреле
     public float   bowRecoilDecay     = 9.0f;  // скорость затухания отдачи
-    public float   bowConcentration   = 0.95f; // 0..1 — насколько гасится idle-дрожь при макс. натяжении
-    public float   bowDrawTilt        = 1.0f;  // сила смещения камеры при натяжении (0 = выкл)
+    public float   bowConcentration   = 0.90f; // 0..1 — насколько гасится idle-дрожь при макс. натяжении
 
     public static HandycamConfig get() {
         if (instance == null) instance = new HandycamConfig();
