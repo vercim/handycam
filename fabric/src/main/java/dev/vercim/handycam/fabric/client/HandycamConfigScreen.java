@@ -289,7 +289,7 @@ public class HandycamConfigScreen {
         hit.addEntry(e.startIntSlider(
                 Component.literal("Bow Recoil Intensity  " + fmt(cfg.bowRecoilIntensity)),
                 toSlider(cfg.bowRecoilIntensity), 0, 800)
-            .setDefaultValue(400)
+            .setDefaultValue(600)
             .setTooltip(Component.literal("How strong the upward kick is when firing the bow."))
             .setSaveConsumer(v -> cfg.bowRecoilIntensity = fromSlider(v))
             .build());
