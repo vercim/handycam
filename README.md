@@ -11,7 +11,6 @@ Handycam adds subtle, physics-inspired camera movement that makes Minecraft feel
 | **Walk bob** | Vertical and lateral oscillation tied to footstep frequency and speed |
 | **Sprint sway** | Roll and lateral drift while sprinting, driven by fractal Perlin noise |
 | **Strafe tilt** | Camera rolls slightly when strafing left or right |
-| **Forward tilt** | Subtle pitch forward while moving |
 | **Mouse lead** | Camera shifts slightly toward the look direction |
 | **Idle shake** | Low-amplitude micro-movement when standing still |
 | **Damage shake** | Spring-simulated camera jolt on incoming damage |
