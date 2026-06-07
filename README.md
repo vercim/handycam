@@ -50,6 +50,7 @@ camera/
      ├─ SpringSimulator    — Underdamped spring for impact effects
      ├─ PerlinNoise        — 2D Perlin noise primitive
      └─ FractalNoise       — Multi-octave Perlin for smooth sway
+```
 
 Each layer is **independent**: they don't call each other, just independently read player state and output their own offset. All offsets are summed by `CameraShakeSystem` and fed into the vanilla camera via Mixin.
 
