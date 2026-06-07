@@ -50,6 +50,9 @@ public final class CameraShakeSystem {
     private static boolean wasPaused = false;
     private static CameraOffset lastComputedOffset = CameraOffset.ZERO;
 
+    private static float creativeFadeBlend = 1f; // 1 = full effects, 0 = no effects
+    private static final float CREATIVE_FADE_SPEED = 3f; // скорость перехода (1/сек)
+
     private CameraShakeSystem() {}
 
     public static void tick(LocalPlayer player) {
@@ -128,7 +131,16 @@ public final class CameraShakeSystem {
 
         PlayerState state = (lastState != null) ? lastState : PlayerState.from(player);
 
-        if (HandycamConfig.get().disableInCreativeFlight && state.isCreativeFlying) {
+        // Плавный переход при включении/выключении полёта в креативе
+        HandycamConfig cfg = HandycamConfig.get();
+        float blendTarget = (cfg.disableInCreativeFlight && state.isCreativeFlying) ? 0f : 1f;
+        if (creativeFadeBlend < blendTarget) {
+            creativeFadeBlend = Math.min(blendTarget, creativeFadeBlend + CREATIVE_FADE_SPEED * dt);
+        } else if (creativeFadeBlend > blendTarget) {
+            creativeFadeBlend = Math.max(blendTarget, creativeFadeBlend - CREATIVE_FADE_SPEED * dt);
+        }
+
+        if (creativeFadeBlend == 0f) {
             lastComputedOffset = CameraOffset.ZERO;
             return CameraOffset.ZERO;
         }
@@ -142,6 +154,10 @@ public final class CameraShakeSystem {
         // (bob freq ≈ 1.6 Hz ≈ spring natural freq → ~50% signal loss) and
         // creating a double-spring with layers that already self-smooth.
         // Each layer is responsible for its own spring/decay.
+        if (creativeFadeBlend < 1f) {
+            sum = sum.scale(creativeFadeBlend);
+        }
+
         currentRoll = sum.roll;
         lastComputedOffset = sum;
         return sum;
