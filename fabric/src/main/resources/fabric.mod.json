@@ -3,7 +3,7 @@
   "id": "handycam",
   "version": "${version}",
   "name": "Handycam",
-  "description": "Cinematic camera shake for Minecraft — idle drift, walk bob, landing impact, damage hit, and sprint sway.",
+  "description": "Cinematic camera shake for Minecraft",
   "authors": [
     "vercim"
   ],
