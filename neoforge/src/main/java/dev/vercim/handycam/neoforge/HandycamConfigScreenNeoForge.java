@@ -119,13 +119,6 @@ public class HandycamConfigScreenNeoForge {
             .setSaveConsumer(v -> cfg.walkBobVerticalMult = fromSlider(v))
             .build());
         movement.addEntry(e.startIntSlider(
-                Component.literal("Lateral Boost  " + fmt(cfg.walkBobLateralMult)),
-                toSlider(cfg.walkBobLateralMult), 50, 300)
-            .setDefaultValue(150)
-            .setTooltip(Component.literal("Extra side roll+yaw swing multiplier"))
-            .setSaveConsumer(v -> cfg.walkBobLateralMult = fromSlider(v))
-            .build());
-        movement.addEntry(e.startIntSlider(
                 Component.literal("Sprint Bob Boost  " + fmt(cfg.sprintBobMult)),
                 toSlider(cfg.sprintBobMult), 160, 360)
             .setDefaultValue(220)
