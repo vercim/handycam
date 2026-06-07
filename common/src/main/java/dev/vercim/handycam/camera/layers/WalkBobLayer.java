@@ -19,12 +19,15 @@ public class WalkBobLayer implements ShakeLayer {
     private final FractalNoise rollNoise  = new FractalNoise(0xBEEFC0DEL, 2, 0.3f, 0.60f);
     private final FractalNoise yawNoise   = new FractalNoise(0xFEEDFACEL, 2, 0.35f, 0.55f);
 
+    private static final float PI = (float) Math.PI;
+
     private float bobPhase    = 0f;
     private float groundBlend = 1f;
     private float airBlend    = 0f;
     private float smoothSpeed = 0f;
     private float phaseSpeed  = 0f;
     private boolean onGround  = true;
+    private boolean wasAirborne = false;
 
     @Override
     public void tick(PlayerState state) {
@@ -35,7 +38,15 @@ public class WalkBobLayer implements ShakeLayer {
     public CameraOffset compute(PlayerState state, float time, float dt) {
         HandycamConfig cfg = HandycamConfig.get();
 
+        boolean justLanded = onGround && wasAirborne;
+        wasAirborne = !onGround;
+
         if (onGround) {
+            // On landing snap bobPhase to the nearest multiple of π (sin²=0),
+            // so the cycle always resumes from its neutral zero and never jerks.
+            if (justLanded) {
+                bobPhase = Math.round(bobPhase / PI) * PI;
+            }
             groundBlend = Math.min(groundBlend + dt / 0.10f, 1f);
             airBlend    = 0f;
         } else {
