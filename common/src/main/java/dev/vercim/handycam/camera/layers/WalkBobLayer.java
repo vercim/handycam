@@ -21,13 +21,14 @@ public class WalkBobLayer implements ShakeLayer {
 
     private static final float PI = (float) Math.PI;
 
-    private float bobPhase    = 0f;
-    private float groundBlend = 1f;
-    private float airBlend    = 0f;
-    private float smoothSpeed = 0f;
-    private float phaseSpeed  = 0f;
-    private boolean onGround  = true;
-    private boolean wasAirborne = false;
+    private float bobPhase       = 0f;
+    private float groundBlend    = 1f;
+    private float airBlend       = 0f;
+    private float smoothSpeed    = 0f;
+    private float phaseSpeed     = 0f;
+    private float smoothSprint   = 1f;  // smoothed sprint multiplier
+    private boolean onGround     = true;
+    private boolean wasAirborne  = false;
 
     @Override
     public void tick(PlayerState state) {
@@ -58,7 +59,9 @@ public class WalkBobLayer implements ShakeLayer {
 
         smoothSpeed += (state.horizontalSpeed - smoothSpeed) * (1f - (float) Math.exp(-dt / 0.05f));
 
-        // Sprint boosts phase speed less aggressively than before
+        float targetSprint = state.isSprinting ? cfg.sprintBobMult : 1.0f;
+        smoothSprint += (targetSprint - smoothSprint) * (1f - (float) Math.exp(-dt / 0.12f));
+
         float targetPhaseSpeed = smoothSpeed * (state.isSprinting ? 1.45f : 1.0f)
                                  * cfg.walkBobFrequency * TWO_PI;
         phaseSpeed += (targetPhaseSpeed * groundBlend - phaseSpeed) * (1f - (float) Math.exp(-dt / 0.08f));
@@ -66,7 +69,7 @@ public class WalkBobLayer implements ShakeLayer {
 
         if (phaseSpeed < 0.01f && groundBlend < 0.01f) return CameraOffset.ZERO;
 
-        float sprintMult = state.isSprinting ? cfg.sprintBobMult : 1.0f;
+        float sprintMult = smoothSprint;
         int oct = cfg.noiseOctaves;
 
         // ── Vertical pitch bob ────────────────────────────────────────────────
