@@ -1,6 +1,7 @@
 package dev.vercim.handycam.camera;
 
 import dev.vercim.handycam.camera.layers.*;
+import dev.vercim.handycam.config.HandycamConfig;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -126,6 +127,11 @@ public final class CameraShakeSystem {
         float time = gameTime + partialTick * (1f / 20f);
 
         PlayerState state = (lastState != null) ? lastState : PlayerState.from(player);
+
+        if (HandycamConfig.get().disableInCreativeFlight && state.isCreativeFlying) {
+            lastComputedOffset = CameraOffset.ZERO;
+            return CameraOffset.ZERO;
+        }
 
         CameraOffset sum = CameraOffset.ZERO;
         for (ShakeLayer layer : LAYERS) {

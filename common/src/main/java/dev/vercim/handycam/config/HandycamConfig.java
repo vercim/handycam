@@ -17,6 +17,9 @@ public class HandycamConfig {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static HandycamConfig instance;
 
+    // ── General ────────────────────────────────────────────────────────────
+    public boolean disableInCreativeFlight = true;  // отключить все эффекты при полёте в креативе
+
     // ── Master ─────────────────────────────────────────────────────────────
     public float masterIntensity = 2.0f;
     public int   noiseOctaves    = 4;    // max octave layers for all FractalNoise (1–6)

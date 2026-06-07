@@ -1,6 +1,7 @@
 package dev.vercim.handycam.camera;
 
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.world.entity.player.Abilities;
 import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.ItemStack;
@@ -19,12 +20,14 @@ public final class PlayerState {
     public final float   bowDrawProgress;      // 0.0–1.0, натяжение лука (для концентрации)
     public final boolean crossbowFired;       // true ровно в тик выстрела из арбалета
     public final float   crossbowDrawProgress; // 0.0–1.0, прогресс заряжания арбалета (0 когда заряжен)
+    public final boolean isCreativeFlying;    // летит в креативе (abilities.flying && abilities.mayfly)
 
     private PlayerState(float horizontalSpeed, float verticalVelocity,
                         boolean isSprinting, boolean isOnGround, boolean isCrouching,
                         float turnRate, float pitchDelta,
                         float strafeSpeed, float forwardSpeed,
-                        float bowDrawProgress, boolean crossbowFired, float crossbowDrawProgress) {
+                        float bowDrawProgress, boolean crossbowFired, float crossbowDrawProgress,
+                        boolean isCreativeFlying) {
         this.horizontalSpeed  = horizontalSpeed;
         this.verticalVelocity = verticalVelocity;
         this.isSprinting      = isSprinting;
@@ -37,6 +40,7 @@ public final class PlayerState {
         this.bowDrawProgress      = bowDrawProgress;
         this.crossbowFired        = crossbowFired;
         this.crossbowDrawProgress = crossbowDrawProgress;
+        this.isCreativeFlying     = isCreativeFlying;
     }
 
     private static float   prevYRot         = 0f;
@@ -112,8 +116,11 @@ public final class PlayerState {
             }
         }
 
+        Abilities ab = player.getAbilities();
+        boolean creativeFlying = ab.flying && ab.mayfly;
+
         return new PlayerState(hSpeed, dy, player.isSprinting(), player.onGround(),
                                player.isCrouching(), turnRate, pitchDelta, strafe, forward,
-                               bowDraw, crossbowFired, crossbowDraw);
+                               bowDraw, crossbowFired, crossbowDraw, creativeFlying);
     }
 }
