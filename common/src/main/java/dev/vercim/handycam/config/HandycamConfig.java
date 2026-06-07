@@ -14,7 +14,13 @@ import java.nio.file.Path;
 @Environment(EnvType.CLIENT)
 public class HandycamConfig {
 
-    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
+    // InstanceCreator ensures GSON calls new HandycamConfig() before overlaying JSON,
+    // so field-initializer defaults apply to any field missing from the saved file.
+    private static final Gson GSON = new GsonBuilder()
+            .setPrettyPrinting()
+            .registerTypeAdapter(HandycamConfig.class,
+                    (com.google.gson.InstanceCreator<HandycamConfig>) t -> new HandycamConfig())
+            .create();
     private static HandycamConfig instance;
 
     // ── General ────────────────────────────────────────────────────────────
