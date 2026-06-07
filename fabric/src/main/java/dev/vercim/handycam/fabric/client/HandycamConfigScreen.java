@@ -100,9 +100,16 @@ public class HandycamConfigScreen {
         movement.addEntry(e.startIntSlider(
                 Component.literal("Vertical Boost  " + fmt(cfg.walkBobVerticalMult)),
                 toSlider(cfg.walkBobVerticalMult), 150, 425)
-            .setDefaultValue(250)
+            .setDefaultValue(200)
             .setTooltip(Component.literal("Extra up-down bounce multiplier"))
             .setSaveConsumer(v -> cfg.walkBobVerticalMult = fromSlider(v))
+            .build());
+        movement.addEntry(e.startIntSlider(
+                Component.literal("Lateral Boost  " + fmt(cfg.walkBobLateralMult)),
+                toSlider(cfg.walkBobLateralMult), 50, 300)
+            .setDefaultValue(150)
+            .setTooltip(Component.literal("Extra side roll+yaw swing multiplier"))
+            .setSaveConsumer(v -> cfg.walkBobLateralMult = fromSlider(v))
             .build());
         movement.addEntry(e.startIntSlider(
                 Component.literal("Sprint Bob Boost  " + fmt(cfg.sprintBobMult)),

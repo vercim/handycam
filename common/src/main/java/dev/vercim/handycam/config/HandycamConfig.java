@@ -40,7 +40,8 @@ public class HandycamConfig {
     public boolean walkBobEnabled      = false;
     public float   walkBobIntensity    = 2.5f;  // degrees per axis at full speed
     public float   walkBobFrequency    = 0.90f; // Hz at speed=1.0
-    public float   walkBobVerticalMult = 2.0f;  // vertical scale relative to other axes
+    public float   walkBobVerticalMult = 2.0f;  // vertical pitch scale relative to other axes
+    public float   walkBobLateralMult  = 1.5f;  // lateral roll+yaw scale relative to base
     public float   walkNoiseAmount     = 0.25f;
     public float   sprintBobMult       = 1.80f; // sprint amplitude multiplier over walk
 
