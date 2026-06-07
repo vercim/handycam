@@ -107,7 +107,7 @@ public class HandycamConfigScreen {
         movement.addEntry(e.startIntSlider(
                 Component.literal("Sprint Bob Boost  " + fmt(cfg.sprintBobMult)),
                 toSlider(cfg.sprintBobMult), 160, 360)
-            .setDefaultValue(220)
+            .setDefaultValue(180)
             .setTooltip(Component.literal("Extra bob when sprinting"))
             .setSaveConsumer(v -> cfg.sprintBobMult = fromSlider(v))
             .build());
