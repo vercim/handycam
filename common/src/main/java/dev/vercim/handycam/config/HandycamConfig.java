@@ -109,6 +109,7 @@ public class HandycamConfig {
             } catch (IOException e) {
                 instance = new HandycamConfig();
             }
+            save(configDir); // записываем обратно, чтобы новые поля появились в файле
         } else {
             instance = new HandycamConfig();
             save(configDir);
