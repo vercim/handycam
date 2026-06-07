@@ -47,8 +47,8 @@ public class HandycamConfig {
 
     // ── Damage ─────────────────────────────────────────────────────────────
     public boolean damageEnabled   = true;
-    public float   damageIntensity = 4.0f;
-    public float   damageDecay     = 2.5f;
+    public float   damageIntensity = 2.0f;
+    public float   damageDecay     = 1.2f;
 
     // ── Sprint / Sway ──────────────────────────────────────────────────────
     public float   turnSway           = 0.08f;  // roll per degree/tick of yaw turn
@@ -90,7 +90,7 @@ public class HandycamConfig {
 
     // ── Impact: Bow (выстрел из лука) ─────────────────────────────────────────
     public boolean bowEnabled        = true;
-    public float   bowRecoilIntensity = 300f;  // сила отдачи при выстреле
+    public float   bowRecoilIntensity = 2.5f;  // сила отдачи при выстреле
     public float   bowRecoilDecay     = 9.0f;  // скорость затухания отдачи
     public float   bowConcentration       = 0.90f; // 0..1 — насколько гасится idle-дрожь при макс. натяжении
     public boolean bowDrawTiltEnabled     = true;  // включить смещение камеры при натяжении
