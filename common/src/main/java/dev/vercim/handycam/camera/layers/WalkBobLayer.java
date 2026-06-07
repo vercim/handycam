@@ -79,7 +79,7 @@ public class WalkBobLayer implements ShakeLayer {
 
         // ── Lateral roll + yaw ────────────────────────────────────────────────
         // sin(phase * 0.5): half frequency — camera sways left/right once per two footfalls.
-        float baseLat = (float) Math.sin(bobPhase * 0.5f);
+        float baseLat = (float) Math.sin(bobPhase * 0.75f);
         float ln      = latNoise.get(bobPhase * 0.30f, oct);
         float rn      = rollNoise.get(bobPhase * 0.25f, oct);
         float yn      = yawNoise.get(bobPhase * 0.20f, oct);
@@ -87,7 +87,7 @@ public class WalkBobLayer implements ShakeLayer {
         float lateralBase = baseLat * 0.68f + ln * 0.32f;
         float rollBob  = lateralBase * cfg.walkBobIntensity * smoothSpeed * sprintMult * 0.28f;
         // Subtle yaw drift — slightly out of phase from roll for a loose, handheld feel
-        float yawBob   = ((float) Math.sin(bobPhase * 0.5f + 0.4f) * 0.55f + yn * 0.45f)
+        float yawBob   = ((float) Math.sin(bobPhase * 0.75f + 0.4f) * 0.55f + yn * 0.45f)
                          * cfg.walkBobIntensity * smoothSpeed * sprintMult * 0.10f;
 
         float master = cfg.masterIntensity * groundBlend;

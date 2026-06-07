@@ -9,7 +9,7 @@ displayName = "Handycam"
 displayURL = "https://modrinth.com/mod/handycam"
 authors = "vercim"
 description = '''
-Cinematic camera shake for Minecraft — idle drift, walk bob, landing impact, damage hit, and sprint sway.
+Cinematic camera shake for Minecraft
 '''
 
 [[dependencies.handycam]]
