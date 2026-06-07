@@ -8,7 +8,9 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.phys.Vec3;
 import org.joml.Quaternionf;
+import org.joml.Vector3f;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -49,5 +51,17 @@ public abstract class CameraMixin {
         // Keep the scalar fields roughly in sync for any code that reads them.
         self.setXRot(self.getXRot() + offset.pitch);
         self.setYRot(self.getYRot() + offset.yaw);
+
+        // View-space positional shift: project camera-right and camera-up into world space.
+        if (Math.abs(offset.x) > 1.0e-6f || Math.abs(offset.y) > 1.0e-6f) {
+            Vector3f right = rotation.transform(new Vector3f(1f, 0f, 0f));
+            Vector3f up    = rotation.transform(new Vector3f(0f, 1f, 0f));
+            Vec3 pos = self.getPosition();
+            self.setPosition(pos.add(
+                right.x * offset.x + up.x * offset.y,
+                right.y * offset.x + up.y * offset.y,
+                right.z * offset.x + up.z * offset.y
+            ));
+        }
     }
 }

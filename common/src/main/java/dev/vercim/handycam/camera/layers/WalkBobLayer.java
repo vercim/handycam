@@ -13,20 +13,20 @@ public class WalkBobLayer implements ShakeLayer {
 
     private static final float TWO_PI = (float) (2.0 * Math.PI);
 
-    // Three independent noise layers per axis for organic, chaotic feel
-    private final FractalNoise vertNoise1 = new FractalNoise(0xDEADBEEFL, 4, 0.5f, 0.5f);
-    private final FractalNoise vertNoise2 = new FractalNoise(0xFEEDFACEL, 3, 1.1f, 0.6f);
-    private final FractalNoise latNoise1  = new FractalNoise(0xCAFEBABEL, 4, 0.4f, 0.5f);
-    private final FractalNoise latNoise2  = new FractalNoise(0xBAADF00DL, 3, 0.9f, 0.6f);
-    private final FractalNoise rollNoise1 = new FractalNoise(0xBEEFC0DEL, 3, 0.3f, 0.6f);
-    private final FractalNoise rollNoise2 = new FractalNoise(0xDECAFBADL, 2, 0.8f, 0.5f);
+    // Noise sources — each axis has two layers for organic feel
+    private final FractalNoise vertNoise  = new FractalNoise(0xDEADBEEFL, 3, 0.5f, 0.55f);
+    private final FractalNoise latNoise   = new FractalNoise(0xCAFEBABEL, 3, 0.4f, 0.55f);
+    private final FractalNoise rollNoise  = new FractalNoise(0xBEEFC0DEL, 2, 0.3f, 0.60f);
+    private final FractalNoise yawNoise   = new FractalNoise(0xFEEDFACEL, 2, 0.35f, 0.55f);
+    private final FractalNoise xNoise     = new FractalNoise(0xBAADF00DL, 2, 0.4f, 0.55f);
+    private final FractalNoise yNoise     = new FractalNoise(0xDECAFBADL, 2, 0.45f, 0.55f);
 
-    private float bobPhase      = 0f;
-    private float groundBlend   = 1f;
-    private float airBlend      = 0f;   // накопленное время в воздухе (для плавного fade-out фазы)
-    private float smoothSpeed   = 0f;
-    private float phaseSpeed    = 0f;   // low-pass на скорости самой фазы — инерция при прыжке
-    private boolean onGround    = true;
+    private float bobPhase    = 0f;
+    private float groundBlend = 1f;
+    private float airBlend    = 0f;
+    private float smoothSpeed = 0f;
+    private float phaseSpeed  = 0f;
+    private boolean onGround  = true;
 
     @Override
     public void tick(PlayerState state) {
@@ -41,21 +41,18 @@ public class WalkBobLayer implements ShakeLayer {
             groundBlend = Math.min(groundBlend + dt / 0.10f, 1f);
             airBlend    = 0f;
         } else {
-            // airBlend нарастает — чем дольше в воздухе тем сильнее fade
             airBlend    = Math.min(airBlend + dt / 0.18f, 1f);
             groundBlend = Math.max(1f - airBlend, 0f);
         }
 
         if (!cfg.walkBobEnabled || groundBlend < 0.001f) return CameraOffset.ZERO;
 
-        // Smooth speed
         smoothSpeed += (state.horizontalSpeed - smoothSpeed) * (1f - (float) Math.exp(-dt / 0.05f));
 
-        float targetPhaseSpeed = smoothSpeed * (state.isSprinting ? 1.7f : 1.0f)
+        // Sprint boosts phase speed less aggressively than before
+        float targetPhaseSpeed = smoothSpeed * (state.isSprinting ? 1.45f : 1.0f)
                                  * cfg.walkBobFrequency * TWO_PI;
-        // Инерция скорости фазы: при прыжке/остановке фаза не рвётся, а плавно тормозит
         phaseSpeed += (targetPhaseSpeed * groundBlend - phaseSpeed) * (1f - (float) Math.exp(-dt / 0.08f));
-
         bobPhase += phaseSpeed * dt;
 
         if (phaseSpeed < 0.01f && groundBlend < 0.01f) return CameraOffset.ZERO;
@@ -63,36 +60,46 @@ public class WalkBobLayer implements ShakeLayer {
         float sprintMult = state.isSprinting ? cfg.sprintBobMult : 1.0f;
         int oct = cfg.noiseOctaves;
 
-        // ── Vertical bob ─────────────────────────────────────────────────────
-        // sin²(phase) = (1 - cos(2·phase)) / 2 — всегда ≥ 0, гладкая, без острых изломов.
-        // Частота двойная относительно lateral → два "толчка" на один шаг влево-вправо.
-        float sinP   = (float) Math.sin(bobPhase);
-        float baseBob = sinP * sinP;  // sin²: гладко, без abs-излома
-        float vn1 = vertNoise1.get(bobPhase * 0.5f,  oct);
-        float vn2 = vertNoise2.get(bobPhase * 0.25f, oct);
-        float verticalBob = -(baseBob * 0.65f + vn1 * 0.22f + vn2 * 0.13f)
-                            * cfg.walkBobIntensity * cfg.walkBobVerticalMult * smoothSpeed * sprintMult;
+        // ── Vertical pitch bob ────────────────────────────────────────────────
+        // sin²(phase): always ≥ 0, two smooth dips per cycle (one per footstep).
+        float sinP    = (float) Math.sin(bobPhase);
+        float basePitch = sinP * sinP;
+        float vn      = vertNoise.get(bobPhase * 0.4f, oct);
+        float pitchBob = -(basePitch * 0.72f + vn * 0.28f)
+                         * cfg.walkBobIntensity * cfg.walkBobVerticalMult * smoothSpeed * sprintMult;
 
-        // ── Lateral sway ──────────────────────────────────────────────────────
-        // sin(phase) — половинная частота относительно вертикали → нет кружения.
-        float baseSway = (float) Math.sin(bobPhase * 0.5f);
-        float ln1 = latNoise1.get(bobPhase * 0.35f, oct);
-        float ln2 = latNoise2.get(bobPhase * 0.18f, oct);
-        float lateralBob = (baseSway * 0.65f + ln1 * 0.22f + ln2 * 0.13f)
-                           * cfg.walkBobIntensity * smoothSpeed * sprintMult * 0.45f;
+        // ── Lateral roll + yaw ────────────────────────────────────────────────
+        // sin(phase * 0.5): half frequency — camera sways left/right once per two footfalls.
+        float baseLat = (float) Math.sin(bobPhase * 0.5f);
+        float ln      = latNoise.get(bobPhase * 0.30f, oct);
+        float rn      = rollNoise.get(bobPhase * 0.25f, oct);
+        float yn      = yawNoise.get(bobPhase * 0.20f, oct);
 
-        // ── Roll ───────────────────────────────────────────────────────────────
-        // Следует за lateral с тем же знаком — камера "кренится" в сторону шага.
-        float rn1 = rollNoise1.get(bobPhase * 0.3f, oct);
-        float rn2 = rollNoise2.get(bobPhase * 0.2f, oct);
-        float rollBob = (baseSway * 0.55f + rn1 * 0.30f + rn2 * 0.15f)
-                        * cfg.walkBobIntensity * smoothSpeed * sprintMult * 0.25f;
+        float lateralBase = baseLat * 0.68f + ln * 0.32f;
+        float rollBob  = lateralBase * cfg.walkBobIntensity * smoothSpeed * sprintMult * 0.28f;
+        // Subtle yaw drift — slightly out of phase from roll for a loose, handheld feel
+        float yawBob   = ((float) Math.sin(bobPhase * 0.5f + 0.4f) * 0.55f + yn * 0.45f)
+                         * cfg.walkBobIntensity * smoothSpeed * sprintMult * 0.10f;
+
+        // ── Positional X/Y shifts (view-space, in blocks) ─────────────────────
+        // X shift follows lateral sway — camera slides right/left with each step.
+        float xn = xNoise.get(bobPhase * 0.28f, oct);
+        float xShift = (baseLat * 0.70f + xn * 0.30f)
+                       * cfg.walkBobXShift * smoothSpeed * sprintMult;
+
+        // Y shift follows pitch bob — camera dips downward on each footfall.
+        float yn2    = yNoise.get(bobPhase * 0.38f, oct);
+        float yShift = -(basePitch * 0.70f + yn2 * 0.30f)
+                       * cfg.walkBobYShift * smoothSpeed * sprintMult;
 
         float master = cfg.masterIntensity * groundBlend;
         return new CameraOffset(
-            verticalBob * master,
-            lateralBob  * master,
-            rollBob     * master
+            pitchBob * master,
+            yawBob   * master,
+            rollBob  * master,
+            0f,
+            xShift   * master,
+            yShift   * master
         );
     }
 }

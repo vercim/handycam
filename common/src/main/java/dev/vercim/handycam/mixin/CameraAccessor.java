@@ -1,6 +1,7 @@
 package dev.vercim.handycam.mixin;
 
 import net.minecraft.client.Camera;
+import net.minecraft.world.phys.Vec3;
 import org.joml.Quaternionf;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
@@ -22,4 +23,10 @@ public interface CameraAccessor {
     /** Gives direct access to the camera's orientation quaternion so we can apply roll. */
     @Accessor("rotation")
     Quaternionf getRotation();
+
+    @Accessor("position")
+    Vec3 getPosition();
+
+    @Accessor("position")
+    void setPosition(Vec3 position);
 }
