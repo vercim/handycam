@@ -120,21 +120,6 @@ public class HandycamConfigScreenNeoForge {
             .setTooltip(Component.literal("Extra bob when sprinting"))
             .setSaveConsumer(v -> cfg.sprintBobMult = fromSlider(v))
             .build());
-        movement.addEntry(e.startIntSlider(
-                Component.literal("Turn Sway  " + fmt(cfg.turnSway)),
-                toSlider(cfg.turnSway), 4, 29)
-            .setDefaultValue(8)
-            .setTooltip(Component.literal("Camera roll when turning"))
-            .setSaveConsumer(v -> cfg.turnSway = fromSlider(v))
-            .build());
-        movement.addEntry(e.startIntSlider(
-                Component.literal("Max Turn Roll  " + fmt(cfg.maxTurnRoll)),
-                toSlider(cfg.maxTurnRoll), 0, 500)
-            .setDefaultValue(250)
-            .setTooltip(Component.literal("Maximum turn roll angle"))
-            .setSaveConsumer(v -> cfg.maxTurnRoll = fromSlider(v))
-            .build());
-
         // ── Damage ────────────────────────────────────────────────────────────
         ConfigCategory damage = builder.getOrCreateCategory(Component.literal("Damage"));
 
@@ -219,6 +204,20 @@ public class HandycamConfigScreenNeoForge {
         // ── Mouse ─────────────────────────────────────────────────────────────
         ConfigCategory mouse = builder.getOrCreateCategory(Component.literal("Mouse"));
 
+        mouse.addEntry(e.startIntSlider(
+                Component.literal("Turn Sway  " + fmt(cfg.turnSway)),
+                toSlider(cfg.turnSway), 4, 29)
+            .setDefaultValue(8)
+            .setTooltip(Component.literal("Camera roll when turning"))
+            .setSaveConsumer(v -> cfg.turnSway = fromSlider(v))
+            .build());
+        mouse.addEntry(e.startIntSlider(
+                Component.literal("Max Turn Roll  " + fmt(cfg.maxTurnRoll)),
+                toSlider(cfg.maxTurnRoll), 0, 500)
+            .setDefaultValue(250)
+            .setTooltip(Component.literal("Maximum turn roll angle"))
+            .setSaveConsumer(v -> cfg.maxTurnRoll = fromSlider(v))
+            .build());
         mouse.addEntry(e.startBooleanToggle(Component.literal("Camera Sway Enabled"), cfg.cameraSwayEnabled)
             .setDefaultValue(true)
             .setTooltip(Component.literal("Camera inertia on mouse movement"))
