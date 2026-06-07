@@ -51,7 +51,7 @@ public class WalkBobLayer implements ShakeLayer {
         float targetPhaseSpeed = smoothSpeed * (state.isSprinting ? 1.45f : 1.0f)
                                  * cfg.walkBobFrequency * TWO_PI;
         phaseSpeed += (targetPhaseSpeed * groundBlend - phaseSpeed) * (1f - (float) Math.exp(-dt / 0.08f));
-        bobPhase += phaseSpeed * dt;
+        bobPhase += phaseSpeed * dt * groundBlend;
 
         if (phaseSpeed < 0.01f && groundBlend < 0.01f) return CameraOffset.ZERO;
 
