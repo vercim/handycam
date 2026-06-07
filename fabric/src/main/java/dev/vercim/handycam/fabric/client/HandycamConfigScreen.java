@@ -25,6 +25,11 @@ public class HandycamConfigScreen {
         // ── General ───────────────────────────────────────────────────────────
         ConfigCategory general = builder.getOrCreateCategory(Component.literal("General"));
 
+        general.addEntry(e.startBooleanToggle(Component.literal("Disable in Creative Flight"), cfg.disableInCreativeFlight)
+            .setDefaultValue(true)
+            .setTooltip(Component.literal("Disable all effects when flying in creative mode"))
+            .setSaveConsumer(v -> cfg.disableInCreativeFlight = v)
+            .build());
         general.addEntry(e.startIntSlider(
                 Component.literal("Global Intensity  " + fmt(cfg.masterIntensity)),
                 toSlider(cfg.masterIntensity), 0, 400)
