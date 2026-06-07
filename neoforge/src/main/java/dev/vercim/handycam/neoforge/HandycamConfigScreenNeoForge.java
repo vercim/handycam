@@ -131,7 +131,7 @@ public class HandycamConfigScreenNeoForge {
         damage.addEntry(e.startIntSlider(
                 Component.literal("Intensity  " + fmt(cfg.damageIntensity)),
                 toSlider(cfg.damageIntensity), 0, 300)
-            .setDefaultValue(150)
+            .setDefaultValue(200)
             .setTooltip(Component.literal("Strength of damage shake"))
             .setSaveConsumer(v -> cfg.damageIntensity = fromSlider(v))
             .build());
