@@ -18,8 +18,6 @@ public class WalkBobLayer implements ShakeLayer {
     private final FractalNoise latNoise   = new FractalNoise(0xCAFEBABEL, 3, 0.4f, 0.55f);
     private final FractalNoise rollNoise  = new FractalNoise(0xBEEFC0DEL, 2, 0.3f, 0.60f);
     private final FractalNoise yawNoise   = new FractalNoise(0xFEEDFACEL, 2, 0.35f, 0.55f);
-    private final FractalNoise xNoise     = new FractalNoise(0xBAADF00DL, 2, 0.4f, 0.55f);
-    private final FractalNoise yNoise     = new FractalNoise(0xDECAFBADL, 2, 0.45f, 0.55f);
 
     private float bobPhase    = 0f;
     private float groundBlend = 1f;
@@ -81,25 +79,11 @@ public class WalkBobLayer implements ShakeLayer {
         float yawBob   = ((float) Math.sin(bobPhase * 0.5f + 0.4f) * 0.55f + yn * 0.45f)
                          * cfg.walkBobIntensity * smoothSpeed * sprintMult * 0.10f;
 
-        // ── Positional X/Y shifts (view-space, in blocks) ─────────────────────
-        // X shift follows lateral sway — camera slides right/left with each step.
-        float xn = xNoise.get(bobPhase * 0.28f, oct);
-        float xShift = (baseLat * 0.70f + xn * 0.30f)
-                       * cfg.walkBobXShift * smoothSpeed * sprintMult;
-
-        // Y shift follows pitch bob — camera dips downward on each footfall.
-        float yn2    = yNoise.get(bobPhase * 0.38f, oct);
-        float yShift = -(basePitch * 0.70f + yn2 * 0.30f)
-                       * cfg.walkBobYShift * smoothSpeed * sprintMult;
-
         float master = cfg.masterIntensity * groundBlend;
         return new CameraOffset(
             pitchBob * master,
             yawBob   * master,
-            rollBob  * master,
-            0f,
-            xShift   * master,
-            yShift   * master
+            rollBob  * master
         );
     }
 }

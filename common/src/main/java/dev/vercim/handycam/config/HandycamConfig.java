@@ -37,8 +37,6 @@ public class HandycamConfig {
     public float   walkBobVerticalMult = 2.5f;  // vertical scale relative to other axes
     public float   walkNoiseAmount     = 0.25f;
     public float   sprintBobMult       = 1.6f;  // sprint amplitude multiplier over walk
-    public float   walkBobXShift       = 0.012f; // view-space lateral position shift (blocks at speed=1)
-    public float   walkBobYShift       = 0.008f; // view-space vertical position shift (blocks at speed=1)
 
     // ── Landing ────────────────────────────────────────────────────────────
     public boolean landingEnabled   = true;
