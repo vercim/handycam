@@ -65,9 +65,3 @@ Each layer is **independent**: they don't call each other, just independently re
 ## Configuration
 
 Open the config screen via ModMenu (Fabric) or the in-game mod list (NeoForge). Settings are saved to `config/handycam-config.json`.
-
-## Links
-
-- [Modrinth](https://modrinth.com/mod/handycam)
-- [Source](https://github.com/vercim/handycam)
-- [Issues](https://github.com/vercim/handycam/issues)
