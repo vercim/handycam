@@ -39,7 +39,7 @@ dependencies {
     modImplementation "dev.architectury:architectury-neoforge:$rootProject.architectury_api_version"
 
     // Cloth Config
-    modImplementation "me.shedaniel.cloth:cloth-config-neoforge:15.0.140"
+    modImplementation "me.shedaniel.cloth:cloth-config-neoforge:17.0.144"
 
     common(project(path: ':common', configuration: 'namedElements')) { transitive = false }
     shadowBundle project(path: ':common', configuration: 'transformProductionNeoForge')

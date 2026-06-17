@@ -3,7 +3,7 @@
   "id": "handycam",
   "version": "${version}",
   "name": "Handycam",
-  "description": "Cinematic camera shake for Minecraft.",
+  "description": "Cinematic camera shake for Minecraft",
   "authors": [
     "vercim"
   ],
@@ -27,14 +27,14 @@
     "handycam.mixins.json"
   ],
   "depends": {
-    "fabricloader": ">=0.16.4",
-    "minecraft": "~1.21.1",
+    "fabricloader": ">=0.19.3",
+    "minecraft": ">=1.21.4",
     "java": ">=21",
-    "architectury": ">=13.0.8",
-    "fabric-api": ">=0.116.6",
-    "cloth-config": ">=15.0.140"
+    "architectury": ">=15.0.3",
+    "fabric-api": ">=0.119.4",
+    "cloth-config": ">=17.0.144"
   },
   "suggests": {
-    "modmenu": ">=11.0.0"
+    "modmenu": ">=13.0.0"
   }
 }
