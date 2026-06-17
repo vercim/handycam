@@ -44,6 +44,16 @@ public class HandycamConfigScreenNeoForge {
             .setTooltip(Component.literal("Disable all effects when flying in creative mode"))
             .setSaveConsumer(v -> cfg.disableInCreativeFlight = v)
             .build());
+        general.addEntry(e.startBooleanToggle(Component.literal("Enable Effects in 3rd Person"), cfg.enableEffectsThirdPerson)
+            .setDefaultValue(false)
+            .setTooltip(Component.literal("Apply camera shake effects in 3rd person view (F5 once)"))
+            .setSaveConsumer(v -> cfg.enableEffectsThirdPerson = v)
+            .build());
+        general.addEntry(e.startBooleanToggle(Component.literal("Enable Effects in 2nd Person"), cfg.enableEffectsSecondPerson)
+            .setDefaultValue(false)
+            .setTooltip(Component.literal("Apply camera shake effects in 2nd person view (F5 twice)"))
+            .setSaveConsumer(v -> cfg.enableEffectsSecondPerson = v)
+            .build());
         general.addEntry(e.startIntSlider(
                 Component.literal("Global Intensity  " + fmt(cfg.masterIntensity)),
                 toSlider(cfg.masterIntensity), 100, 400)

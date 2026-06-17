@@ -9,34 +9,34 @@ displayName = "Handycam"
 displayURL = "https://modrinth.com/mod/handycam"
 authors = "vercim"
 description = '''
-Cinematic camera shake for Minecraft
+Cinematic camera shake for Minecraft.
 '''
 
 [[dependencies.handycam]]
 modId = "neoforge"
 type = "required"
-versionRange = "[21.4.0,)"
+versionRange = "[21.1.0,21.2.0)"
 ordering = "NONE"
 side = "CLIENT"
 
 [[dependencies.handycam]]
 modId = "minecraft"
 type = "required"
-versionRange = "[1.21.4,)"
+versionRange = "[1.21.1,1.21.2)"
 ordering = "NONE"
 side = "CLIENT"
 
 [[dependencies.handycam]]
 modId = "architectury"
 type = "required"
-versionRange = "[15.0.3,)"
+versionRange = "[13.0.8,)"
 ordering = "AFTER"
 side = "CLIENT"
 
 [[dependencies.handycam]]
 modId = "cloth_config"
 type = "required"
-versionRange = "[17,)"
+versionRange = "[15,)"
 ordering = "AFTER"
 side = "CLIENT"
 

@@ -3,8 +3,10 @@ package dev.vercim.handycam.mixin;
 import dev.vercim.handycam.camera.CrosshairSwaySystem;
 import dev.vercim.handycam.config.HandycamConfig;
 import net.minecraft.client.DeltaTracker;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.CameraType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -19,6 +21,9 @@ public abstract class GuiMixin {
 
     @Inject(method = "renderCrosshair", at = @At("HEAD"))
     private void handycam$crosshairPush(GuiGraphics graphics, DeltaTracker tracker, CallbackInfo ci) {
+        // В 3-м и 2-м лице не двигаем HUD — эффекты применяются только к камере
+        if (Minecraft.getInstance().options.getCameraType() != CameraType.FIRST_PERSON) return;
+
         HandycamConfig cfg = HandycamConfig.get();
         float ox = cfg.mouseLeadEnabled ? CrosshairSwaySystem.offsetX : 0f;
         float oy = cfg.mouseLeadEnabled ? CrosshairSwaySystem.offsetY : 0f;
@@ -46,6 +51,8 @@ public abstract class GuiMixin {
 
     @Inject(method = "renderCrosshair", at = @At("TAIL"))
     private void handycam$crosshairPop(GuiGraphics graphics, DeltaTracker tracker, CallbackInfo ci) {
+        if (Minecraft.getInstance().options.getCameraType() != CameraType.FIRST_PERSON) return;
+
         HandycamConfig cfg = HandycamConfig.get();
         float ox = cfg.mouseLeadEnabled ? CrosshairSwaySystem.offsetX : 0f;
         float oy = cfg.mouseLeadEnabled ? CrosshairSwaySystem.offsetY : 0f;
