@@ -97,6 +97,11 @@ public class HandycamConfig {
     public float   hitIntensity = 2.0f;   // degrees of pitch kick on attack
     public float   hitDecay     = 20.0f;   // decay rate (higher = snappier)
 
+    // ── Eat / Drink ────────────────────────────────────────────────────────────
+    public boolean eatEnabled    = true;
+    public float   eatIntensity  = 1.5f;  // общий масштаб (наклон + покачивание)
+    public float   eatSwayAmount = 0.8f;  // амплитуда шума покачивания (0=только наклон, 1+=активно)
+
     // ── Impact: Bow (выстрел из лука) ─────────────────────────────────────────
     public boolean bowEnabled        = true;
     public float   bowRecoilIntensity = 2.5f;  // сила отдачи при выстреле

@@ -26,6 +26,7 @@ public final class CameraShakeSystem {
         new ForwardTiltLayer(),
         new CrouchShakeLayer(),
         new MouseLeadLayer(),
+        new EatSwayLayer(),
         JUMP,
         LANDING,
         DAMAGE,
