@@ -7,7 +7,6 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.phys.Vec3;
 import org.joml.Quaternionf;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -54,17 +53,6 @@ public abstract class CameraMixin {
         if (isFirstPerson) {
             self.setXRot(self.getXRot() + offset.pitch);
             self.setYRot(self.getYRot() + offset.yaw);
-        }
-
-        // Selfie camera: reposition camera close to player face in second-person view.
-        // Vanilla already flips yaw+180 and inverts pitch, so camera orientation is correct.
-        // We move it to selfie distance instead of vanilla's max-zoom (~4 blocks).
-        // Use invokeSetPosition() (method call) — direct field write breaks rendering (see memory).
-        if (isSecondPerson) {
-            Vec3 eyePos  = entity.getEyePosition(partialTick);
-            Vec3 lookDir = entity.getLookAngle();
-            Vec3 newPos  = eyePos.add(lookDir.scale(cfg.selfieCameraDistance));
-            self.invokeSetPosition(newPos);
         }
     }
 }
