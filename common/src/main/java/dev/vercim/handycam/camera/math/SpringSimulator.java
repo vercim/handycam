@@ -1,6 +1,5 @@
 package dev.vercim.handycam.camera.math;
 
-/** Critically damped spring — плавно возвращается в цель без колебаний. */
 public final class SpringSimulator {
 
     private final float stiffness;
@@ -8,9 +7,9 @@ public final class SpringSimulator {
     private float position;
     private float velocity;
 
-    // Explicit Euler is unstable when omega_n * dt >= 2 (omega_n = sqrt(stiffness)).
-    // Stiffest spring used is 500 → omega_n ≈ 22.4 → stable dt < 0.089 s.
-    // Sub-stepping at 1/120 s keeps every spring stable at any render FPS.
+    
+    
+    
     private static final float SUB_STEP = 1f / 120f;
 
     public SpringSimulator(float stiffness, float damping) {
@@ -29,7 +28,7 @@ public final class SpringSimulator {
         return position;
     }
 
-    /** speedMult scales response speed: 2.0 = twice as fast, 0.5 = twice as slow. */
+    
     public float update(float target, float dt, float speedMult) {
         float sm = speedMult * speedMult;
         int steps = Math.max(1, (int) Math.ceil(dt / SUB_STEP));

@@ -12,23 +12,23 @@ import net.fabricmc.api.Environment;
 @Environment(EnvType.CLIENT)
 public class HitImpactLayer implements ShakeLayer {
 
-    // Spring: directional punch impulse
+    
     private final SpringSimulator pitchSpring = new SpringSimulator(300f, 34f);
     private final SpringSimulator yawSpring   = new SpringSimulator(200f, 28f);
     private final SpringSimulator rollSpring  = new SpringSimulator(200f, 28f);
 
-    // Noise: chaotic shake layered on top of the impulse
-    // 3 octaves + fast frequency for high-frequency "rattling" feel
+    
+    
     private final FractalNoise noiseP = new FractalNoise(0xAABBCCDDL, 3, 25f, 0.6f);
     private final FractalNoise noiseY = new FractalNoise(0x11223344L, 3, 20f, 0.6f);
     private final FractalNoise noiseR = new FractalNoise(0x55667788L, 3, 18f, 0.5f);
 
-    // Normalized targets [0..1] for spring impulse
+    
     private float pitchTarget = 0f;
     private float yawTarget   = 0f;
     private float rollTarget  = 0f;
 
-    // Trauma [0..1] drives noise amplitude
+    
     private float trauma = 0f;
 
     private int side = 1;
@@ -43,7 +43,7 @@ public class HitImpactLayer implements ShakeLayer {
         yawTarget   =  side * 0.3f;
         rollTarget  =  side * 0.2f;
 
-        // Each hit adds trauma, capped at 1
+        
         trauma = Math.min(trauma + 0.8f, 1.0f);
     }
 
@@ -52,7 +52,7 @@ public class HitImpactLayer implements ShakeLayer {
         HandycamConfig cfg = HandycamConfig.get();
         if (!cfg.hitEnabled) return CameraOffset.ZERO;
 
-        // Spring impulse
+        
         float pitch = pitchSpring.update(pitchTarget, dt);
         float yaw   = yawSpring  .update(yawTarget,   dt);
         float roll  = rollSpring .update(rollTarget,  dt);
@@ -62,7 +62,7 @@ public class HitImpactLayer implements ShakeLayer {
         yawTarget   *= (float) Math.exp(-dt * decay);
         rollTarget  *= (float) Math.exp(-dt * decay);
 
-        // Noise layer: trauma² for nonlinear falloff (same as DamageShakeLayer)
+        
         int oct = cfg.noiseOctaves;
         float shake = trauma * trauma;
         float np = noiseP.get(time,       oct) * shake * 0.4f;

@@ -7,7 +7,7 @@ public final class PerlinNoise {
     public PerlinNoise(long seed) {
         int[] p = new int[256];
         for (int i = 0; i < 256; i++) p[i] = i;
-        // Fisher-Yates shuffle with the seed
+        
         java.util.Random rng = new java.util.Random(seed);
         for (int i = 255; i > 0; i--) {
             int j = rng.nextInt(i + 1);
@@ -16,7 +16,7 @@ public final class PerlinNoise {
         for (int i = 0; i < 512; i++) perm[i] = p[i & 255];
     }
 
-    /** Returns a value in [-1, 1] for a 1-D input. */
+    
     public float get(float x) {
         int xi = (int) Math.floor(x) & 255;
         float xf = x - (float) Math.floor(x);

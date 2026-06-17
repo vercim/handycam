@@ -18,7 +18,7 @@ public final class HandycamMod {
     }
 
     private static void registerEvents() {
-        // Tick — advance camera shake system each game tick
+        
         ClientTickEvent.CLIENT_POST.register(client -> {
             LocalPlayer player = client.player;
             if (player != null) {

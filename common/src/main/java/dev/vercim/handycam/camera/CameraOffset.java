@@ -8,7 +8,7 @@ public final class CameraOffset {
     public final float yaw;
     public final float roll;
     public final float fovDelta;
-    /** World-space vertical position offset in blocks (positive = up). */
+    
     public final float y;
 
     public CameraOffset(float pitch, float yaw, float roll, float fovDelta, float y) {

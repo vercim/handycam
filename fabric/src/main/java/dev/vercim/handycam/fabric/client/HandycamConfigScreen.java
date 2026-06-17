@@ -11,9 +11,9 @@ import net.minecraft.network.chat.Component;
 
 public class HandycamConfigScreen {
 
-    /** Normalize: display = round(value / configDefault × 100). Default always shows as 100. */
+    
     private static int norm(float v, float def) { return Math.round(v / def * 100f); }
-    /** Denormalize: stored = display / 100 × configDefault. */
+    
     private static float denorm(int n, float def) { return n / 100f * def; }
 
     public static Screen create(Screen parent) {
@@ -24,7 +24,7 @@ public class HandycamConfigScreen {
         HandycamConfig cfg = HandycamConfig.get();
         ConfigEntryBuilder e = builder.entryBuilder();
 
-        // ── General ───────────────────────────────────────────────────────────
+        
         ConfigCategory general = builder.getOrCreateCategory(Component.literal("General"));
 
         general.addEntry(e.startBooleanToggle(Component.literal("Disable in Creative Flight"), cfg.disableInCreativeFlight)
@@ -47,7 +47,7 @@ public class HandycamConfigScreen {
             .setTooltip(Component.literal("Allow vanilla FOV changes (sprinting boost, speed effects). Disable to lock FOV to your settings value."))
             .setSaveConsumer(v -> cfg.enableVanillaFov = v)
             .build());
-        // masterIntensity default = 2.0f → 100%; range 0–200%
+        
         general.addEntry(e.startIntSlider(Component.literal("Global Intensity"),
                 norm(cfg.masterIntensity, 2f), 0, 200)
             .setDefaultValue(100)
@@ -61,7 +61,7 @@ public class HandycamConfigScreen {
             .setSaveConsumer(v -> cfg.noiseOctaves = v)
             .build());
 
-        // ── Breath & Idle ─────────────────────────────────────────────────────
+        
         ConfigCategory idle = builder.getOrCreateCategory(Component.literal("Breath & Idle"));
 
         var breathToggle = e.startBooleanToggle(Component.literal("Breath Enabled"), cfg.breathEnabled)
@@ -70,7 +70,7 @@ public class HandycamConfigScreen {
             .setSaveConsumer(v -> cfg.breathEnabled = v)
             .build();
         idle.addEntry(breathToggle);
-        // breathIntensity default = 1.0f
+        
         idle.addEntry(e.startIntSlider(Component.literal("Breath Intensity"),
                 norm(cfg.breathIntensity, 1f), 0, 200)
             .setDefaultValue(100)
@@ -85,7 +85,7 @@ public class HandycamConfigScreen {
             .setSaveConsumer(v -> cfg.idleEnabled = v)
             .build();
         idle.addEntry(idleToggle);
-        // idleIntensity default = 1.5f
+        
         idle.addEntry(e.startIntSlider(Component.literal("Idle Intensity"),
                 norm(cfg.idleIntensity, 1.5f), 0, 200)
             .setDefaultValue(100)
@@ -93,7 +93,7 @@ public class HandycamConfigScreen {
             .setRequirement(Requirement.isTrue(idleToggle::getValue))
             .setSaveConsumer(v -> cfg.idleIntensity = denorm(v, 1.5f))
             .build());
-        // idleFrequency default = 0.5f
+        
         idle.addEntry(e.startIntSlider(Component.literal("Idle Frequency"),
                 norm(cfg.idleFrequency, 0.5f), 25, 200)
             .setDefaultValue(100)
@@ -101,7 +101,7 @@ public class HandycamConfigScreen {
             .setRequirement(Requirement.isTrue(idleToggle::getValue))
             .setSaveConsumer(v -> cfg.idleFrequency = denorm(v, 0.5f))
             .build());
-        // idleTremorScale default = 0.75f
+        
         idle.addEntry(e.startIntSlider(Component.literal("Hand Tremor"),
                 norm(cfg.idleTremorScale, 0.75f), 0, 200)
             .setDefaultValue(100)
@@ -110,7 +110,7 @@ public class HandycamConfigScreen {
             .setSaveConsumer(v -> cfg.idleTremorScale = denorm(v, 0.75f))
             .build());
 
-        // ── Walk & Sprint ─────────────────────────────────────────────────────
+        
         ConfigCategory movement = builder.getOrCreateCategory(Component.literal("Walk & Sprint"));
 
         var walkBobToggle = e.startBooleanToggle(Component.literal("[BETA] Walk Bob Enabled"), cfg.walkBobEnabled)
@@ -119,7 +119,7 @@ public class HandycamConfigScreen {
             .setSaveConsumer(v -> cfg.walkBobEnabled = v)
             .build();
         movement.addEntry(walkBobToggle);
-        // walkBobIntensity default = 2.5f
+        
         movement.addEntry(e.startIntSlider(Component.literal("Bob Intensity"),
                 norm(cfg.walkBobIntensity, 2.5f), 0, 200)
             .setDefaultValue(100)
@@ -127,7 +127,7 @@ public class HandycamConfigScreen {
             .setRequirement(Requirement.isTrue(walkBobToggle::getValue))
             .setSaveConsumer(v -> cfg.walkBobIntensity = denorm(v, 2.5f))
             .build());
-        // walkBobFrequency default = 0.9f
+        
         movement.addEntry(e.startIntSlider(Component.literal("Step Frequency"),
                 norm(cfg.walkBobFrequency, 0.9f), 25, 200)
             .setDefaultValue(100)
@@ -135,7 +135,7 @@ public class HandycamConfigScreen {
             .setRequirement(Requirement.isTrue(walkBobToggle::getValue))
             .setSaveConsumer(v -> cfg.walkBobFrequency = denorm(v, 0.9f))
             .build());
-        // walkBobVerticalMult default = 2.0f
+        
         movement.addEntry(e.startIntSlider(Component.literal("Vertical Boost"),
                 norm(cfg.walkBobVerticalMult, 2f), 50, 200)
             .setDefaultValue(100)
@@ -143,7 +143,7 @@ public class HandycamConfigScreen {
             .setRequirement(Requirement.isTrue(walkBobToggle::getValue))
             .setSaveConsumer(v -> cfg.walkBobVerticalMult = denorm(v, 2f))
             .build());
-        // sprintBobMult default = 1.8f
+        
         movement.addEntry(e.startIntSlider(Component.literal("Sprint Bob Boost"),
                 norm(cfg.sprintBobMult, 1.8f), 50, 200)
             .setDefaultValue(100)
@@ -152,7 +152,7 @@ public class HandycamConfigScreen {
             .setSaveConsumer(v -> cfg.sprintBobMult = denorm(v, 1.8f))
             .build());
 
-        // ── Directional Tilt ─────────────────────────────────────────────────
+        
         ConfigCategory tilt = builder.getOrCreateCategory(Component.literal("Directional Tilt"));
 
         var forwardTiltToggle = e.startBooleanToggle(Component.literal("Forward/Back Lean"), cfg.forwardTiltEnabled)
@@ -161,7 +161,7 @@ public class HandycamConfigScreen {
             .setSaveConsumer(v -> cfg.forwardTiltEnabled = v)
             .build();
         tilt.addEntry(forwardTiltToggle);
-        // forwardTiltIntensity default = 3.0f
+        
         tilt.addEntry(e.startIntSlider(Component.literal("Forward/Back Intensity"),
                 norm(cfg.forwardTiltIntensity, 3f), 0, 200)
             .setDefaultValue(100)
@@ -169,7 +169,7 @@ public class HandycamConfigScreen {
             .setRequirement(Requirement.isTrue(forwardTiltToggle::getValue))
             .setSaveConsumer(v -> cfg.forwardTiltIntensity = denorm(v, 3f))
             .build());
-        // forwardTiltDecay default = 1.0f
+        
         tilt.addEntry(e.startIntSlider(Component.literal("Forward/Back Decay"),
                 norm(cfg.forwardTiltDecay, 1f), 25, 300)
             .setDefaultValue(100)
@@ -184,7 +184,7 @@ public class HandycamConfigScreen {
             .setSaveConsumer(v -> cfg.strafeTiltEnabled = v)
             .build();
         tilt.addEntry(strafeTiltToggle);
-        // strafeTiltIntensity default = 3.0f
+        
         tilt.addEntry(e.startIntSlider(Component.literal("Left/Right Intensity"),
                 norm(cfg.strafeTiltIntensity, 3f), 0, 200)
             .setDefaultValue(100)
@@ -192,7 +192,7 @@ public class HandycamConfigScreen {
             .setRequirement(Requirement.isTrue(strafeTiltToggle::getValue))
             .setSaveConsumer(v -> cfg.strafeTiltIntensity = denorm(v, 3f))
             .build());
-        // strafeTiltDecay default = 1.0f
+        
         tilt.addEntry(e.startIntSlider(Component.literal("Left/Right Decay"),
                 norm(cfg.strafeTiltDecay, 1f), 25, 300)
             .setDefaultValue(100)
@@ -201,7 +201,7 @@ public class HandycamConfigScreen {
             .setSaveConsumer(v -> cfg.strafeTiltDecay = denorm(v, 1f))
             .build());
 
-        // ── Jump & Landing ────────────────────────────────────────────────────
+        
         ConfigCategory jump = builder.getOrCreateCategory(Component.literal("Jump & Landing"));
 
         var jumpToggle = e.startBooleanToggle(Component.literal("Jump Enabled"), cfg.jumpEnabled)
@@ -210,7 +210,7 @@ public class HandycamConfigScreen {
             .setSaveConsumer(v -> cfg.jumpEnabled = v)
             .build();
         jump.addEntry(jumpToggle);
-        // jumpIntensity default = 4.1f
+        
         jump.addEntry(e.startIntSlider(Component.literal("Jump Intensity"),
                 norm(cfg.jumpIntensity, 4.1f), 0, 200)
             .setDefaultValue(100)
@@ -218,7 +218,7 @@ public class HandycamConfigScreen {
             .setRequirement(Requirement.isTrue(jumpToggle::getValue))
             .setSaveConsumer(v -> cfg.jumpIntensity = denorm(v, 4.1f))
             .build());
-        // jumpDecay default = 5.1f
+        
         jump.addEntry(e.startIntSlider(Component.literal("Jump Decay"),
                 norm(cfg.jumpDecay, 5.1f), 25, 300)
             .setDefaultValue(100)
@@ -233,7 +233,7 @@ public class HandycamConfigScreen {
             .setSaveConsumer(v -> cfg.landingEnabled = v)
             .build();
         jump.addEntry(landingToggle);
-        // landingIntensity default = 3.85f
+        
         jump.addEntry(e.startIntSlider(Component.literal("Landing Intensity"),
                 norm(cfg.landingIntensity, 3.85f), 0, 200)
             .setDefaultValue(100)
@@ -242,7 +242,7 @@ public class HandycamConfigScreen {
             .setSaveConsumer(v -> cfg.landingIntensity = denorm(v, 3.85f))
             .build());
 
-        // ── Crouch ────────────────────────────────────────────────────────────
+        
         ConfigCategory crouch = builder.getOrCreateCategory(Component.literal("Crouch"));
 
         var crouchToggle = e.startBooleanToggle(Component.literal("Enabled"), cfg.crouchEnabled)
@@ -251,7 +251,7 @@ public class HandycamConfigScreen {
             .setSaveConsumer(v -> cfg.crouchEnabled = v)
             .build();
         crouch.addEntry(crouchToggle);
-        // crouchIntensity default = 3.2f
+        
         crouch.addEntry(e.startIntSlider(Component.literal("Intensity"),
                 norm(cfg.crouchIntensity, 3.2f), 0, 200)
             .setDefaultValue(100)
@@ -260,7 +260,7 @@ public class HandycamConfigScreen {
             .setSaveConsumer(v -> cfg.crouchIntensity = denorm(v, 3.2f))
             .build());
 
-        // ── Mouse & Cursor ────────────────────────────────────────────────────
+        
         ConfigCategory mouse = builder.getOrCreateCategory(Component.literal("Mouse & Cursor"));
 
         var cameraSwayToggle = e.startBooleanToggle(Component.literal("Camera Sway Enabled"), cfg.cameraSwayEnabled)
@@ -269,7 +269,7 @@ public class HandycamConfigScreen {
             .setSaveConsumer(v -> cfg.cameraSwayEnabled = v)
             .build();
         mouse.addEntry(cameraSwayToggle);
-        // turnSway default = 0.08f
+        
         mouse.addEntry(e.startIntSlider(Component.literal("Turn Sway"),
                 norm(cfg.turnSway, 0.08f), 0, 200)
             .setDefaultValue(100)
@@ -283,7 +283,7 @@ public class HandycamConfigScreen {
             .setRequirement(Requirement.isTrue(cameraSwayToggle::getValue))
             .setSaveConsumer(v -> cfg.cameraSwayLead = v)
             .build());
-        // maxTurnRoll default = 2.5f
+        
         mouse.addEntry(e.startIntSlider(Component.literal("Max Turn Roll"),
                 norm(cfg.maxTurnRoll, 2.5f), 0, 200)
             .setDefaultValue(100)
@@ -291,7 +291,7 @@ public class HandycamConfigScreen {
             .setRequirement(Requirement.isTrue(cameraSwayToggle::getValue))
             .setSaveConsumer(v -> cfg.maxTurnRoll = denorm(v, 2.5f))
             .build());
-        // swayYawLag default = 0.08f
+        
         mouse.addEntry(e.startIntSlider(Component.literal("Yaw Sway"),
                 norm(cfg.swayYawLag, 0.08f), 0, 200)
             .setDefaultValue(100)
@@ -299,7 +299,7 @@ public class HandycamConfigScreen {
             .setRequirement(Requirement.isTrue(cameraSwayToggle::getValue))
             .setSaveConsumer(v -> cfg.swayYawLag = denorm(v, 0.08f))
             .build());
-        // swayPitchLag default = 0.14f
+        
         mouse.addEntry(e.startIntSlider(Component.literal("Pitch Sway"),
                 norm(cfg.swayPitchLag, 0.14f), 0, 200)
             .setDefaultValue(100)
@@ -314,7 +314,7 @@ public class HandycamConfigScreen {
             .setSaveConsumer(v -> cfg.mouseLeadEnabled = v)
             .build();
         mouse.addEntry(crosshairDriftToggle);
-        // mouseSwayScale default = 0.3f
+        
         mouse.addEntry(e.startIntSlider(Component.literal("Mouse Sway Scale"),
                 norm(cfg.mouseSwayScale, 0.3f), 0, 200)
             .setDefaultValue(100)
@@ -322,7 +322,7 @@ public class HandycamConfigScreen {
             .setRequirement(Requirement.isTrue(crosshairDriftToggle::getValue))
             .setSaveConsumer(v -> cfg.mouseSwayScale = denorm(v, 0.3f))
             .build());
-        // verticalDriftIntensity default = 0.9f
+        
         mouse.addEntry(e.startIntSlider(Component.literal("Crosshair Vertical Drift"),
                 norm(cfg.verticalDriftIntensity, 0.9f), 0, 200)
             .setDefaultValue(100)
@@ -330,7 +330,7 @@ public class HandycamConfigScreen {
             .setRequirement(Requirement.isTrue(crosshairDriftToggle::getValue))
             .setSaveConsumer(v -> cfg.verticalDriftIntensity = denorm(v, 0.9f))
             .build());
-        // mouseSwaySmoothing default = 0.09f
+        
         mouse.addEntry(e.startIntSlider(Component.literal("Mouse Sway Smoothness"),
                 norm(cfg.mouseSwaySmoothing, 0.09f), 0, 200)
             .setDefaultValue(100)
@@ -339,7 +339,7 @@ public class HandycamConfigScreen {
             .setSaveConsumer(v -> cfg.mouseSwaySmoothing = denorm(v, 0.09f))
             .build());
 
-        // ── Eating & Drinking ─────────────────────────────────────────────────
+        
         ConfigCategory eat = builder.getOrCreateCategory(Component.literal("Eating & Drinking"));
 
         var eatToggle = e.startBooleanToggle(Component.literal("Enabled"), cfg.eatEnabled)
@@ -348,7 +348,7 @@ public class HandycamConfigScreen {
             .setSaveConsumer(v -> cfg.eatEnabled = v)
             .build();
         eat.addEntry(eatToggle);
-        // eatIntensity default = 1.5f
+        
         eat.addEntry(e.startIntSlider(Component.literal("Intensity"),
                 norm(cfg.eatIntensity, 1.5f), 0, 200)
             .setDefaultValue(100)
@@ -356,7 +356,7 @@ public class HandycamConfigScreen {
             .setRequirement(Requirement.isTrue(eatToggle::getValue))
             .setSaveConsumer(v -> cfg.eatIntensity = denorm(v, 1.5f))
             .build());
-        // eatSwayAmount default = 1.2f
+        
         eat.addEntry(e.startIntSlider(Component.literal("Sway Amount"),
                 norm(cfg.eatSwayAmount, 1.2f), 0, 200)
             .setDefaultValue(100)
@@ -365,7 +365,7 @@ public class HandycamConfigScreen {
             .setSaveConsumer(v -> cfg.eatSwayAmount = denorm(v, 1.2f))
             .build());
 
-        // ── Hit Impact ────────────────────────────────────────────────────────
+        
         ConfigCategory hit = builder.getOrCreateCategory(Component.literal("Hit Impact"));
 
         var hitToggle = e.startBooleanToggle(Component.literal("Enabled"), cfg.hitEnabled)
@@ -374,7 +374,7 @@ public class HandycamConfigScreen {
             .setSaveConsumer(v -> cfg.hitEnabled = v)
             .build();
         hit.addEntry(hitToggle);
-        // hitIntensity default = 2.0f
+        
         hit.addEntry(e.startIntSlider(Component.literal("Intensity"),
                 norm(cfg.hitIntensity, 2f), 0, 200)
             .setDefaultValue(100)
@@ -382,7 +382,7 @@ public class HandycamConfigScreen {
             .setRequirement(Requirement.isTrue(hitToggle::getValue))
             .setSaveConsumer(v -> cfg.hitIntensity = denorm(v, 2f))
             .build());
-        // hitDecay default = 20.0f
+        
         hit.addEntry(e.startIntSlider(Component.literal("Decay"),
                 norm(cfg.hitDecay, 20f), 25, 300)
             .setDefaultValue(100)
@@ -391,7 +391,7 @@ public class HandycamConfigScreen {
             .setSaveConsumer(v -> cfg.hitDecay = denorm(v, 20f))
             .build());
 
-        // ── Damage Impact ─────────────────────────────────────────────────────
+        
         ConfigCategory damage = builder.getOrCreateCategory(Component.literal("Damage Impact"));
 
         var damageToggle = e.startBooleanToggle(Component.literal("Enabled"), cfg.damageEnabled)
@@ -400,7 +400,7 @@ public class HandycamConfigScreen {
             .setSaveConsumer(v -> cfg.damageEnabled = v)
             .build();
         damage.addEntry(damageToggle);
-        // damageIntensity default = 2.0f
+        
         damage.addEntry(e.startIntSlider(Component.literal("Intensity"),
                 norm(cfg.damageIntensity, 2f), 0, 200)
             .setDefaultValue(100)
@@ -408,7 +408,7 @@ public class HandycamConfigScreen {
             .setRequirement(Requirement.isTrue(damageToggle::getValue))
             .setSaveConsumer(v -> cfg.damageIntensity = denorm(v, 2f))
             .build());
-        // damageDecay default = 1.2f
+        
         damage.addEntry(e.startIntSlider(Component.literal("Decay"),
                 norm(cfg.damageDecay, 1.2f), 25, 300)
             .setDefaultValue(100)
@@ -417,7 +417,7 @@ public class HandycamConfigScreen {
             .setSaveConsumer(v -> cfg.damageDecay = denorm(v, 1.2f))
             .build());
 
-        // ── Bow Impact ────────────────────────────────────────────────────────
+        
         ConfigCategory bow = builder.getOrCreateCategory(Component.literal("Bow Impact"));
 
         var bowToggle = e.startBooleanToggle(Component.literal("Enabled"), cfg.bowEnabled)
@@ -426,7 +426,7 @@ public class HandycamConfigScreen {
             .setSaveConsumer(v -> cfg.bowEnabled = v)
             .build();
         bow.addEntry(bowToggle);
-        // bowRecoilIntensity default = 2.5f
+        
         bow.addEntry(e.startIntSlider(Component.literal("Recoil Intensity"),
                 norm(cfg.bowRecoilIntensity, 2.5f), 0, 200)
             .setDefaultValue(100)
@@ -434,7 +434,7 @@ public class HandycamConfigScreen {
             .setRequirement(Requirement.isTrue(bowToggle::getValue))
             .setSaveConsumer(v -> cfg.bowRecoilIntensity = denorm(v, 2.5f))
             .build());
-        // bowRecoilDecay default = 9.0f
+        
         bow.addEntry(e.startIntSlider(Component.literal("Recoil Decay"),
                 norm(cfg.bowRecoilDecay, 9f), 25, 300)
             .setDefaultValue(100)
@@ -442,7 +442,7 @@ public class HandycamConfigScreen {
             .setRequirement(Requirement.isTrue(bowToggle::getValue))
             .setSaveConsumer(v -> cfg.bowRecoilDecay = denorm(v, 9f))
             .build());
-        // bowConcentration default = 0.9f; physical max = 1.0 → display max = 111
+        
         bow.addEntry(e.startIntSlider(Component.literal("Concentration"),
                 norm(cfg.bowConcentration, 0.9f), 0, 111)
             .setDefaultValue(100)
@@ -464,7 +464,7 @@ public class HandycamConfigScreen {
             .setSaveConsumer(v -> cfg.bowCrosshairShrinkEnabled = v)
             .build();
         bow.addEntry(bowCrosshairToggle);
-        // bowCrosshairShrink default = 0.2f; range 0–200% (200 = 0.4f)
+        
         bow.addEntry(e.startIntSlider(Component.literal("Crosshair Shrink"),
                 norm(cfg.bowCrosshairShrink, 0.2f), 0, 200)
             .setDefaultValue(100)

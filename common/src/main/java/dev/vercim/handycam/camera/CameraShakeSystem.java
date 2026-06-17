@@ -12,7 +12,7 @@ import java.util.List;
 @Environment(EnvType.CLIENT)
 public final class CameraShakeSystem {
 
-    // ── Layers ─────────────────────────────────────────────────────────────
+    
     private static final LandingImpactLayer LANDING = new LandingImpactLayer();
     private static final DamageShakeLayer   DAMAGE  = new DamageShakeLayer();
     private static final JumpShakeLayer     JUMP    = new JumpShakeLayer();
@@ -36,7 +36,7 @@ public final class CameraShakeSystem {
         new CameraSwayLayer()
     );
 
-    // ── Shared state ────────────────────────────────────────────────────────
+    
     private static float  gameTime    = 0f;
     private static float  currentRoll = 0f;
     private static PlayerState lastState = null;
@@ -52,11 +52,11 @@ public final class CameraShakeSystem {
     private static boolean wasPaused = false;
     private static CameraOffset lastComputedOffset = CameraOffset.ZERO;
 
-    // Reusable accumulator — avoids allocating a CameraOffset per add() call in the sum loop.
-    private static final float[] scratch = new float[5]; // [pitch, yaw, roll, fovDelta, y]
+    
+    private static final float[] scratch = new float[5]; 
 
-    private static float creativeFadeBlend = 1f; // 1 = full effects, 0 = no effects
-    private static final float CREATIVE_FADE_SPEED = 3f; // скорость перехода (1/сек)
+    private static float creativeFadeBlend = 1f; 
+    private static final float CREATIVE_FADE_SPEED = 3f; 
 
     private CameraShakeSystem() {}
 
@@ -68,7 +68,7 @@ public final class CameraShakeSystem {
             return;
         }
         if (wasPaused) {
-            // First tick after pause — resync rotations so turnRate/pitchDelta don't spike
+            
             PlayerState.sync(player);
             lastFrameNano = -1L;
             wasPaused = false;
@@ -88,11 +88,11 @@ public final class CameraShakeSystem {
             if (fallDist > 0.15f) LANDING.onLand(fallDist);
         }
 
-        // Damage detection: hurtTime jumps to hurtDuration when player is hit
+        
         int   hurtTime = player.hurtTime;
         float health   = player.getHealth();
         if (hurtTime > prevHurtTime) {
-            // Player was just hurt — estimate damage from health delta
+            
             float delta = (prevHealth > 0f) ? Math.max(prevHealth - health, 0f) : 1f;
             float maxHp = player.getMaxHealth();
             DAMAGE.onDamage(Math.max(delta, 1f), maxHp > 0f ? maxHp : 20f);
@@ -100,7 +100,7 @@ public final class CameraShakeSystem {
         prevHurtTime = hurtTime;
         prevHealth   = health;
 
-        // swingTime resets to 0 on every new swing — catches rapid clicks and block breaking
+        
         boolean isSwinging = player.swinging;
         if (isSwinging && player.swingTime == 0) {
             HIT.onHit();
@@ -136,7 +136,7 @@ public final class CameraShakeSystem {
 
         PlayerState state = (lastState != null) ? lastState : PlayerState.from(player);
 
-        // Плавный переход при включении/выключении полёта в креативе
+        
         HandycamConfig cfg = HandycamConfig.get();
         float blendTarget = (cfg.disableInCreativeFlight && state.isCreativeFlying) ? 0f : 1f;
         if (creativeFadeBlend < blendTarget) {
@@ -161,10 +161,10 @@ public final class CameraShakeSystem {
             s[4] += o.y;
         }
 
-        // No final-smoothing springs here — they were attenuating the walk bob
-        // (bob freq ≈ 1.6 Hz ≈ spring natural freq → ~50% signal loss) and
-        // creating a double-spring with layers that already self-smooth.
-        // Each layer is responsible for its own spring/decay.
+        
+        
+        
+        
         if (creativeFadeBlend < 1f) {
             s[0] *= creativeFadeBlend;
             s[1] *= creativeFadeBlend;

@@ -9,20 +9,20 @@ import net.minecraft.world.item.ItemUseAnimation;
 
 public final class PlayerState {
 
-    public final float   horizontalSpeed;  // 0.0–1.0
-    public final float   verticalVelocity; // blocks/tick, positive = moving up
+    public final float   horizontalSpeed;  
+    public final float   verticalVelocity; 
     public final boolean isSprinting;
     public final boolean isOnGround;
     public final boolean isCrouching;
-    public final float   turnRate;         // delta yaw per tick (degrees)
-    public final float   pitchDelta;       // delta pitch per tick (degrees)
-    public final float   strafeSpeed;      // -1.0 (left) .. +1.0 (right), relative to look dir
-    public final float   forwardSpeed;     // -1.0 (back) .. +1.0 (forward), relative to look dir
-    public final float   bowDrawProgress;      // 0.0–1.0, натяжение лука (для концентрации)
-    public final boolean crossbowFired;       // true ровно в тик выстрела из арбалета
-    public final float   crossbowDrawProgress; // 0.0–1.0, прогресс заряжания арбалета (0 когда заряжен)
-    public final boolean isCreativeFlying;    // летит в креативе (abilities.flying && abilities.mayfly)
-    public final boolean isEating;            // true пока игрок ест или пьёт (UseAnim.EAT / DRINK)
+    public final float   turnRate;         
+    public final float   pitchDelta;       
+    public final float   strafeSpeed;      
+    public final float   forwardSpeed;     
+    public final float   bowDrawProgress;      
+    public final boolean crossbowFired;       
+    public final float   crossbowDrawProgress; 
+    public final boolean isCreativeFlying;    
+    public final boolean isEating;            
 
     private PlayerState(float horizontalSpeed, float verticalVelocity,
                         boolean isSprinting, boolean isOnGround, boolean isCrouching,
@@ -50,7 +50,7 @@ public final class PlayerState {
     private static float   prevXRot         = 0f;
     private static boolean prevCrossbowCharged = false;
 
-    /** Call after a pause/alt-tab to resync rotation without generating a delta spike. */
+    
     public static void sync(LocalPlayer player) {
         prevYRot = player.getYRot();
         prevXRot = player.getXRot();
@@ -76,24 +76,24 @@ public final class PlayerState {
         if (pitchDelta < -20f) pitchDelta = -20f;
         prevXRot = currentXRot;
 
-        // Decompose velocity into forward/strafe relative to player's look direction
+        
         float yawRad   = (float) Math.toRadians(currentYRot);
         float sinYaw   = (float) Math.sin(yawRad);
         float cosYaw   = (float) Math.cos(yawRad);
-        // forward = -sin(yaw)*dx + cos(yaw)*(-dz)  (MC: +z = south = yaw 0 forward)
-        // Wait: in MC yaw 0 = south (+z), yaw 90 = west (-x)
-        // forward vec: (-sin(yaw), -cos(yaw)) in xz
-        // right vec:   ( cos(yaw), -sin(yaw)) in xz ... let's verify:
-        // yaw=0 (south, look +z): forward = cosYaw*dz - sinYaw*dx = dz > 0 when moving forward ✓
-        // right at yaw=0: (1, 0) → dx positive when strafing right ✓
+        
+        
+        
+        
+        
+        
         float forward = cosYaw * dz - sinYaw * dx;
         float strafe  =   cosYaw * dx + sinYaw * dz;
-        // Normalize to ~[-1, 1] using same walk speed divisor
+        
         float norm    = 0.3f;
         forward = Math.max(-1f, Math.min(1f, forward / norm));
         strafe  = Math.max(-1f, Math.min(1f, strafe  / norm));
 
-        // Bow draw progress: 0..1 over the first 20 ticks of holding a bow.
+        
         float bowDraw = 0f;
         if (player.isUsingItem()) {
             ItemStack use = player.getUseItem();
@@ -102,7 +102,7 @@ public final class PlayerState {
             }
         }
 
-        // Crossbow: заряжание и детект выстрела.
+        
         ItemStack main = player.getMainHandItem();
         ItemStack off  = player.getOffhandItem();
         boolean nowCharged = (main.getItem() instanceof CrossbowItem && CrossbowItem.isCharged(main))
@@ -110,7 +110,7 @@ public final class PlayerState {
         boolean crossbowFired = prevCrossbowCharged && !nowCharged;
         prevCrossbowCharged = nowCharged;
 
-        // Прогресс заряжания: 0 когда заряжен или не заряжается (арбалет берёт ~25 тиков).
+        
         float crossbowDraw = 0f;
         if (player.isUsingItem()) {
             ItemStack use = player.getUseItem();

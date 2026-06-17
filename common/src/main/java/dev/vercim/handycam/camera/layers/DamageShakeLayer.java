@@ -12,13 +12,13 @@ import net.fabricmc.api.Environment;
 @Environment(EnvType.CLIENT)
 public class DamageShakeLayer implements ShakeLayer {
 
-    // Underdamped springs — низкое затухание даёт чёткий bounce (отскок + перелёт)
-    // stiffness=60, damping=8 → ζ≈0.52 (underdamped), пик ~0.155s после удара
+    
+    
     private final SpringSimulator pitchSpring = new SpringSimulator(60f, 8f);
     private final SpringSimulator yawSpring   = new SpringSimulator(60f, 8f);
     private final SpringSimulator rollSpring  = new SpringSimulator(60f, 8f);
 
-    // Fractal noise — хаотичная тряска после удара
+    
     private final FractalNoise pitchA = new FractalNoise(0x11223344L, 4, 8f,  0.55f);
     private final FractalNoise pitchB = new FractalNoise(0xAABB1122L, 3, 22f, 0.5f);
     private final FractalNoise yawA   = new FractalNoise(0x55667788L, 4, 11f, 0.55f);
@@ -32,18 +32,18 @@ public class DamageShakeLayer implements ShakeLayer {
         HandycamConfig cfg = HandycamConfig.get();
         if (!cfg.damageEnabled) return;
 
-        // sqrt даёт нелинейную шкалу: даже 1 урон из 20 HP = 0.22 (заметно)
+        
         float severity = (float) Math.sqrt(damageAmount / maxHealth);
         traumaAmount = Math.min(traumaAmount + severity, 1f);
 
-        // Velocity impulse — камера резко пинается назад, пружина возвращает с bounce
-        // kickStrength * 40 → пик ~5° для 1/20hp, ~22° для летального удара
+        
+        
         hitCounter++;
         int side = (hitCounter % 2 == 0) ? 1 : -1;
         float kick = severity * 40f;
-        pitchSpring.addVelocity(-kick);                    // назад по pitch
-        yawSpring  .addVelocity( side * kick * 0.45f);    // боковое смещение
-        rollSpring .addVelocity( side * kick * 0.35f);    // крен
+        pitchSpring.addVelocity(-kick);                    
+        yawSpring  .addVelocity( side * kick * 0.45f);    
+        rollSpring .addVelocity( side * kick * 0.35f);    
     }
 
     @Override
@@ -52,12 +52,12 @@ public class DamageShakeLayer implements ShakeLayer {
         boolean springActive = Math.abs(pitchSpring.getPosition()) > 0.001f;
         if (!cfg.damageEnabled || (traumaAmount < 0.01f && !springActive)) return CameraOffset.ZERO;
 
-        // Spring bounce — target=0, пружина сама возвращается и overshoots
+        
         float sp = pitchSpring.update(0f, dt);
         float sy = yawSpring  .update(0f, dt);
         float sr = rollSpring .update(0f, dt);
 
-        // Noise-тряска поверх bounce
+        
         float shake = traumaAmount * traumaAmount;
         int oct = cfg.noiseOctaves;
         float p = (pitchA.get(time,       oct) * 0.6f + pitchB.get(time + 13f, oct) * 0.4f) * shake;
