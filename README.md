@@ -13,16 +13,33 @@ Handycam adds subtle, physics-inspired camera movement that makes Minecraft feel
 | **Walk bob** | Vertical and lateral oscillation tied to footstep frequency and speed |
 | **Sprint sway** | Roll and lateral drift while sprinting, driven by fractal Perlin noise |
 | **Strafe tilt** | Camera rolls slightly when strafing left or right |
+| **Forward tilt** | Subtle pitch forward while moving |
 | **Mouse lead** | Camera shifts slightly toward the look direction |
 | **Idle shake** | Low-amplitude micro-movement when standing still |
+| **Breath** | Slow vertical camera bob simulating breathing (sine wave, ~0.4 Hz) |
 | **Damage shake** | Spring-simulated camera jolt on incoming damage |
 | **Hit impact** | Multi-axis camera impact when hitting entities |
 | **Landing impact** | Brief downward pitch proportional to fall height |
 | **Jump shake** | Camera response to jumping and landing |
 | **Crouch shake** | Small camera dip when crouching |
+| **Eat sway** | Camera tilts and sways while eating food or drinking potions |
 | **Bow shot recoil** | Camera kick on bow and crossbow release, with draw-tilt compensation |
 
 All effects are independently configurable or can be disabled entirely.
+
+## File Name Format
+
+Jar files follow this naming pattern:
+
+```
+handycam-1.2.0-fabric-1.21.4.jar
+           │         │      │
+           │         │      └─ Minecraft version this jar targets
+           │         └─ Mod loader (fabric or neoforge)
+           └─ Mod version
+```
+
+Make sure the Minecraft version in the filename matches your game version. Fabric and NeoForge jars are separate downloads even for the same Minecraft version.
 
 ## Structure
 
@@ -34,11 +51,12 @@ camera/
   ├─ ShakeLayer            — Interface; all effects extend this
   ├─ CameraOffset          — Immutable container (pitch, yaw, roll, x, y, z)
   ├─ PlayerState           — Read-only snapshot of player input/state per tick
-  ├─ CrosshairSwaySystem   — Tracks UI compensation for draw-tilt
+  ├─ CrosshairSwaySystem   — Tracks UI compensation for draw-tilt and eat-tilt
   ├─ layers/
   │  ├─ WalkBobLayer       — Footstep-driven up/down and side-to-side bob
   │  ├─ CameraSwayLayer    — Noise-driven roll and drift while sprinting
   │  ├─ IdleShakeLayer     — Subtle micro-motion when standing still
+  │  ├─ BreathLayer        — Slow vertical sine-wave bob simulating breathing
   │  ├─ DamageShakeLayer   — Spring-damped impulse on damage
   │  ├─ HitImpactLayer     — Multi-axis hit detection and response
   │  ├─ LandingImpactLayer — Downward pitch proportional to fall distance
@@ -47,6 +65,7 @@ camera/
   │  ├─ ForwardTiltLayer   — Pitch forward when moving
   │  ├─ MouseLeadLayer     — Offset toward look direction
   │  ├─ CrouchShakeLayer   — Dip when toggling crouch
+  │  ├─ EatSwayLayer       — Tilt and noise sway while eating/drinking
   │  └─ BowShotLayer       — Recoil, draw-tilt, and crosshair compensation
   └─ math/
      ├─ SpringSimulator    — Underdamped spring for impact effects

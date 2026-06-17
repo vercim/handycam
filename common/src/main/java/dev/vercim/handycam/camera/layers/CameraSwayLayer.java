@@ -11,12 +11,12 @@ import net.fabricmc.api.Environment;
 @Environment(EnvType.CLIENT)
 public class CameraSwayLayer implements ShakeLayer {
 
-    // Roll: reacts to horizontal turning.
+    
     private final SpringSimulator rollSpring     = new SpringSimulator(120f, 22f);
-    // Yaw lag: camera yaw trails behind head rotation (left-right inertia).
+    
     private final SpringSimulator yawLagSpring   = new SpringSimulator(60f,  15f);
-    // Pitch lag: camera pitch trails behind vertical movement (up-down inertia).
-    // Looser spring so the lag lingers longer — feels like camera has weight.
+    
+    
     private final SpringSimulator pitchLagSpring = new SpringSimulator(40f,  12f);
 
     @Override
@@ -31,8 +31,8 @@ public class CameraSwayLayer implements ShakeLayer {
 
         float sprintMult = state.isSprinting ? 1.5f : 1.0f;
 
-        // ── Horizontal sway (turning) ──────────────────────────────────────
-        // Turn roll (крен при повороте) и yaw/pitch lag (инерция) — оба включены/отключены вместе
+        
+        
         float targetRoll  = 0f;
         float targetYaw   = 0f;
         float targetPitch = 0f;

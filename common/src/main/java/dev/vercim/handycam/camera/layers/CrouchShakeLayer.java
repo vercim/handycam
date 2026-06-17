@@ -8,18 +8,14 @@ import dev.vercim.handycam.config.HandycamConfig;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 
-/**
- * Crouch bounce: when crouching/standing, camera pitches down/up via spring.
- * Similar to LandingImpactLayer but slower and less intense.
- */
 @Environment(EnvType.CLIENT)
 public class CrouchShakeLayer implements ShakeLayer {
 
-    // Soft springs — gentle sway, not snappy like jump/landing
+    
     private final SpringSimulator pitchSpring = new SpringSimulator(100f, 18f);
     private final SpringSimulator rollSpring  = new SpringSimulator(80f, 15f);
 
-    // Target direction: +1 = fully crouched, 0 = standing
+    
     private float pitchTarget = 0f;
     private float rollTarget  = 0f;
 
@@ -27,12 +23,12 @@ public class CrouchShakeLayer implements ShakeLayer {
 
     @Override
     public void tick(PlayerState state) {
-        // Detect crouch state change
+        
         if (state.isCrouching && !wasCrouching) {
-            // Just crouched down
+            
             onCrouch();
         } else if (!state.isCrouching && wasCrouching) {
-            // Just stood up
+            
             onStand();
         }
         wasCrouching = state.isCrouching;
@@ -42,7 +38,7 @@ public class CrouchShakeLayer implements ShakeLayer {
         HandycamConfig cfg = HandycamConfig.get();
         if (!cfg.crouchEnabled) return;
 
-        // Crouch down: pitch down slightly, subtle roll
+        
         pitchTarget = -cfg.crouchIntensity * 0.7f;
         rollTarget  = cfg.crouchIntensity * 0.15f;
     }
@@ -51,7 +47,7 @@ public class CrouchShakeLayer implements ShakeLayer {
         HandycamConfig cfg = HandycamConfig.get();
         if (!cfg.crouchEnabled) return;
 
-        // Stand up: pitch up, opposite roll
+        
         pitchTarget =  cfg.crouchIntensity * 0.5f;
         rollTarget  = -cfg.crouchIntensity * 0.15f;
     }
@@ -64,7 +60,7 @@ public class CrouchShakeLayer implements ShakeLayer {
         float pitch = pitchSpring.update(pitchTarget, dt);
         float roll  = rollSpring .update(rollTarget,  dt);
 
-        // Slow decay — target drifts to zero for smooth return
+        
         float expDecay = (float) Math.exp(-dt / 0.3f);
         pitchTarget *= expDecay;
         rollTarget  *= expDecay;

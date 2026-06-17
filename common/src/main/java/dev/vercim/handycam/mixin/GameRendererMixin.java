@@ -15,10 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(GameRenderer.class)
 public abstract class GameRendererMixin {
 
-    /**
-     * When enableVanillaFov is false, return the raw FOV setting without any
-     * dynamic modifiers (sprinting boost, fly speed, potion effects, etc.).
-     */
+    
     @Inject(method = "getFov", at = @At("RETURN"), cancellable = true)
     private void handycam$blockDynamicFov(Camera camera, float partialTick, boolean useFov,
                                           CallbackInfoReturnable<Float> cir) {

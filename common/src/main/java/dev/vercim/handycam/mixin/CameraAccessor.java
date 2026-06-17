@@ -20,11 +20,11 @@ public interface CameraAccessor {
     @Accessor("yRot")
     void setYRot(float yRot);
 
-    /** Gives direct access to the camera's orientation quaternion so we can apply roll. */
+    
     @Accessor("rotation")
     Quaternionf getRotation();
 
-    /** Moves the camera along its local axes. verticalOffset is camera-local up (≈ world Y). */
+    
     @Invoker("move")
     void invokeMove(float distanceOffset, float verticalOffset, float horizontalOffset);
 }

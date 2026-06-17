@@ -13,7 +13,7 @@ public class WalkBobLayer implements ShakeLayer {
 
     private static final float TWO_PI = (float) (2.0 * Math.PI);
 
-    // Noise sources — each axis has two layers for organic feel
+    
     private final FractalNoise vertNoise  = new FractalNoise(0xDEADBEEFL, 3, 0.5f, 0.55f);
     private final FractalNoise latNoise   = new FractalNoise(0xCAFEBABEL, 3, 0.4f, 0.55f);
     private final FractalNoise rollNoise  = new FractalNoise(0xBEEFC0DEL, 2, 0.3f, 0.60f);
@@ -26,7 +26,7 @@ public class WalkBobLayer implements ShakeLayer {
     private float airBlend       = 0f;
     private float smoothSpeed    = 0f;
     private float phaseSpeed     = 0f;
-    private float smoothSprint   = 1f;  // smoothed sprint multiplier
+    private float smoothSprint   = 1f;  
     private boolean onGround     = true;
     private boolean wasAirborne  = false;
 
@@ -43,8 +43,8 @@ public class WalkBobLayer implements ShakeLayer {
         wasAirborne = !onGround;
 
         if (onGround) {
-            // On landing snap bobPhase to the nearest multiple of π (sin²=0),
-            // so the cycle always resumes from its neutral zero and never jerks.
+            
+            
             if (justLanded) {
                 bobPhase = Math.round(bobPhase / PI) * PI;
             }
@@ -72,16 +72,16 @@ public class WalkBobLayer implements ShakeLayer {
         float sprintMult = smoothSprint;
         int oct = cfg.noiseOctaves;
 
-        // ── Vertical pitch bob ────────────────────────────────────────────────
-        // sin²(phase): always ≥ 0, two smooth dips per cycle (one per footstep).
+        
+        
         float sinP    = (float) Math.sin(bobPhase);
         float basePitch = sinP * sinP;
         float vn      = vertNoise.get(bobPhase * 0.4f, oct);
         float pitchBob = -(basePitch * 0.72f + vn * 0.28f)
                          * cfg.walkBobIntensity * cfg.walkBobVerticalMult * smoothSpeed * sprintMult;
 
-        // ── Lateral roll + yaw ────────────────────────────────────────────────
-        // sin(phase * 0.5): half frequency — camera sways left/right once per two footfalls.
+        
+        
         float baseLat = (float) Math.sin(bobPhase * 0.75f);
         float ln      = latNoise.get(bobPhase * 0.30f, oct);
         float rn      = rollNoise.get(bobPhase * 0.25f, oct);
@@ -89,7 +89,7 @@ public class WalkBobLayer implements ShakeLayer {
 
         float lateralBase = baseLat * 0.68f + ln * 0.32f;
         float rollBob  = lateralBase * cfg.walkBobIntensity * smoothSpeed * sprintMult * 0.28f;
-        // Subtle yaw drift — slightly out of phase from roll for a loose, handheld feel
+        
         float yawBob   = ((float) Math.sin(bobPhase * 0.75f + 0.4f) * 0.55f + yn * 0.45f)
                          * cfg.walkBobIntensity * smoothSpeed * sprintMult * 0.10f;
 

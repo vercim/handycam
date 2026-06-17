@@ -12,16 +12,12 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/**
- * Offsets the crosshair render position by CrosshairSwaySystem.offsetX/Y.
- * Pushes a translate before renderCrosshair and pops after.
- */
 @Mixin(Gui.class)
 public abstract class GuiMixin {
 
     @Inject(method = "renderCrosshair", at = @At("HEAD"))
     private void handycam$crosshairPush(GuiGraphics graphics, DeltaTracker tracker, CallbackInfo ci) {
-        // В 3-м и 2-м лице не двигаем HUD — эффекты применяются только к камере
+        
         if (Minecraft.getInstance().options.getCameraType() != CameraType.FIRST_PERSON) return;
 
         HandycamConfig cfg = HandycamConfig.get();
@@ -44,7 +40,7 @@ public abstract class GuiMixin {
         graphics.pose().pushPose();
         if (hasTranslate) graphics.pose().translate(ox, oy, 0f);
         if (hasScale) {
-            // Скейлить вокруг центра прицела (с учётом смещения).
+            
             graphics.pose().translate( cx, cy, 0f);
             graphics.pose().scale(scale, scale, 1f);
             graphics.pose().translate(-cx, -cy, 0f);

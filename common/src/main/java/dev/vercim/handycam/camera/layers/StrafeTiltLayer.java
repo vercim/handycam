@@ -12,16 +12,16 @@ import net.fabricmc.api.Environment;
 @Environment(EnvType.CLIENT)
 public class StrafeTiltLayer implements ShakeLayer {
 
-    // Roll spring: snappy — responds immediately to strafe input
+    
     private final SpringSimulator rollSpring = new SpringSimulator(500f, 44f);
-    // Yaw spring: slightly softer
+    
     private final SpringSimulator yawSpring  = new SpringSimulator(400f, 40f);
 
-    // Low-pass filter on strafe input — smooths the 20Hz PlayerState stepping
-    // to a continuous signal at full framerate before feeding into springs/noise.
+    
+    
     private float smoothStrafe = 0f;
 
-    // Noise layered on top of tilt for organic feel
+    
     private final FractalNoise rollNoise = new FractalNoise(0xA1B2C3D4L, 4, 0.4f, 0.5f);
     private final FractalNoise yawNoise  = new FractalNoise(0xD4C3B2A1L, 3, 0.3f, 0.5f);
 
@@ -35,14 +35,14 @@ public class StrafeTiltLayer implements ShakeLayer {
             return CameraOffset.ZERO;
         }
 
-        // Smooth the raw 20Hz strafe signal at full framerate; speed scales τ
+        
         float tau = 0.04f / Math.max(cfg.strafeTiltDecay, 0.1f);
         smoothStrafe += (state.strafeSpeed - smoothStrafe) * (1f - (float) Math.exp(-dt / tau));
 
         float sprintMult = state.isSprinting ? 1.4f : 1.0f;
         float i = cfg.strafeTiltIntensity * sprintMult;
 
-        // Strafe right → lean right (positive roll)
+        
         float targetRoll =  smoothStrafe * i;
         float targetYaw  = -smoothStrafe * i * 0.25f;
 
@@ -50,7 +50,7 @@ public class StrafeTiltLayer implements ShakeLayer {
         float roll = rollSpring.update(targetRoll, dt, speed);
         float yaw  = yawSpring .update(targetYaw,  dt, speed);
 
-        // Noise amplitude gated by smoothStrafe — no 20Hz stepping
+        
         int oct = cfg.noiseOctaves;
         float nAbs = Math.abs(smoothStrafe);
         float nRoll = rollNoise.get(time,       oct) * nAbs * i * 0.15f;
