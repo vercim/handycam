@@ -54,6 +54,11 @@ public class HandycamConfigScreenNeoForge {
             .setTooltip(Component.literal("Apply camera shake effects in 2nd person view (F5 twice)"))
             .setSaveConsumer(v -> cfg.enableEffectsSecondPerson = v)
             .build());
+        general.addEntry(e.startBooleanToggle(Component.literal("Enable Vanilla FOV"), cfg.enableVanillaFov)
+            .setDefaultValue(true)
+            .setTooltip(Component.literal("Allow vanilla FOV changes (sprinting boost, speed effects). Disable to lock FOV to your settings value."))
+            .setSaveConsumer(v -> cfg.enableVanillaFov = v)
+            .build());
         general.addEntry(e.startIntSlider(
                 Component.literal("Global Intensity  " + fmt(cfg.masterIntensity)),
                 toSlider(cfg.masterIntensity), 100, 400)
@@ -337,10 +342,15 @@ public class HandycamConfigScreenNeoForge {
             .setTooltip(Component.literal("Idle shake suppression when bow fully drawn"))
             .setSaveConsumer(v -> cfg.bowConcentration = fromSlider(v))
             .build());
-        bow.addEntry(e.startBooleanToggle(Component.literal("Draw Tilt Enabled"), cfg.bowDrawTiltEnabled)
-            .setDefaultValue(true)
-            .setTooltip(Component.literal("Camera lean when drawing bow / loading crossbow"))
+        bow.addEntry(e.startBooleanToggle(Component.literal("Draw Tilt Enabled (experimental)"), cfg.bowDrawTiltEnabled)
+            .setDefaultValue(false)
+            .setTooltip(Component.literal("[Experimental] Camera lean when drawing bow / loading crossbow"))
             .setSaveConsumer(v -> cfg.bowDrawTiltEnabled = v)
+            .build());
+        bow.addEntry(e.startBooleanToggle(Component.literal("Crosshair Shrink Enabled (experimental)"), cfg.bowCrosshairShrinkEnabled)
+            .setDefaultValue(false)
+            .setTooltip(Component.literal("[Experimental] Shrink crosshair when bow is fully drawn"))
+            .setSaveConsumer(v -> cfg.bowCrosshairShrinkEnabled = v)
             .build());
         bow.addEntry(e.startIntSlider(
                 Component.literal("Crosshair Shrink  " + fmt(cfg.bowCrosshairShrink)),
