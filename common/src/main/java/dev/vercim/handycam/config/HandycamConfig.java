@@ -24,7 +24,12 @@ public class HandycamConfig {
     private static HandycamConfig instance;
 
     // ── General ────────────────────────────────────────────────────────────
-    public boolean disableInCreativeFlight = true;  // отключить все эффекты при полёте в креативе
+    public boolean disableInCreativeFlight   = true;   // отключить все эффекты при полёте в креативе
+    public boolean enableEffectsThirdPerson  = false;  // эффекты тряски в 3-м лице (F5 ×1)
+    public boolean enableEffectsSecondPerson = false;  // эффекты тряски во 2-м лице (F5 ×2)
+
+    // ── Selfie Camera (2nd person / F5 ×2) ────────────────────────────────
+    public float selfieCameraDistance = 1.2f;   // расстояние от глаз игрока до камеры (блоки)
 
     // ── Master ─────────────────────────────────────────────────────────────
     public float masterIntensity = 2.0f;
