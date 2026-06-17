@@ -231,6 +231,11 @@ public class HandycamConfigScreenNeoForge {
             .setTooltip(Component.literal("Camera roll when turning"))
             .setSaveConsumer(v -> cfg.turnSway = fromSlider(v))
             .build());
+        mouse.addEntry(e.startBooleanToggle(Component.literal("Lead (on) / Lag (off)"), cfg.cameraSwayLead)
+            .setDefaultValue(true)
+            .setTooltip(Component.literal("Lead or lag camera behind mouse"))
+            .setSaveConsumer(v -> cfg.cameraSwayLead = v)
+            .build());
         mouse.addEntry(e.startIntSlider(
                 Component.literal("Max Turn Roll  " + fmt(cfg.maxTurnRoll)),
                 toSlider(cfg.maxTurnRoll), 0, 500)
@@ -242,11 +247,6 @@ public class HandycamConfigScreenNeoForge {
             .setDefaultValue(true)
             .setTooltip(Component.literal("Camera inertia on mouse movement"))
             .setSaveConsumer(v -> cfg.cameraSwayEnabled = v)
-            .build());
-        mouse.addEntry(e.startBooleanToggle(Component.literal("Lead (on) / Lag (off)"), cfg.cameraSwayLead)
-            .setDefaultValue(true)
-            .setTooltip(Component.literal("Lead or lag camera behind mouse"))
-            .setSaveConsumer(v -> cfg.cameraSwayLead = v)
             .build());
         mouse.addEntry(e.startIntSlider(
                 Component.literal("Yaw Sway  " + fmt(cfg.swayYawLag)),
