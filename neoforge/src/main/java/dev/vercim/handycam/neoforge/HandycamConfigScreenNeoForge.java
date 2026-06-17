@@ -361,7 +361,7 @@ public class HandycamConfigScreenNeoForge {
             .build());
 
         // ── Eat ───────────────────────────────────────────────────────────────
-        ConfigCategory eat = builder.getOrCreateCategory(Component.literal("Eat"));
+        ConfigCategory eat = builder.getOrCreateCategory(Component.literal("Eating & Drinking"));
 
         eat.addEntry(e.startBooleanToggle(Component.literal("Enabled"), cfg.eatEnabled)
             .setDefaultValue(true)
