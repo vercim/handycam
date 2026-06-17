@@ -103,8 +103,8 @@ public class HandycamConfigScreen {
             .setSaveConsumer(v -> cfg.idleTremorScale = fromSlider(v))
             .build());
 
-        // ── Movement ─────────────────────────────────────────────────────────
-        ConfigCategory movement = builder.getOrCreateCategory(Component.literal("Movement"));
+        // ── Walk & Sprint ─────────────────────────────────────────────────────
+        ConfigCategory movement = builder.getOrCreateCategory(Component.literal("Walk & Sprint"));
 
         var walkBobToggle = e.startBooleanToggle(Component.literal("[BETA] Walk Bob Enabled"), cfg.walkBobEnabled)
             .setDefaultValue(false)
