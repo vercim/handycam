@@ -20,6 +20,7 @@ public final class CameraShakeSystem {
     private static final BowShotLayer       BOW     = new BowShotLayer();
 
     private static final List<ShakeLayer> LAYERS = List.of(
+        new BreathLayer(),
         new IdleShakeLayer(),
         new WalkBobLayer(),
         new StrafeTiltLayer(),
@@ -52,7 +53,7 @@ public final class CameraShakeSystem {
     private static CameraOffset lastComputedOffset = CameraOffset.ZERO;
 
     // Reusable accumulator — avoids allocating a CameraOffset per add() call in the sum loop.
-    private static final float[] scratch = new float[4]; // [pitch, yaw, roll, fovDelta]
+    private static final float[] scratch = new float[5]; // [pitch, yaw, roll, fovDelta, y]
 
     private static float creativeFadeBlend = 1f; // 1 = full effects, 0 = no effects
     private static final float CREATIVE_FADE_SPEED = 3f; // скорость перехода (1/сек)
@@ -150,13 +151,14 @@ public final class CameraShakeSystem {
         }
 
         float[] s = scratch;
-        s[0] = 0f; s[1] = 0f; s[2] = 0f; s[3] = 0f;
+        s[0] = 0f; s[1] = 0f; s[2] = 0f; s[3] = 0f; s[4] = 0f;
         for (ShakeLayer layer : LAYERS) {
             CameraOffset o = layer.compute(state, time, dt);
             s[0] += o.pitch;
             s[1] += o.yaw;
             s[2] += o.roll;
             s[3] += o.fovDelta;
+            s[4] += o.y;
         }
 
         // No final-smoothing springs here — they were attenuating the walk bob
@@ -168,9 +170,10 @@ public final class CameraShakeSystem {
             s[1] *= creativeFadeBlend;
             s[2] *= creativeFadeBlend;
             s[3] *= creativeFadeBlend;
+            s[4] *= creativeFadeBlend;
         }
 
-        CameraOffset sum = new CameraOffset(s[0], s[1], s[2], s[3]);
+        CameraOffset sum = new CameraOffset(s[0], s[1], s[2], s[3], s[4]);
         currentRoll = sum.roll;
         lastComputedOffset = sum;
         return sum;

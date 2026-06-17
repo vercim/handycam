@@ -60,33 +60,45 @@ public class HandycamConfigScreen {
             .setSaveConsumer(v -> cfg.noiseOctaves = v)
             .build());
 
-        // ── Idle ──────────────────────────────────────────────────────────────
-        ConfigCategory idle = builder.getOrCreateCategory(Component.literal("Idle"));
+        // ── Breath & Idle ─────────────────────────────────────────────────────
+        ConfigCategory idle = builder.getOrCreateCategory(Component.literal("Breath & Idle"));
 
-        idle.addEntry(e.startBooleanToggle(Component.literal("Enabled"), cfg.idleEnabled)
+        idle.addEntry(e.startBooleanToggle(Component.literal("Breath Enabled"), cfg.breathEnabled)
             .setDefaultValue(true)
-            .setTooltip(Component.literal("Breathing motion when standing still"))
+            .setTooltip(Component.literal("Slow vertical body bob simulating breathing (camera rises and falls)"))
+            .setSaveConsumer(v -> cfg.breathEnabled = v)
+            .build());
+        idle.addEntry(e.startIntSlider(
+                Component.literal("Breath Intensity  " + fmt(cfg.breathIntensity)),
+                toSlider(cfg.breathIntensity), 0, 300)
+            .setDefaultValue(100)
+            .setTooltip(Component.literal("Strength of breathing movement (~2-3 s cycle at 1.0)"))
+            .setSaveConsumer(v -> cfg.breathIntensity = fromSlider(v))
+            .build());
+        idle.addEntry(e.startBooleanToggle(Component.literal("Idle Enabled"), cfg.idleEnabled)
+            .setDefaultValue(true)
+            .setTooltip(Component.literal("Micro hand tremor and subtle head drift when standing still"))
             .setSaveConsumer(v -> cfg.idleEnabled = v)
             .build());
         idle.addEntry(e.startIntSlider(
-                Component.literal("Intensity  " + fmt(cfg.idleIntensity)),
+                Component.literal("Idle Intensity  " + fmt(cfg.idleIntensity)),
                 toSlider(cfg.idleIntensity), 0, 300)
             .setDefaultValue(150)
-            .setTooltip(Component.literal("Strength of breathing"))
+            .setTooltip(Component.literal("Strength of idle head motion"))
             .setSaveConsumer(v -> cfg.idleIntensity = fromSlider(v))
             .build());
         idle.addEntry(e.startIntSlider(
-                Component.literal("Frequency  " + fmt(cfg.idleFrequency)),
+                Component.literal("Idle Frequency  " + fmt(cfg.idleFrequency)),
                 toSlider(cfg.idleFrequency), 30, 125)
             .setDefaultValue(50)
-            .setTooltip(Component.literal("Speed of breathing cycle"))
+            .setTooltip(Component.literal("Speed of idle drift cycle"))
             .setSaveConsumer(v -> cfg.idleFrequency = fromSlider(v))
             .build());
         idle.addEntry(e.startIntSlider(
                 Component.literal("Hand Tremor  " + fmt(cfg.idleTremorScale)),
                 toSlider(cfg.idleTremorScale), 40, 540)
             .setDefaultValue(75)
-            .setTooltip(Component.literal("Fine hand shake on top of breathing"))
+            .setTooltip(Component.literal("Fine hand shake on top of idle drift"))
             .setSaveConsumer(v -> cfg.idleTremorScale = fromSlider(v))
             .build());
 
