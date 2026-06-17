@@ -56,7 +56,7 @@ public class EatSwayLayer implements ShakeLayer {
 
         // Базовый наклон: вниз (отрицательный pitch) + вправо (положительный roll)
         float basePitch = -0.8f * b * i;
-        float baseRoll  =  0.5f * b * i;
+        float baseRoll  =  1.5f * b * i;
 
         // Хаотичное покачивание через шум — имитация жевания
         float sway = b * cfg.eatSwayAmount;
@@ -76,9 +76,9 @@ public class EatSwayLayer implements ShakeLayer {
             cachedFov  = fovDeg;
             cachedGuiW = guiW;
         }
-        // Знак: pitch отрицательный (наклон вниз) → компенсация вверх (+eatCompY в экранных coords).
+        // Знак: basePitch отрицательный (камера вниз) → eatCompY отрицательный (прицел вверх).
         CrosshairSwaySystem.eatCompX = 0f;
-        CrosshairSwaySystem.eatCompY = -basePitch * cachedPixPerDeg * 0.65f;
+        CrosshairSwaySystem.eatCompY = basePitch * cachedPixPerDeg * 0.65f;
 
         return new CameraOffset(basePitch + np, ny, baseRoll + nr);
     }
