@@ -246,12 +246,12 @@ public class HandycamConfigScreen {
             .build());
         bow.addEntry(e.startBooleanToggle(Component.literal("[BETA] Draw Tilt Enabled"), cfg.bowDrawTiltEnabled)
             .setDefaultValue(false)
-            .setTooltip(Component.literal("[Experimental] Camera lean when drawing bow / loading crossbow"))
+            .setTooltip(Component.literal("Camera lean when drawing bow / loading crossbow"))
             .setSaveConsumer(v -> cfg.bowDrawTiltEnabled = v)
             .build());
         bow.addEntry(e.startBooleanToggle(Component.literal("[BETA] Crosshair Shrink Enabled"), cfg.bowCrosshairShrinkEnabled)
             .setDefaultValue(false)
-            .setTooltip(Component.literal("[Experimental] Shrink crosshair when bow is fully drawn"))
+            .setTooltip(Component.literal("Shrink crosshair when bow is fully drawn"))
             .setSaveConsumer(v -> cfg.bowCrosshairShrinkEnabled = v)
             .build());
         bow.addEntry(e.startIntSlider(
