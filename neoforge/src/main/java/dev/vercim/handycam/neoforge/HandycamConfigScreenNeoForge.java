@@ -44,12 +44,12 @@ public class HandycamConfigScreenNeoForge {
             .setTooltip(Component.literal("Disable all effects when flying in creative mode"))
             .setSaveConsumer(v -> cfg.disableInCreativeFlight = v)
             .build());
-        general.addEntry(e.startBooleanToggle(Component.literal("Enable Effects in 3rd Person"), cfg.enableEffectsThirdPerson)
+        general.addEntry(e.startBooleanToggle(Component.literal("[BETA] Enable Effects in 3rd Person"), cfg.enableEffectsThirdPerson)
             .setDefaultValue(false)
             .setTooltip(Component.literal("Apply camera shake effects in 3rd person view (F5 once)"))
             .setSaveConsumer(v -> cfg.enableEffectsThirdPerson = v)
             .build());
-        general.addEntry(e.startBooleanToggle(Component.literal("Enable Effects in 2nd Person"), cfg.enableEffectsSecondPerson)
+        general.addEntry(e.startBooleanToggle(Component.literal("[BETA] Enable Effects in 2nd Person"), cfg.enableEffectsSecondPerson)
             .setDefaultValue(false)
             .setTooltip(Component.literal("Apply camera shake effects in 2nd person view (F5 twice)"))
             .setSaveConsumer(v -> cfg.enableEffectsSecondPerson = v)
@@ -107,7 +107,7 @@ public class HandycamConfigScreenNeoForge {
         // ── Movement (Walk Bob + Sprint Sway) ────────────────────────────────
         ConfigCategory movement = builder.getOrCreateCategory(Component.literal("Movement"));
 
-        movement.addEntry(e.startBooleanToggle(Component.literal("Walk Bob Enabled"), cfg.walkBobEnabled)
+        movement.addEntry(e.startBooleanToggle(Component.literal("[BETA] Walk Bob Enabled"), cfg.walkBobEnabled)
             .setDefaultValue(false)
             .setTooltip(Component.literal("Camera bobbing while walking"))
             .setSaveConsumer(v -> cfg.walkBobEnabled = v)
@@ -342,12 +342,12 @@ public class HandycamConfigScreenNeoForge {
             .setTooltip(Component.literal("Idle shake suppression when bow fully drawn"))
             .setSaveConsumer(v -> cfg.bowConcentration = fromSlider(v))
             .build());
-        bow.addEntry(e.startBooleanToggle(Component.literal("Draw Tilt Enabled (experimental)"), cfg.bowDrawTiltEnabled)
+        bow.addEntry(e.startBooleanToggle(Component.literal("[BETA] Draw Tilt Enabled"), cfg.bowDrawTiltEnabled)
             .setDefaultValue(false)
             .setTooltip(Component.literal("[Experimental] Camera lean when drawing bow / loading crossbow"))
             .setSaveConsumer(v -> cfg.bowDrawTiltEnabled = v)
             .build());
-        bow.addEntry(e.startBooleanToggle(Component.literal("Crosshair Shrink Enabled (experimental)"), cfg.bowCrosshairShrinkEnabled)
+        bow.addEntry(e.startBooleanToggle(Component.literal("[BETA] Crosshair Shrink Enabled"), cfg.bowCrosshairShrinkEnabled)
             .setDefaultValue(false)
             .setTooltip(Component.literal("[Experimental] Shrink crosshair when bow is fully drawn"))
             .setSaveConsumer(v -> cfg.bowCrosshairShrinkEnabled = v)
