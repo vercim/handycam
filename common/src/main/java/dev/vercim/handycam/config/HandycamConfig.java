@@ -27,6 +27,7 @@ public class HandycamConfig {
     public boolean disableInCreativeFlight   = true;   // отключить все эффекты при полёте в креативе
     public boolean enableEffectsThirdPerson  = false;  // эффекты тряски в 3-м лице (F5 ×1)
     public boolean enableEffectsSecondPerson = false;  // эффекты тряски во 2-м лице (F5 ×2)
+    public boolean enableVanillaFov          = true;   // разрешить ванильное изменение FOV при беге/спринте
 
     // ── Master ─────────────────────────────────────────────────────────────
     public float masterIntensity = 2.0f;
@@ -101,7 +102,8 @@ public class HandycamConfig {
     public float   bowRecoilIntensity = 2.5f;  // сила отдачи при выстреле
     public float   bowRecoilDecay     = 9.0f;  // скорость затухания отдачи
     public float   bowConcentration       = 0.90f; // 0..1 — насколько гасится idle-дрожь при макс. натяжении
-    public boolean bowDrawTiltEnabled     = true;  // включить смещение камеры при натяжении
+    public boolean bowDrawTiltEnabled     = false; // [experimental] смещение камеры при натяжении лука
+    public boolean bowCrosshairShrinkEnabled = false; // [experimental] уменьшение прицела при натяжении
     public float   bowCrosshairShrink    = 0.20f; // насколько уменьшается прицел при макс. натяжении (0=нет, 1=полностью)
 
     public static HandycamConfig get() {
