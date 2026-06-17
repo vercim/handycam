@@ -5,6 +5,7 @@ import net.minecraft.world.entity.player.Abilities;
 import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemUseAnimation;
 
 public final class PlayerState {
 
@@ -21,13 +22,14 @@ public final class PlayerState {
     public final boolean crossbowFired;       // true ровно в тик выстрела из арбалета
     public final float   crossbowDrawProgress; // 0.0–1.0, прогресс заряжания арбалета (0 когда заряжен)
     public final boolean isCreativeFlying;    // летит в креативе (abilities.flying && abilities.mayfly)
+    public final boolean isEating;            // true пока игрок ест или пьёт (UseAnim.EAT / DRINK)
 
     private PlayerState(float horizontalSpeed, float verticalVelocity,
                         boolean isSprinting, boolean isOnGround, boolean isCrouching,
                         float turnRate, float pitchDelta,
                         float strafeSpeed, float forwardSpeed,
                         float bowDrawProgress, boolean crossbowFired, float crossbowDrawProgress,
-                        boolean isCreativeFlying) {
+                        boolean isCreativeFlying, boolean isEating) {
         this.horizontalSpeed  = horizontalSpeed;
         this.verticalVelocity = verticalVelocity;
         this.isSprinting      = isSprinting;
@@ -41,6 +43,7 @@ public final class PlayerState {
         this.crossbowFired        = crossbowFired;
         this.crossbowDrawProgress = crossbowDrawProgress;
         this.isCreativeFlying     = isCreativeFlying;
+        this.isEating             = isEating;
     }
 
     private static float   prevYRot         = 0f;
@@ -119,8 +122,15 @@ public final class PlayerState {
         Abilities ab = player.getAbilities();
         boolean creativeFlying = ab.flying && ab.mayfly;
 
+        boolean isEating = false;
+        if (player.isUsingItem()) {
+            ItemStack use = player.getUseItem();
+            ItemUseAnimation anim = use.getItem().getUseAnimation(use);
+            isEating = (anim == ItemUseAnimation.EAT || anim == ItemUseAnimation.DRINK);
+        }
+
         return new PlayerState(hSpeed, dy, player.isSprinting(), player.onGround(),
                                player.isCrouching(), turnRate, pitchDelta, strafe, forward,
-                               bowDraw, crossbowFired, crossbowDraw, creativeFlying);
+                               bowDraw, crossbowFired, crossbowDraw, creativeFlying, isEating);
     }
 }

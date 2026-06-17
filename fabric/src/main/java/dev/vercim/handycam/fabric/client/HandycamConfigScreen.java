@@ -30,12 +30,12 @@ public class HandycamConfigScreen {
             .setTooltip(Component.literal("Disable all effects when flying in creative mode"))
             .setSaveConsumer(v -> cfg.disableInCreativeFlight = v)
             .build());
-        general.addEntry(e.startBooleanToggle(Component.literal("[BETA] Enable Effects in 3rd Person"), cfg.enableEffectsThirdPerson)
+        general.addEntry(e.startBooleanToggle(Component.literal("Enable Effects in 3rd Person"), cfg.enableEffectsThirdPerson)
             .setDefaultValue(false)
             .setTooltip(Component.literal("Apply camera shake effects in 3rd person view (F5 once)"))
             .setSaveConsumer(v -> cfg.enableEffectsThirdPerson = v)
             .build());
-        general.addEntry(e.startBooleanToggle(Component.literal("[BETA] Enable Effects in 2nd Person"), cfg.enableEffectsSecondPerson)
+        general.addEntry(e.startBooleanToggle(Component.literal("Enable Effects in 2nd Person"), cfg.enableEffectsSecondPerson)
             .setDefaultValue(false)
             .setTooltip(Component.literal("Apply camera shake effects in 2nd person view (F5 twice)"))
             .setSaveConsumer(v -> cfg.enableEffectsSecondPerson = v)
@@ -260,6 +260,29 @@ public class HandycamConfigScreen {
             .setDefaultValue(20)
             .setTooltip(Component.literal("How much the crosshair shrinks at full draw (0 = off)"))
             .setSaveConsumer(v -> cfg.bowCrosshairShrink = fromSlider(v))
+            .build());
+
+        // ── Eat ───────────────────────────────────────────────────────────────
+        ConfigCategory eat = builder.getOrCreateCategory(Component.literal("Eat"));
+
+        eat.addEntry(e.startBooleanToggle(Component.literal("Enabled"), cfg.eatEnabled)
+            .setDefaultValue(true)
+            .setTooltip(Component.literal("Camera tilt and sway while eating food or drinking potions"))
+            .setSaveConsumer(v -> cfg.eatEnabled = v)
+            .build());
+        eat.addEntry(e.startIntSlider(
+                Component.literal("Intensity  " + fmt(cfg.eatIntensity)),
+                toSlider(cfg.eatIntensity), 0, 300)
+            .setDefaultValue(150)
+            .setTooltip(Component.literal("Overall strength of tilt and sway"))
+            .setSaveConsumer(v -> cfg.eatIntensity = fromSlider(v))
+            .build());
+        eat.addEntry(e.startIntSlider(
+                Component.literal("Sway Amount  " + fmt(cfg.eatSwayAmount)),
+                toSlider(cfg.eatSwayAmount), 0, 150)
+            .setDefaultValue(80)
+            .setTooltip(Component.literal("How much the camera wanders while chewing (0 = static tilt only)"))
+            .setSaveConsumer(v -> cfg.eatSwayAmount = fromSlider(v))
             .build());
 
         // ── Crouch ────────────────────────────────────────────────────────────
