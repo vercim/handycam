@@ -221,8 +221,8 @@ public class HandycamConfigScreenNeoForge {
             .setSaveConsumer(v -> cfg.crouchIntensity = fromSlider(v))
             .build());
 
-        // ── Mouse ─────────────────────────────────────────────────────────────
-        ConfigCategory mouse = builder.getOrCreateCategory(Component.literal("Mouse"));
+        // ── Mouse & Cursor ────────────────────────────────────────────────────
+        ConfigCategory mouse = builder.getOrCreateCategory(Component.literal("Mouse & Cursor"));
 
         mouse.addEntry(e.startIntSlider(
                 Component.literal("Turn Sway  " + fmt(cfg.turnSway)),
@@ -384,7 +384,7 @@ public class HandycamConfigScreenNeoForge {
             .build());
 
         // ── Jump & Landing ────────────────────────────────────────────────────
-        ConfigCategory jump = builder.getOrCreateCategory(Component.literal("Jump"));
+        ConfigCategory jump = builder.getOrCreateCategory(Component.literal("Jump & Landing"));
 
         jump.addEntry(e.startBooleanToggle(Component.literal("Jump Enabled"), cfg.jumpEnabled)
             .setDefaultValue(true)
