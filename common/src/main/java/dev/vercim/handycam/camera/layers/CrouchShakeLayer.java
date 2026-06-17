@@ -65,8 +65,9 @@ public class CrouchShakeLayer implements ShakeLayer {
         float roll  = rollSpring .update(rollTarget,  dt);
 
         // Slow decay — target drifts to zero for smooth return
-        pitchTarget *= (float) Math.exp(-dt / 0.3f);
-        rollTarget  *= (float) Math.exp(-dt / 0.3f);
+        float expDecay = (float) Math.exp(-dt / 0.3f);
+        pitchTarget *= expDecay;
+        rollTarget  *= expDecay;
 
         float m = cfg.masterIntensity;
         return new CameraOffset(pitch * m, 0f, roll * m);

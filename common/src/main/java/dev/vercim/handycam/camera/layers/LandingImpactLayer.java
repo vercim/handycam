@@ -61,9 +61,11 @@ public class LandingImpactLayer implements ShakeLayer {
         float yaw   = yawSpring  .update(yawTarget,   dt);
 
         // Decay targets toward 0 so springs have a destination to return to.
-        pitchTarget *= (float) Math.exp(-dt / 0.12f);
-        rollTarget  *= (float) Math.exp(-dt / 0.18f);
-        yawTarget   *= (float) Math.exp(-dt / 0.18f);
+        float expP  = (float) Math.exp(-dt / 0.12f);
+        float expRY = (float) Math.exp(-dt / 0.18f);
+        pitchTarget *= expP;
+        rollTarget  *= expRY;
+        yawTarget   *= expRY;
 
         // Config values applied every frame — слайдеры работают мгновенно
         float i = cfg.landingIntensity * cfg.masterIntensity;

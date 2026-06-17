@@ -51,10 +51,10 @@ public class JumpShakeLayer implements ShakeLayer {
         float yaw   = yawSpring  .update(yawTarget,   dt);
 
         // Decay targets toward 0 for smooth spring return
-        float decayRate = cfg.jumpDecay;
-        pitchTarget *= (float) Math.exp(-dt * decayRate);
-        rollTarget  *= (float) Math.exp(-dt * decayRate);
-        yawTarget   *= (float) Math.exp(-dt * decayRate);
+        float expDecay = (float) Math.exp(-dt * cfg.jumpDecay);
+        pitchTarget *= expDecay;
+        rollTarget  *= expDecay;
+        yawTarget   *= expDecay;
 
         // Intensity читается каждый кадр — слайдер применяется мгновенно
         float intensity = cfg.jumpIntensity * cfg.masterIntensity;
