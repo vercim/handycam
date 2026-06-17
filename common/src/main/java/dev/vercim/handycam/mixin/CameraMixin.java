@@ -48,6 +48,7 @@ public abstract class CameraMixin {
         if (Math.abs(offset.pitch) > 1.0e-4f) rotation.rotateX( offset.pitch * Mth.DEG_TO_RAD);
         if (Math.abs(offset.yaw)   > 1.0e-4f) rotation.rotateY(-offset.yaw   * Mth.DEG_TO_RAD);
         if (Math.abs(offset.roll)  > 1.0e-4f) rotation.rotateZ( offset.roll  * Mth.DEG_TO_RAD);
+        if (Math.abs(offset.y)     > 1.0e-5f) self.invokeMove(0f, offset.y, 0f);
 
         // Keep the scalar fields roughly in sync for any code that reads them.
         if (isFirstPerson) {
