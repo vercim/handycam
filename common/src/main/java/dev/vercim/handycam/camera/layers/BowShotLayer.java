@@ -42,6 +42,11 @@ public class BowShotLayer implements ShakeLayer {
     private float prevDraw = 0f;
     private int   side     = 1;
 
+    // Cached FOV projection — recomputed only when FOV or window width changes.
+    private float cachedPixPerDeg = 0f;
+    private int   cachedFov   = -1;
+    private int   cachedGuiW  = -1;
+
     @Override
     public void tick(PlayerState state) {
         // Обычный лук: отпустили натянутую тетиву.
@@ -86,9 +91,9 @@ public class BowShotLayer implements ShakeLayer {
         float pitch = pitchSpring.update(pitchTarget, dt);
         float yaw   = yawSpring  .update(yawTarget,   dt);
 
-        float decay = cfg.bowRecoilDecay;
-        pitchTarget *= (float) Math.exp(-dt * decay);
-        yawTarget   *= (float) Math.exp(-dt * decay);
+        float expDecay = (float) Math.exp(-dt * cfg.bowRecoilDecay);
+        pitchTarget *= expDecay;
+        yawTarget   *= expDecay;
 
         // Плавный шум: линейный спад trauma, приглушённые амплитуды.
         float shake = trauma;
@@ -111,11 +116,16 @@ public class BowShotLayer implements ShakeLayer {
         // Crosshair compensation: противоположное смещение чтобы прицел оставался
         // на реальной точке прицеливания, несмотря на визуальный крен камеры.
         // Перевод градусов → GUI-пиксели через ширину экрана и FOV.
-        Minecraft mc = Minecraft.getInstance();
-        float guiW   = mc.getWindow().getGuiScaledWidth();
-        float fovDeg = mc.options.fov().get();
-        float pixPerDeg = (float) ((guiW / 2.0) / Math.tan(Math.toRadians(fovDeg / 2.0))
-                                   * Math.toRadians(1.0));
+        Minecraft mc    = Minecraft.getInstance();
+        int guiW        = mc.getWindow().getGuiScaledWidth();
+        int fovDeg      = mc.options.fov().get();
+        if (fovDeg != cachedFov || guiW != cachedGuiW) {
+            cachedPixPerDeg = (float) ((guiW / 2.0) / Math.tan(Math.toRadians(fovDeg / 2.0))
+                                       * Math.toRadians(1.0));
+            cachedFov  = fovDeg;
+            cachedGuiW = guiW;
+        }
+        float pixPerDeg = cachedPixPerDeg;
         // Знаки: камера вправо (yaw+) → прицел влево (-X); камера вниз (pitch+) → прицел вверх (-Y)
         // 0.65 — эмпирическая поправка: точная проекционная формула немного переоценивает смещение.
         CrosshairSwaySystem.drawCompX = -yawDraw   * drawScale * pixPerDeg * 0.65f;

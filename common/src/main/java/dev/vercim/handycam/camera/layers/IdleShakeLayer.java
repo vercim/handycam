@@ -66,9 +66,10 @@ public class IdleShakeLayer implements ShakeLayer {
         float tr = tremorRoll .update(tremorRollTarget,  dt);
 
         // Slow decay — tremor lingers before returning to zero (τ = 0.6s)
-        tremorPitchTarget *= (float) Math.exp(-dt / 0.6f);
-        tremorYawTarget   *= (float) Math.exp(-dt / 0.6f);
-        tremorRollTarget  *= (float) Math.exp(-dt / 0.6f);
+        float expDecay = (float) Math.exp(-dt / 0.6f);
+        tremorPitchTarget *= expDecay;
+        tremorYawTarget   *= expDecay;
+        tremorRollTarget  *= expDecay;
 
         return new CameraOffset(
             breathP + tp,

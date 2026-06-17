@@ -50,6 +50,9 @@ public final class CameraShakeSystem {
     private static boolean wasPaused = false;
     private static CameraOffset lastComputedOffset = CameraOffset.ZERO;
 
+    // Reusable accumulator — avoids allocating a CameraOffset per add() call in the sum loop.
+    private static final float[] scratch = new float[4]; // [pitch, yaw, roll, fovDelta]
+
     private static float creativeFadeBlend = 1f; // 1 = full effects, 0 = no effects
     private static final float CREATIVE_FADE_SPEED = 3f; // скорость перехода (1/сек)
 
@@ -145,9 +148,14 @@ public final class CameraShakeSystem {
             return CameraOffset.ZERO;
         }
 
-        CameraOffset sum = CameraOffset.ZERO;
+        float[] s = scratch;
+        s[0] = 0f; s[1] = 0f; s[2] = 0f; s[3] = 0f;
         for (ShakeLayer layer : LAYERS) {
-            sum = sum.add(layer.compute(state, time, dt));
+            CameraOffset o = layer.compute(state, time, dt);
+            s[0] += o.pitch;
+            s[1] += o.yaw;
+            s[2] += o.roll;
+            s[3] += o.fovDelta;
         }
 
         // No final-smoothing springs here — they were attenuating the walk bob
@@ -155,9 +163,13 @@ public final class CameraShakeSystem {
         // creating a double-spring with layers that already self-smooth.
         // Each layer is responsible for its own spring/decay.
         if (creativeFadeBlend < 1f) {
-            sum = sum.scale(creativeFadeBlend);
+            s[0] *= creativeFadeBlend;
+            s[1] *= creativeFadeBlend;
+            s[2] *= creativeFadeBlend;
+            s[3] *= creativeFadeBlend;
         }
 
+        CameraOffset sum = new CameraOffset(s[0], s[1], s[2], s[3]);
         currentRoll = sum.roll;
         lastComputedOffset = sum;
         return sum;
