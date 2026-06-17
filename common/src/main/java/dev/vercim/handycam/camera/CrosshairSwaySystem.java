@@ -21,6 +21,11 @@ public final class CrosshairSwaySystem {
     public static float drawCompX = 0f;
     public static float drawCompY = 0f;
 
+    // Compensation for eat/drink lean: cancels the static down-tilt so aim point stays fixed.
+    // Written by EatSwayLayer, read by GuiMixin.
+    public static float eatCompX = 0f;
+    public static float eatCompY = 0f;
+
     // Current bow draw progress [0..1]. Written by BowShotLayer, read by GuiMixin for crosshair scaling.
     public static float bowDrawProgress = 0f;
 }

@@ -1,12 +1,14 @@
 package dev.vercim.handycam.camera.layers;
 
 import dev.vercim.handycam.camera.CameraOffset;
+import dev.vercim.handycam.camera.CrosshairSwaySystem;
 import dev.vercim.handycam.camera.PlayerState;
 import dev.vercim.handycam.camera.ShakeLayer;
 import dev.vercim.handycam.camera.math.FractalNoise;
 import dev.vercim.handycam.config.HandycamConfig;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.Minecraft;
 
 /**
  * Плавный наклон камеры вниз-вправо и хаотичное покачивание (имитация жевания)
@@ -23,11 +25,17 @@ public class EatSwayLayer implements ShakeLayer {
 
     private float eatBlend = 0f;
 
+    private float cachedPixPerDeg = 0f;
+    private int   cachedFov       = -1;
+    private int   cachedGuiW      = -1;
+
     @Override
     public CameraOffset compute(PlayerState state, float time, float dt) {
         HandycamConfig cfg = HandycamConfig.get();
         if (!cfg.eatEnabled) {
             eatBlend = 0f;
+            CrosshairSwaySystem.eatCompX = 0f;
+            CrosshairSwaySystem.eatCompY = 0f;
             return CameraOffset.ZERO;
         }
 
@@ -37,7 +45,11 @@ public class EatSwayLayer implements ShakeLayer {
         float k = state.isEating ? 3.0f : 5.0f;
         eatBlend += (blendTarget - eatBlend) * (1f - (float) Math.exp(-k * dt));
 
-        if (eatBlend <= 0f) return CameraOffset.ZERO;
+        if (eatBlend <= 0f) {
+            CrosshairSwaySystem.eatCompX = 0f;
+            CrosshairSwaySystem.eatCompY = 0f;
+            return CameraOffset.ZERO;
+        }
 
         float i = cfg.eatIntensity * cfg.masterIntensity;
         float b = eatBlend;
@@ -52,6 +64,21 @@ public class EatSwayLayer implements ShakeLayer {
         float np = noiseP.get(time,        oct) * sway * 0.55f * i;
         float ny = noiseY.get(time + 50f,  oct) * sway * 0.38f * i;
         float nr = noiseR.get(time + 100f, oct) * sway * 0.32f * i;
+
+        // Компенсация прицела: отменяем статичный наклон (basePitch) чтобы прицел
+        // оставался на цели. Шум (np, ny) не компенсируется — даёт лёгкую живость прицела.
+        Minecraft mc  = Minecraft.getInstance();
+        int guiW      = mc.getWindow().getGuiScaledWidth();
+        int fovDeg    = mc.options.fov().get();
+        if (fovDeg != cachedFov || guiW != cachedGuiW) {
+            cachedPixPerDeg = (float) ((guiW / 2.0) / Math.tan(Math.toRadians(fovDeg / 2.0))
+                                       * Math.toRadians(1.0));
+            cachedFov  = fovDeg;
+            cachedGuiW = guiW;
+        }
+        // Знак: pitch отрицательный (наклон вниз) → компенсация вверх (+eatCompY в экранных coords).
+        CrosshairSwaySystem.eatCompX = 0f;
+        CrosshairSwaySystem.eatCompY = -basePitch * cachedPixPerDeg * 0.65f;
 
         return new CameraOffset(basePitch + np, ny, baseRoll + nr);
     }

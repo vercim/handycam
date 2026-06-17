@@ -27,8 +27,8 @@ public abstract class GuiMixin {
         HandycamConfig cfg = HandycamConfig.get();
         float ox = cfg.mouseLeadEnabled ? CrosshairSwaySystem.offsetX : 0f;
         float oy = cfg.mouseLeadEnabled ? CrosshairSwaySystem.offsetY : 0f;
-        ox += CrosshairSwaySystem.drawCompX;
-        oy += CrosshairSwaySystem.drawCompY;
+        ox += CrosshairSwaySystem.drawCompX + CrosshairSwaySystem.eatCompX;
+        oy += CrosshairSwaySystem.drawCompY + CrosshairSwaySystem.eatCompY;
         float scale = cfg.bowCrosshairShrinkEnabled
                 ? 1f - CrosshairSwaySystem.bowDrawProgress * cfg.bowCrosshairShrink
                 : 1f;
@@ -58,8 +58,8 @@ public abstract class GuiMixin {
         HandycamConfig cfg = HandycamConfig.get();
         float ox = cfg.mouseLeadEnabled ? CrosshairSwaySystem.offsetX : 0f;
         float oy = cfg.mouseLeadEnabled ? CrosshairSwaySystem.offsetY : 0f;
-        ox += CrosshairSwaySystem.drawCompX;
-        oy += CrosshairSwaySystem.drawCompY;
+        ox += CrosshairSwaySystem.drawCompX + CrosshairSwaySystem.eatCompX;
+        oy += CrosshairSwaySystem.drawCompY + CrosshairSwaySystem.eatCompY;
         float scale = cfg.bowCrosshairShrinkEnabled
                 ? 1f - CrosshairSwaySystem.bowDrawProgress * cfg.bowCrosshairShrink
                 : 1f;
