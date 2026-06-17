@@ -280,8 +280,8 @@ public class HandycamConfigScreen {
         eat.addEntry(e.startIntSlider(
                 Component.literal("Sway Amount  " + fmt(cfg.eatSwayAmount)),
                 toSlider(cfg.eatSwayAmount), 0, 150)
-            .setDefaultValue(80)
-            .setTooltip(Component.literal("How much the camera wanders while chewing (0 = static tilt only)"))
+            .setDefaultValue(120)
+            .setTooltip(Component.literal("How much the camera wanders while chewing"))
             .setSaveConsumer(v -> cfg.eatSwayAmount = fromSlider(v))
             .build());
 

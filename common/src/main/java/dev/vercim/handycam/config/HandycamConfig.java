@@ -100,7 +100,7 @@ public class HandycamConfig {
     // ── Eat / Drink ────────────────────────────────────────────────────────────
     public boolean eatEnabled    = true;
     public float   eatIntensity  = 1.5f;  // общий масштаб (наклон + покачивание)
-    public float   eatSwayAmount = 0.8f;  // амплитуда шума покачивания (0=только наклон, 1+=активно)
+    public float   eatSwayAmount = 1.2f;  // амплитуда шума покачивания
 
     // ── Impact: Bow (выстрел из лука) ─────────────────────────────────────────
     public boolean bowEnabled        = true;

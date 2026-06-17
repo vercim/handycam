@@ -32,13 +32,10 @@ public class EatSwayLayer implements ShakeLayer {
         }
 
         float blendTarget = state.isEating ? 1f : 0f;
-        // Нарастание медленнее (0.4 сек), затухание быстрее (0.25 сек)
-        float blendSpeed = state.isEating ? 2.5f : 4.0f;
-        if (blendTarget > eatBlend) {
-            eatBlend = Math.min(blendTarget, eatBlend + blendSpeed * dt);
-        } else {
-            eatBlend = Math.max(blendTarget, eatBlend - blendSpeed * dt);
-        }
+        // Экспоненциальное приближение: нарастает плавно (ease-in-out), спадает быстрее.
+        // k = 1/τ: k=3 → τ≈0.33s нарастание, k=5 → τ≈0.2s спад.
+        float k = state.isEating ? 3.0f : 5.0f;
+        eatBlend += (blendTarget - eatBlend) * (1f - (float) Math.exp(-k * dt));
 
         if (eatBlend <= 0f) return CameraOffset.ZERO;
 
