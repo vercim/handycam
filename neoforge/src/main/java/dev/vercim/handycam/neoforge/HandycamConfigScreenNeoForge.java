@@ -174,7 +174,7 @@ public class HandycamConfigScreenNeoForge {
         moveTilt.addEntry(e.startIntSlider(
                 Component.literal("Forward/Back Intensity  " + fmt(cfg.forwardTiltIntensity)),
                 toSlider(cfg.forwardTiltIntensity), 0, 600)
-            .setDefaultValue(300)
+            .setDefaultValue(200)
             .setTooltip(Component.literal("Amount of forward/back tilt"))
             .setSaveConsumer(v -> cfg.forwardTiltIntensity = fromSlider(v))
             .build());
@@ -193,7 +193,7 @@ public class HandycamConfigScreenNeoForge {
         moveTilt.addEntry(e.startIntSlider(
                 Component.literal("Left/Right Intensity  " + fmt(cfg.strafeTiltIntensity)),
                 toSlider(cfg.strafeTiltIntensity), 0, 600)
-            .setDefaultValue(300)
+            .setDefaultValue(200)
             .setTooltip(Component.literal("Amount of strafe lean"))
             .setSaveConsumer(v -> cfg.strafeTiltIntensity = fromSlider(v))
             .build());
