@@ -29,7 +29,9 @@ public abstract class GuiMixin {
         float oy = cfg.mouseLeadEnabled ? CrosshairSwaySystem.offsetY : 0f;
         ox += CrosshairSwaySystem.drawCompX;
         oy += CrosshairSwaySystem.drawCompY;
-        float scale = 1f - CrosshairSwaySystem.bowDrawProgress * cfg.bowCrosshairShrink;
+        float scale = cfg.bowCrosshairShrinkEnabled
+                ? 1f - CrosshairSwaySystem.bowDrawProgress * cfg.bowCrosshairShrink
+                : 1f;
 
         boolean hasTranslate = ox != 0f || oy != 0f;
         boolean hasScale     = scale < 0.9999f;
@@ -58,7 +60,9 @@ public abstract class GuiMixin {
         float oy = cfg.mouseLeadEnabled ? CrosshairSwaySystem.offsetY : 0f;
         ox += CrosshairSwaySystem.drawCompX;
         oy += CrosshairSwaySystem.drawCompY;
-        float scale = 1f - CrosshairSwaySystem.bowDrawProgress * cfg.bowCrosshairShrink;
+        float scale = cfg.bowCrosshairShrinkEnabled
+                ? 1f - CrosshairSwaySystem.bowDrawProgress * cfg.bowCrosshairShrink
+                : 1f;
 
         boolean hasTranslate = ox != 0f || oy != 0f;
         boolean hasScale     = scale < 0.9999f;
