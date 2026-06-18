@@ -1,6 +1,6 @@
 ![handycam-mod-title](https://cdn.modrinth.com/data/cached_images/f0131939e364cce9aad3f8672e08e9a185c05bd9.png)
 
-> Procedural camera motion for Minecraft — Fabric & NeoForge
+> Procedural camera motion for Minecraft — Fabric, NeoForge and Forge
 
 Handycam adds subtle, physics-inspired camera movement that makes Minecraft feel like it's being filmed with a real handheld camera. Every step, sprint, hit, and landing is reflected in the camera with spring-simulated, noise-driven motion.
 
