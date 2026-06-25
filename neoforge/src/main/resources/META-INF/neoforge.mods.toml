@@ -28,13 +28,6 @@ ordering = "NONE"
 side = "CLIENT"
 
 [[dependencies.handycam]]
-modId = "architectury"
-type = "required"
-versionRange = "[15.0.3,)"
-ordering = "AFTER"
-side = "CLIENT"
-
-[[dependencies.handycam]]
 modId = "cloth_config"
 type = "required"
 versionRange = "[17,)"

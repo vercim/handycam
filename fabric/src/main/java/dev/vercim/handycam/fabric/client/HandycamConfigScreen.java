@@ -44,115 +44,24 @@ public class HandycamConfigScreen {
             .build());
         general.addEntry(e.startBooleanToggle(Component.literal("Enable Vanilla FOV"), cfg.enableVanillaFov)
             .setDefaultValue(true)
-            .setTooltip(Component.literal("Allow vanilla FOV changes (sprinting boost, speed effects). Disable to lock FOV to your settings value."))
+            .setTooltip(Component.literal("Allow vanilla FOV modifiers (sprinting, speed effects)."))
             .setSaveConsumer(v -> cfg.enableVanillaFov = v)
             .build());
         
         general.addEntry(e.startIntSlider(Component.literal("Global Intensity"),
                 norm(cfg.masterIntensity, 2f), 0, 200)
             .setDefaultValue(100)
-            .setTooltip(Component.literal("Master volume for all effects (100 = default)"))
+            .setTooltip(Component.literal("Master volume for all effects"))
             .setSaveConsumer(v -> cfg.masterIntensity = denorm(v, 2f))
             .build());
         general.addEntry(e.startIntSlider(Component.literal("Detail Layers"),
                 cfg.noiseOctaves, 2, 5)
             .setDefaultValue(4)
-            .setTooltip(Component.literal("Smoothness of motion"))
+            .setTooltip(Component.literal("Detail complexity of motion"))
             .setSaveConsumer(v -> cfg.noiseOctaves = v)
             .build());
 
-        
-        ConfigCategory idle = builder.getOrCreateCategory(Component.literal("Breath & Idle"));
 
-        var breathToggle = e.startBooleanToggle(Component.literal("Breath Enabled"), cfg.breathEnabled)
-            .setDefaultValue(true)
-            .setTooltip(Component.literal("Slow vertical body bob simulating breathing (camera rises and falls)"))
-            .setSaveConsumer(v -> cfg.breathEnabled = v)
-            .build();
-        idle.addEntry(breathToggle);
-        
-        idle.addEntry(e.startIntSlider(Component.literal("Breath Intensity"),
-                norm(cfg.breathIntensity, 1f), 0, 200)
-            .setDefaultValue(100)
-            .setTooltip(Component.literal("Strength of breathing movement (100 = default)"))
-            .setRequirement(Requirement.isTrue(breathToggle::getValue))
-            .setSaveConsumer(v -> cfg.breathIntensity = denorm(v, 1f))
-            .build());
-
-        var idleToggle = e.startBooleanToggle(Component.literal("Idle Enabled"), cfg.idleEnabled)
-            .setDefaultValue(true)
-            .setTooltip(Component.literal("Micro hand tremor and subtle head drift when standing still"))
-            .setSaveConsumer(v -> cfg.idleEnabled = v)
-            .build();
-        idle.addEntry(idleToggle);
-        
-        idle.addEntry(e.startIntSlider(Component.literal("Idle Intensity"),
-                norm(cfg.idleIntensity, 1.5f), 0, 200)
-            .setDefaultValue(100)
-            .setTooltip(Component.literal("Strength of idle head motion (100 = default)"))
-            .setRequirement(Requirement.isTrue(idleToggle::getValue))
-            .setSaveConsumer(v -> cfg.idleIntensity = denorm(v, 1.5f))
-            .build());
-        
-        idle.addEntry(e.startIntSlider(Component.literal("Idle Frequency"),
-                norm(cfg.idleFrequency, 0.5f), 25, 200)
-            .setDefaultValue(100)
-            .setTooltip(Component.literal("Speed of idle drift cycle (100 = default)"))
-            .setRequirement(Requirement.isTrue(idleToggle::getValue))
-            .setSaveConsumer(v -> cfg.idleFrequency = denorm(v, 0.5f))
-            .build());
-        
-        idle.addEntry(e.startIntSlider(Component.literal("Hand Tremor"),
-                norm(cfg.idleTremorScale, 0.75f), 0, 200)
-            .setDefaultValue(100)
-            .setTooltip(Component.literal("Fine hand shake on top of idle drift (100 = default)"))
-            .setRequirement(Requirement.isTrue(idleToggle::getValue))
-            .setSaveConsumer(v -> cfg.idleTremorScale = denorm(v, 0.75f))
-            .build());
-
-        
-        ConfigCategory movement = builder.getOrCreateCategory(Component.literal("Walk & Sprint"));
-
-        var walkBobToggle = e.startBooleanToggle(Component.literal("[BETA] Walk Bob Enabled"), cfg.walkBobEnabled)
-            .setDefaultValue(false)
-            .setTooltip(Component.literal("Camera bobbing while walking"))
-            .setSaveConsumer(v -> cfg.walkBobEnabled = v)
-            .build();
-        movement.addEntry(walkBobToggle);
-        
-        movement.addEntry(e.startIntSlider(Component.literal("Bob Intensity"),
-                norm(cfg.walkBobIntensity, 2.5f), 0, 200)
-            .setDefaultValue(100)
-            .setTooltip(Component.literal("Amount of bob motion (100 = default)"))
-            .setRequirement(Requirement.isTrue(walkBobToggle::getValue))
-            .setSaveConsumer(v -> cfg.walkBobIntensity = denorm(v, 2.5f))
-            .build());
-        
-        movement.addEntry(e.startIntSlider(Component.literal("Step Frequency"),
-                norm(cfg.walkBobFrequency, 0.9f), 25, 200)
-            .setDefaultValue(100)
-            .setTooltip(Component.literal("Speed of bob per step (100 = default)"))
-            .setRequirement(Requirement.isTrue(walkBobToggle::getValue))
-            .setSaveConsumer(v -> cfg.walkBobFrequency = denorm(v, 0.9f))
-            .build());
-        
-        movement.addEntry(e.startIntSlider(Component.literal("Vertical Boost"),
-                norm(cfg.walkBobVerticalMult, 2f), 50, 200)
-            .setDefaultValue(100)
-            .setTooltip(Component.literal("Extra up-down bounce multiplier (100 = default)"))
-            .setRequirement(Requirement.isTrue(walkBobToggle::getValue))
-            .setSaveConsumer(v -> cfg.walkBobVerticalMult = denorm(v, 2f))
-            .build());
-        
-        movement.addEntry(e.startIntSlider(Component.literal("Sprint Bob Boost"),
-                norm(cfg.sprintBobMult, 1.8f), 50, 200)
-            .setDefaultValue(100)
-            .setTooltip(Component.literal("Extra bob when sprinting (100 = default)"))
-            .setRequirement(Requirement.isTrue(walkBobToggle::getValue))
-            .setSaveConsumer(v -> cfg.sprintBobMult = denorm(v, 1.8f))
-            .build());
-
-        
         ConfigCategory tilt = builder.getOrCreateCategory(Component.literal("Directional Tilt"));
 
         var forwardTiltToggle = e.startBooleanToggle(Component.literal("Forward/Back Lean"), cfg.forwardTiltEnabled)
@@ -165,7 +74,7 @@ public class HandycamConfigScreen {
         tilt.addEntry(e.startIntSlider(Component.literal("Forward/Back Intensity"),
                 norm(cfg.forwardTiltIntensity, 3f), 0, 200)
             .setDefaultValue(100)
-            .setTooltip(Component.literal("Amount of forward/back tilt (100 = default)"))
+            .setTooltip(Component.literal("Amount of forward/back tilt"))
             .setRequirement(Requirement.isTrue(forwardTiltToggle::getValue))
             .setSaveConsumer(v -> cfg.forwardTiltIntensity = denorm(v, 3f))
             .build());
@@ -173,7 +82,7 @@ public class HandycamConfigScreen {
         tilt.addEntry(e.startIntSlider(Component.literal("Forward/Back Decay"),
                 norm(cfg.forwardTiltDecay, 1f), 25, 300)
             .setDefaultValue(100)
-            .setTooltip(Component.literal("How fast tilt returns to neutral (100 = default)"))
+            .setTooltip(Component.literal("How fast tilt returns to neutral"))
             .setRequirement(Requirement.isTrue(forwardTiltToggle::getValue))
             .setSaveConsumer(v -> cfg.forwardTiltDecay = denorm(v, 1f))
             .build());
@@ -188,7 +97,7 @@ public class HandycamConfigScreen {
         tilt.addEntry(e.startIntSlider(Component.literal("Left/Right Intensity"),
                 norm(cfg.strafeTiltIntensity, 3f), 0, 200)
             .setDefaultValue(100)
-            .setTooltip(Component.literal("Amount of strafe lean (100 = default)"))
+            .setTooltip(Component.literal("Amount of strafe lean"))
             .setRequirement(Requirement.isTrue(strafeTiltToggle::getValue))
             .setSaveConsumer(v -> cfg.strafeTiltIntensity = denorm(v, 3f))
             .build());
@@ -196,13 +105,104 @@ public class HandycamConfigScreen {
         tilt.addEntry(e.startIntSlider(Component.literal("Left/Right Decay"),
                 norm(cfg.strafeTiltDecay, 1f), 25, 300)
             .setDefaultValue(100)
-            .setTooltip(Component.literal("How fast lean returns to straight (100 = default)"))
+            .setTooltip(Component.literal("How fast lean returns to straight"))
             .setRequirement(Requirement.isTrue(strafeTiltToggle::getValue))
             .setSaveConsumer(v -> cfg.strafeTiltDecay = denorm(v, 1f))
             .build());
 
-        
-        ConfigCategory jump = builder.getOrCreateCategory(Component.literal("Jump & Landing"));
+
+        ConfigCategory idle = builder.getOrCreateCategory(Component.literal("Breath & Idle"));
+
+        var breathToggle = e.startBooleanToggle(Component.literal("Breath Enabled"), cfg.breathEnabled)
+            .setDefaultValue(true)
+            .setTooltip(Component.literal("Slow vertical body bob simulating breathing"))
+            .setSaveConsumer(v -> cfg.breathEnabled = v)
+            .build();
+        idle.addEntry(breathToggle);
+
+        idle.addEntry(e.startIntSlider(Component.literal("Breath Intensity"),
+                norm(cfg.breathIntensity, 1f), 0, 200)
+            .setDefaultValue(100)
+            .setTooltip(Component.literal("Strength of breathing movement"))
+            .setRequirement(Requirement.isTrue(breathToggle::getValue))
+            .setSaveConsumer(v -> cfg.breathIntensity = denorm(v, 1f))
+            .build());
+
+        var idleToggle = e.startBooleanToggle(Component.literal("Idle Enabled"), cfg.idleEnabled)
+            .setDefaultValue(true)
+            .setTooltip(Component.literal("Micro hand tremor and subtle head drift when standing still"))
+            .setSaveConsumer(v -> cfg.idleEnabled = v)
+            .build();
+        idle.addEntry(idleToggle);
+
+        idle.addEntry(e.startIntSlider(Component.literal("Idle Intensity"),
+                norm(cfg.idleIntensity, 1.5f), 0, 200)
+            .setDefaultValue(100)
+            .setTooltip(Component.literal("Strength of idle head motion"))
+            .setRequirement(Requirement.isTrue(idleToggle::getValue))
+            .setSaveConsumer(v -> cfg.idleIntensity = denorm(v, 1.5f))
+            .build());
+
+        idle.addEntry(e.startIntSlider(Component.literal("Idle Frequency"),
+                norm(cfg.idleFrequency, 0.5f), 25, 200)
+            .setDefaultValue(100)
+            .setTooltip(Component.literal("Speed of idle drift cycle"))
+            .setRequirement(Requirement.isTrue(idleToggle::getValue))
+            .setSaveConsumer(v -> cfg.idleFrequency = denorm(v, 0.5f))
+            .build());
+
+        idle.addEntry(e.startIntSlider(Component.literal("Hand Tremor"),
+                norm(cfg.idleTremorScale, 0.75f), 0, 200)
+            .setDefaultValue(100)
+            .setTooltip(Component.literal("Fine hand shake on top of idle drift"))
+            .setRequirement(Requirement.isTrue(idleToggle::getValue))
+            .setSaveConsumer(v -> cfg.idleTremorScale = denorm(v, 0.75f))
+            .build());
+
+
+        ConfigCategory movement = builder.getOrCreateCategory(Component.literal("Walk & Sprint"));
+
+        var walkBobToggle = e.startBooleanToggle(Component.literal("[BETA] Walk Bob Enabled"), cfg.walkBobEnabled)
+            .setDefaultValue(false)
+            .setTooltip(Component.literal("Camera bobbing while walking"))
+            .setSaveConsumer(v -> cfg.walkBobEnabled = v)
+            .build();
+        movement.addEntry(walkBobToggle);
+
+        movement.addEntry(e.startIntSlider(Component.literal("Bob Intensity"),
+                norm(cfg.walkBobIntensity, 2.5f), 0, 200)
+            .setDefaultValue(100)
+            .setTooltip(Component.literal("Amount of bob motion"))
+            .setRequirement(Requirement.isTrue(walkBobToggle::getValue))
+            .setSaveConsumer(v -> cfg.walkBobIntensity = denorm(v, 2.5f))
+            .build());
+
+        movement.addEntry(e.startIntSlider(Component.literal("Step Frequency"),
+                norm(cfg.walkBobFrequency, 0.9f), 25, 200)
+            .setDefaultValue(100)
+            .setTooltip(Component.literal("Speed of bob per step"))
+            .setRequirement(Requirement.isTrue(walkBobToggle::getValue))
+            .setSaveConsumer(v -> cfg.walkBobFrequency = denorm(v, 0.9f))
+            .build());
+
+        movement.addEntry(e.startIntSlider(Component.literal("Vertical Boost"),
+                norm(cfg.walkBobVerticalMult, 2f), 50, 200)
+            .setDefaultValue(100)
+            .setTooltip(Component.literal("Extra up-down bounce multiplier"))
+            .setRequirement(Requirement.isTrue(walkBobToggle::getValue))
+            .setSaveConsumer(v -> cfg.walkBobVerticalMult = denorm(v, 2f))
+            .build());
+
+        movement.addEntry(e.startIntSlider(Component.literal("Sprint Bob Boost"),
+                norm(cfg.sprintBobMult, 1.8f), 50, 200)
+            .setDefaultValue(100)
+            .setTooltip(Component.literal("Extra bob when sprinting"))
+            .setRequirement(Requirement.isTrue(walkBobToggle::getValue))
+            .setSaveConsumer(v -> cfg.sprintBobMult = denorm(v, 1.8f))
+            .build());
+
+
+        ConfigCategory jump = builder.getOrCreateCategory(Component.literal("Jump & Crouch"));
 
         var jumpToggle = e.startBooleanToggle(Component.literal("Jump Enabled"), cfg.jumpEnabled)
             .setDefaultValue(true)
@@ -210,19 +210,19 @@ public class HandycamConfigScreen {
             .setSaveConsumer(v -> cfg.jumpEnabled = v)
             .build();
         jump.addEntry(jumpToggle);
-        
+
         jump.addEntry(e.startIntSlider(Component.literal("Jump Intensity"),
                 norm(cfg.jumpIntensity, 4.1f), 0, 200)
             .setDefaultValue(100)
-            .setTooltip(Component.literal("Amount of jump tilt (100 = default)"))
+            .setTooltip(Component.literal("Amount of jump tilt"))
             .setRequirement(Requirement.isTrue(jumpToggle::getValue))
             .setSaveConsumer(v -> cfg.jumpIntensity = denorm(v, 4.1f))
             .build());
-        
+
         jump.addEntry(e.startIntSlider(Component.literal("Jump Decay"),
                 norm(cfg.jumpDecay, 5.1f), 25, 300)
             .setDefaultValue(100)
-            .setTooltip(Component.literal("How fast jump tilt fades (100 = default)"))
+            .setTooltip(Component.literal("How fast jump tilt fades"))
             .setRequirement(Requirement.isTrue(jumpToggle::getValue))
             .setSaveConsumer(v -> cfg.jumpDecay = denorm(v, 5.1f))
             .build());
@@ -233,29 +233,26 @@ public class HandycamConfigScreen {
             .setSaveConsumer(v -> cfg.landingEnabled = v)
             .build();
         jump.addEntry(landingToggle);
-        
+
         jump.addEntry(e.startIntSlider(Component.literal("Landing Intensity"),
                 norm(cfg.landingIntensity, 3.85f), 0, 200)
             .setDefaultValue(100)
-            .setTooltip(Component.literal("Strength of landing impact (100 = default)"))
+            .setTooltip(Component.literal("Strength of landing impact"))
             .setRequirement(Requirement.isTrue(landingToggle::getValue))
             .setSaveConsumer(v -> cfg.landingIntensity = denorm(v, 3.85f))
             .build());
 
-        
-        ConfigCategory crouch = builder.getOrCreateCategory(Component.literal("Crouch"));
-
-        var crouchToggle = e.startBooleanToggle(Component.literal("Enabled"), cfg.crouchEnabled)
+        var crouchToggle = e.startBooleanToggle(Component.literal("Crouch Enabled"), cfg.crouchEnabled)
             .setDefaultValue(true)
             .setTooltip(Component.literal("Camera dip when crouching"))
             .setSaveConsumer(v -> cfg.crouchEnabled = v)
             .build();
-        crouch.addEntry(crouchToggle);
-        
-        crouch.addEntry(e.startIntSlider(Component.literal("Intensity"),
+        jump.addEntry(crouchToggle);
+
+        jump.addEntry(e.startIntSlider(Component.literal("Crouch Intensity"),
                 norm(cfg.crouchIntensity, 3.2f), 0, 200)
             .setDefaultValue(100)
-            .setTooltip(Component.literal("Size of crouch dip (100 = default)"))
+            .setTooltip(Component.literal("Size of crouch dip"))
             .setRequirement(Requirement.isTrue(crouchToggle::getValue))
             .setSaveConsumer(v -> cfg.crouchIntensity = denorm(v, 3.2f))
             .build());
@@ -273,7 +270,7 @@ public class HandycamConfigScreen {
         mouse.addEntry(e.startIntSlider(Component.literal("Turn Sway"),
                 norm(cfg.turnSway, 0.08f), 0, 200)
             .setDefaultValue(100)
-            .setTooltip(Component.literal("Camera roll when turning (100 = default)"))
+            .setTooltip(Component.literal("Camera roll when turning"))
             .setRequirement(Requirement.isTrue(cameraSwayToggle::getValue))
             .setSaveConsumer(v -> cfg.turnSway = denorm(v, 0.08f))
             .build());
@@ -287,7 +284,7 @@ public class HandycamConfigScreen {
         mouse.addEntry(e.startIntSlider(Component.literal("Max Turn Roll"),
                 norm(cfg.maxTurnRoll, 2.5f), 0, 200)
             .setDefaultValue(100)
-            .setTooltip(Component.literal("Maximum turn roll angle (100 = default)"))
+            .setTooltip(Component.literal("Maximum turn roll angle"))
             .setRequirement(Requirement.isTrue(cameraSwayToggle::getValue))
             .setSaveConsumer(v -> cfg.maxTurnRoll = denorm(v, 2.5f))
             .build());
@@ -295,7 +292,7 @@ public class HandycamConfigScreen {
         mouse.addEntry(e.startIntSlider(Component.literal("Yaw Sway"),
                 norm(cfg.swayYawLag, 0.08f), 0, 200)
             .setDefaultValue(100)
-            .setTooltip(Component.literal("Horizontal (left/right) inertia (100 = default)"))
+            .setTooltip(Component.literal("Horizontal inertia"))
             .setRequirement(Requirement.isTrue(cameraSwayToggle::getValue))
             .setSaveConsumer(v -> cfg.swayYawLag = denorm(v, 0.08f))
             .build());
@@ -303,7 +300,7 @@ public class HandycamConfigScreen {
         mouse.addEntry(e.startIntSlider(Component.literal("Pitch Sway"),
                 norm(cfg.swayPitchLag, 0.14f), 0, 200)
             .setDefaultValue(100)
-            .setTooltip(Component.literal("Vertical (up/down) inertia (100 = default)"))
+            .setTooltip(Component.literal("Vertical inertia"))
             .setRequirement(Requirement.isTrue(cameraSwayToggle::getValue))
             .setSaveConsumer(v -> cfg.swayPitchLag = denorm(v, 0.14f))
             .build());
@@ -318,7 +315,7 @@ public class HandycamConfigScreen {
         mouse.addEntry(e.startIntSlider(Component.literal("Mouse Sway Scale"),
                 norm(cfg.mouseSwayScale, 0.3f), 0, 200)
             .setDefaultValue(100)
-            .setTooltip(Component.literal("Amount of sideways drift (100 = default)"))
+            .setTooltip(Component.literal("Amount of sideways drift"))
             .setRequirement(Requirement.isTrue(crosshairDriftToggle::getValue))
             .setSaveConsumer(v -> cfg.mouseSwayScale = denorm(v, 0.3f))
             .build());
@@ -326,7 +323,7 @@ public class HandycamConfigScreen {
         mouse.addEntry(e.startIntSlider(Component.literal("Crosshair Vertical Drift"),
                 norm(cfg.verticalDriftIntensity, 0.9f), 0, 200)
             .setDefaultValue(100)
-            .setTooltip(Component.literal("Amount of up/down drift (100 = default)"))
+            .setTooltip(Component.literal("Amount of up/down drift"))
             .setRequirement(Requirement.isTrue(crosshairDriftToggle::getValue))
             .setSaveConsumer(v -> cfg.verticalDriftIntensity = denorm(v, 0.9f))
             .build());
@@ -334,7 +331,7 @@ public class HandycamConfigScreen {
         mouse.addEntry(e.startIntSlider(Component.literal("Mouse Sway Smoothness"),
                 norm(cfg.mouseSwaySmoothing, 0.09f), 0, 200)
             .setDefaultValue(100)
-            .setTooltip(Component.literal("Smoothness of drift motion (100 = default)"))
+            .setTooltip(Component.literal("Smoothness of drift motion"))
             .setRequirement(Requirement.isTrue(crosshairDriftToggle::getValue))
             .setSaveConsumer(v -> cfg.mouseSwaySmoothing = denorm(v, 0.09f))
             .build());
@@ -344,7 +341,7 @@ public class HandycamConfigScreen {
 
         var eatToggle = e.startBooleanToggle(Component.literal("Enabled"), cfg.eatEnabled)
             .setDefaultValue(true)
-            .setTooltip(Component.literal("Camera tilt and sway while eating food or drinking potions"))
+            .setTooltip(Component.literal("Camera tilt and sway while eating or drinking"))
             .setSaveConsumer(v -> cfg.eatEnabled = v)
             .build();
         eat.addEntry(eatToggle);
@@ -352,7 +349,7 @@ public class HandycamConfigScreen {
         eat.addEntry(e.startIntSlider(Component.literal("Intensity"),
                 norm(cfg.eatIntensity, 1.5f), 0, 200)
             .setDefaultValue(100)
-            .setTooltip(Component.literal("Overall strength of tilt and sway (100 = default)"))
+            .setTooltip(Component.literal("Overall strength of tilt and sway"))
             .setRequirement(Requirement.isTrue(eatToggle::getValue))
             .setSaveConsumer(v -> cfg.eatIntensity = denorm(v, 1.5f))
             .build());
@@ -360,65 +357,62 @@ public class HandycamConfigScreen {
         eat.addEntry(e.startIntSlider(Component.literal("Sway Amount"),
                 norm(cfg.eatSwayAmount, 1.2f), 0, 200)
             .setDefaultValue(100)
-            .setTooltip(Component.literal("How much the camera wanders while chewing (100 = default)"))
+            .setTooltip(Component.literal("How much the camera wanders while chewing"))
             .setRequirement(Requirement.isTrue(eatToggle::getValue))
             .setSaveConsumer(v -> cfg.eatSwayAmount = denorm(v, 1.2f))
             .build());
 
         
-        ConfigCategory hit = builder.getOrCreateCategory(Component.literal("Hit Impact"));
+        ConfigCategory hit = builder.getOrCreateCategory(Component.literal("Swing & Damage"));
 
-        var hitToggle = e.startBooleanToggle(Component.literal("Enabled"), cfg.hitEnabled)
+        var hitToggle = e.startBooleanToggle(Component.literal("Swing Enabled"), cfg.hitEnabled)
             .setDefaultValue(true)
             .setTooltip(Component.literal("Camera kick when hitting"))
             .setSaveConsumer(v -> cfg.hitEnabled = v)
             .build();
         hit.addEntry(hitToggle);
-        
-        hit.addEntry(e.startIntSlider(Component.literal("Intensity"),
+
+        hit.addEntry(e.startIntSlider(Component.literal("Swing Intensity"),
                 norm(cfg.hitIntensity, 2f), 0, 200)
             .setDefaultValue(100)
-            .setTooltip(Component.literal("Strength of hit kick (100 = default)"))
+            .setTooltip(Component.literal("Strength of hit kick"))
             .setRequirement(Requirement.isTrue(hitToggle::getValue))
             .setSaveConsumer(v -> cfg.hitIntensity = denorm(v, 2f))
             .build());
-        
-        hit.addEntry(e.startIntSlider(Component.literal("Decay"),
+
+        hit.addEntry(e.startIntSlider(Component.literal("Swing Decay"),
                 norm(cfg.hitDecay, 20f), 25, 300)
             .setDefaultValue(100)
-            .setTooltip(Component.literal("How fast hit kick fades (100 = default)"))
+            .setTooltip(Component.literal("How fast hit kick fades"))
             .setRequirement(Requirement.isTrue(hitToggle::getValue))
             .setSaveConsumer(v -> cfg.hitDecay = denorm(v, 20f))
             .build());
 
-        
-        ConfigCategory damage = builder.getOrCreateCategory(Component.literal("Damage Impact"));
-
-        var damageToggle = e.startBooleanToggle(Component.literal("Enabled"), cfg.damageEnabled)
+        var damageToggle = e.startBooleanToggle(Component.literal("Damage Enabled"), cfg.damageEnabled)
             .setDefaultValue(true)
             .setTooltip(Component.literal("Shake when taking damage"))
             .setSaveConsumer(v -> cfg.damageEnabled = v)
             .build();
-        damage.addEntry(damageToggle);
-        
-        damage.addEntry(e.startIntSlider(Component.literal("Intensity"),
+        hit.addEntry(damageToggle);
+
+        hit.addEntry(e.startIntSlider(Component.literal("Damage Intensity"),
                 norm(cfg.damageIntensity, 2f), 0, 200)
             .setDefaultValue(100)
-            .setTooltip(Component.literal("Strength of damage shake (100 = default)"))
+            .setTooltip(Component.literal("Strength of damage shake"))
             .setRequirement(Requirement.isTrue(damageToggle::getValue))
             .setSaveConsumer(v -> cfg.damageIntensity = denorm(v, 2f))
             .build());
-        
-        damage.addEntry(e.startIntSlider(Component.literal("Decay"),
+
+        hit.addEntry(e.startIntSlider(Component.literal("Damage Decay"),
                 norm(cfg.damageDecay, 1.2f), 25, 300)
             .setDefaultValue(100)
-            .setTooltip(Component.literal("How fast shake fades (100 = default)"))
+            .setTooltip(Component.literal("How fast shake fades"))
             .setRequirement(Requirement.isTrue(damageToggle::getValue))
             .setSaveConsumer(v -> cfg.damageDecay = denorm(v, 1.2f))
             .build());
 
         
-        ConfigCategory bow = builder.getOrCreateCategory(Component.literal("Bow Impact"));
+        ConfigCategory bow = builder.getOrCreateCategory(Component.literal("Bow & Crossbow"));
 
         var bowToggle = e.startBooleanToggle(Component.literal("Enabled"), cfg.bowEnabled)
             .setDefaultValue(true)
@@ -430,7 +424,7 @@ public class HandycamConfigScreen {
         bow.addEntry(e.startIntSlider(Component.literal("Recoil Intensity"),
                 norm(cfg.bowRecoilIntensity, 2.5f), 0, 200)
             .setDefaultValue(100)
-            .setTooltip(Component.literal("Strength of bow/crossbow recoil (100 = default)"))
+            .setTooltip(Component.literal("Strength of bow/crossbow recoil"))
             .setRequirement(Requirement.isTrue(bowToggle::getValue))
             .setSaveConsumer(v -> cfg.bowRecoilIntensity = denorm(v, 2.5f))
             .build());
@@ -438,7 +432,7 @@ public class HandycamConfigScreen {
         bow.addEntry(e.startIntSlider(Component.literal("Recoil Decay"),
                 norm(cfg.bowRecoilDecay, 9f), 25, 300)
             .setDefaultValue(100)
-            .setTooltip(Component.literal("How fast recoil fades (100 = default)"))
+            .setTooltip(Component.literal("How fast recoil fades"))
             .setRequirement(Requirement.isTrue(bowToggle::getValue))
             .setSaveConsumer(v -> cfg.bowRecoilDecay = denorm(v, 9f))
             .build());
@@ -446,7 +440,7 @@ public class HandycamConfigScreen {
         bow.addEntry(e.startIntSlider(Component.literal("Concentration"),
                 norm(cfg.bowConcentration, 0.9f), 0, 111)
             .setDefaultValue(100)
-            .setTooltip(Component.literal("Idle shake suppression when bow fully drawn (100 = default, 111 = full)"))
+            .setTooltip(Component.literal("Idle shake suppression when bow fully drawn"))
             .setRequirement(Requirement.isTrue(bowToggle::getValue))
             .setSaveConsumer(v -> cfg.bowConcentration = Math.min(denorm(v, 0.9f), 1.0f))
             .build());
@@ -468,7 +462,7 @@ public class HandycamConfigScreen {
         bow.addEntry(e.startIntSlider(Component.literal("Crosshair Shrink"),
                 norm(cfg.bowCrosshairShrink, 0.2f), 0, 200)
             .setDefaultValue(100)
-            .setTooltip(Component.literal("How much the crosshair shrinks at full draw (100 = default)"))
+            .setTooltip(Component.literal("How much the crosshair shrinks at full draw"))
             .setRequirement(Requirement.isTrue(() -> bowToggle.getValue() && bowCrosshairToggle.getValue()))
             .setSaveConsumer(v -> cfg.bowCrosshairShrink = denorm(v, 0.2f))
             .build());

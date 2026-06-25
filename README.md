@@ -1,10 +1,10 @@
 ![handycam-mod-title](https://cdn.modrinth.com/data/cached_images/f0131939e364cce9aad3f8672e08e9a185c05bd9.png)
 
-> Procedural camera motion for Minecraft — Fabric, NeoForge and Forge
+> Procedural camera motion for Minecraft — Fabric and NeoForge
 
 Handycam adds subtle, physics-inspired camera movement that makes Minecraft feel like it's being filmed with a real handheld camera. Every step, sprint, hit, and landing is reflected in the camera with spring-simulated, noise-driven motion.
 
-[<img alt="modrinth" height="56" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/available/modrinth_vector.svg">](https://modrinth.com/mod/handycam/) [<img alt="architectury-api" height="56" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/requires/architectury-api_vector.svg">](https://modrinth.com/mod/architectury-api) [<img alt="cloth-config-api" height="56" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/requires/cloth-config-api_vector.svg">](https://modrinth.com/mod/cloth-config)
+[<img alt="modrinth" height="56" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/available/modrinth_vector.svg">](https://modrinth.com/mod/handycam/) [<img alt="cloth-config-api" height="56" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/requires/cloth-config-api_vector.svg">](https://modrinth.com/mod/cloth-config)
 
 ## Effects
 
@@ -32,7 +32,7 @@ All effects are independently configurable or can be disabled entirely.
 Jar files follow this naming pattern:
 
 ```
-handycam-1.2.0-fabric-1.21.4.jar
+handycam-1.2.1-fabric-1.21.4.jar
            │         │      │
            │         │      └─ Minecraft version this jar targets
            │         └─ Mod loader (fabric or neoforge)
@@ -77,7 +77,6 @@ Each layer is **independent**: they don't call each other, just independently re
 
 ## Requirements
 
-- [Architectury API](https://modrinth.com/mod/architectury-api)
 - [Cloth Config](https://modrinth.com/mod/cloth-config)
 - [ModMenu](https://modrinth.com/mod/modmenu) *(Fabric only)*
 

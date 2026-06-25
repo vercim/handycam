@@ -77,11 +77,9 @@ public class WalkBobLayer implements ShakeLayer {
         float sinP    = (float) Math.sin(bobPhase);
         float basePitch = sinP * sinP;
         float vn      = vertNoise.get(bobPhase * 0.4f, oct);
-        float pitchBob = -(basePitch * 0.72f + vn * 0.28f)
-                         * cfg.walkBobIntensity * cfg.walkBobVerticalMult * smoothSpeed * sprintMult;
+        float yBob    = -(basePitch * 0.72f + vn * 0.28f)
+                        * cfg.walkBobIntensity * cfg.walkBobVerticalMult * smoothSpeed * sprintMult * 0.02f;
 
-        
-        
         float baseLat = (float) Math.sin(bobPhase * 0.75f);
         float ln      = latNoise.get(bobPhase * 0.30f, oct);
         float rn      = rollNoise.get(bobPhase * 0.25f, oct);
@@ -89,15 +87,17 @@ public class WalkBobLayer implements ShakeLayer {
 
         float lateralBase = baseLat * 0.68f + ln * 0.32f;
         float rollBob  = lateralBase * cfg.walkBobIntensity * smoothSpeed * sprintMult * 0.28f;
-        
+
         float yawBob   = ((float) Math.sin(bobPhase * 0.75f + 0.4f) * 0.55f + yn * 0.45f)
                          * cfg.walkBobIntensity * smoothSpeed * sprintMult * 0.10f;
 
         float master = cfg.masterIntensity * groundBlend;
         return new CameraOffset(
-            pitchBob * master,
-            yawBob   * master,
-            rollBob  * master
+            0f,
+            yawBob * master,
+            rollBob * master,
+            0f,
+            yBob   * master
         );
     }
 }
