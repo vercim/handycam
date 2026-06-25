@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Handycam — client-side Minecraft mod (1.21.4), procedural camera system. Architectury, Fabric + NeoForge, Java 21, Mojang mappings.
+Handycam — client-side Minecraft mod (1.21.4), procedural camera system. Fabric + NeoForge, Java 21, Mojang mappings.
 
 ## Build
 

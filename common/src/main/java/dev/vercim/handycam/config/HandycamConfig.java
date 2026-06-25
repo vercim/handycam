@@ -98,8 +98,8 @@ public class HandycamConfig {
 
     
     public boolean hitEnabled   = true;
-    public float   hitIntensity = 2.0f;   
-    public float   hitDecay     = 20.0f;   
+    public float   hitIntensity = 2.0f;
+    public float   hitDecay     = 20.0f;
 
     
     public boolean eatEnabled    = true;
