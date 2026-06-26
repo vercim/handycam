@@ -175,6 +175,9 @@ jobs:
           CHANGELOG="${{ steps.changelog.outputs.content }}"
           PLATFORMS="${{ steps.vars.outputs.platforms }}"
 
+          AUTH=$(curl -s -H "Authorization: $MODRINTH_TOKEN" "https://api.modrinth.com/v2/_private/user")
+          echo "Auth check: $AUTH"
+
           for LOADER in $(echo "$PLATFORMS" | tr ',' ' '); do
             JAR="${LOADER}/build/libs/handycam-${MOD_VERSION}-${LOADER}-${MC_VERSION}.jar"
 
@@ -230,7 +233,7 @@ jobs:
               }')
 
             RESPONSE=$(curl -s -w "\n%{http_code}" -X POST \
-              -H "Authorization: Bearer $MODRINTH_TOKEN" \
+              -H "Authorization: $MODRINTH_TOKEN" \
               -F "data=$DATA" \
               -F "file=@$JAR" \
               "https://api.modrinth.com/v2/version")
