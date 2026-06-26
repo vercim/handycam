@@ -88,15 +88,13 @@ jobs:
         id: changelog
         run: |
           VERSION="${{ steps.vars.outputs.mod_version }}"
+          CONTENT=$(sed -n "/^## \\[$VERSION\\]/,/^## \\[/{/^## \\[/!p}" CHANGELOG.md)
+          if [ -z "$CONTENT" ]; then
+            CONTENT=$(cat CHANGELOG.md)
+          fi
           {
             echo 'content<<CHANGELOG_EOF'
-            python3 -c "
-import re
-v = '$VERSION'
-text = open('CHANGELOG.md').read()
-m = re.search(r'## \[' + re.escape(v) + r'\][^\n]*\n(.*?)(?=\n## \[|\Z)', text, re.DOTALL)
-print(m.group(1).strip() if m else text.strip())
-"
+            printf '%s\n' "$CONTENT"
             echo 'CHANGELOG_EOF'
           } >> $GITHUB_OUTPUT
 
