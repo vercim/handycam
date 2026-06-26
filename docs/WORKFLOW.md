@@ -15,14 +15,14 @@ Add a secret to the repository:
 
 ### 1. Bump the mod version
 
-In [`gradle.properties`](gradle.properties):
+In [`gradle.properties`](../gradle.properties):
 ```
 mod_version = 1.2.2
 ```
 
 ### 2. Write the changelog
 
-In [`CHANGELOG.md`](CHANGELOG.md), add a new section at the top:
+In [`CHANGELOG.md`](../CHANGELOG.md), add a new section at the top:
 ```markdown
 ## [1.2.2] - 2026-07-01
 
@@ -35,11 +35,7 @@ In [`CHANGELOG.md`](CHANGELOG.md), add a new section at the top:
 
 The version number in the header must exactly match `mod_version` in `gradle.properties`.
 
-### 3. Update the project page (if needed)
-
-Edit [`DESCRIPTION.md`](DESCRIPTION.md) and push to `main` — the Modrinth project description updates automatically.
-
-### 4. Run the workflow
+### 3. Run the workflow
 
 **GitHub → Actions → Publish → Run workflow → select branch `main` → action: `new_release` → Run workflow**
 
@@ -83,8 +79,7 @@ The workflow stops immediately with a clear error if something is wrong:
 
 | File | Purpose |
 |------|---------|
-| [`gradle.properties`](gradle.properties) | Mod version, MC version, loader list |
-| [`CHANGELOG.md`](CHANGELOG.md) | Release notes (picked up automatically) |
-| [`DESCRIPTION.md`](DESCRIPTION.md) | Modrinth project page content |
-| [`.github/workflows/publish.yml`](.github/workflows/publish.yml) | Publish workflow |
-| [`.github/workflows/sync-description.yml`](.github/workflows/sync-description.yml) | Description sync workflow |
+| [`gradle.properties`](../gradle.properties) | Mod version, MC version, loader list |
+| [`CHANGELOG.md`](../CHANGELOG.md) | Release notes (picked up automatically) |
+| [`docs/DESCRIPTION.md`](DESCRIPTION.md) | Modrinth project page (update manually) |
+| [`.github/workflows/publish.yml`](../.github/workflows/publish.yml) | Publish workflow |
