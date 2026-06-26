@@ -175,6 +175,10 @@ jobs:
           CHANGELOG="${{ steps.changelog.outputs.content }}"
           PLATFORMS="${{ steps.vars.outputs.platforms }}"
 
+          # Fetch actual project ID (not slug) — create version API requires the real ID
+          PROJECT_ID=$(curl -s "https://api.modrinth.com/v2/project/handycam" | jq -r '.id')
+          echo "Project ID: $PROJECT_ID"
+
           for LOADER in $(echo "$PLATFORMS" | tr ',' ' '); do
             JAR="${LOADER}/build/libs/handycam-${MOD_VERSION}-${LOADER}-${MC_VERSION}.jar"
 
@@ -208,12 +212,14 @@ jobs:
                 ;;
             esac
 
-            DATA=$(jq -n \
+            # Write JSON to temp file to avoid shell quoting issues with multiline content
+            jq -n \
               --arg name   "Handycam ${MOD_VERSION} ${DISPLAY}" \
               --arg ver    "${MOD_VERSION}+${MC_VERSION}" \
               --arg mc     "$MC_VERSION" \
               --arg log    "$CHANGELOG" \
               --arg loader "$LOADER" \
+              --arg pid    "$PROJECT_ID" \
               --argjson deps "$DEPS" \
               '{
                 name:           $name,
@@ -224,15 +230,13 @@ jobs:
                 version_type:   "beta",
                 loaders:        [$loader],
                 featured:       true,
-                project_id:     "handycam",
+                project_id:     $pid,
                 file_parts:     ["file"],
                 primary_file:   "file"
-              }')
-
-            echo "Sending DATA: $DATA"
+              }' > /tmp/modrinth_data.json
             RESPONSE=$(curl -s -w "\n%{http_code}" -X POST \
               -H "Authorization: $MODRINTH_TOKEN" \
-              -F "data=$DATA;type=application/json" \
+              -F "data=</tmp/modrinth_data.json;type=application/json" \
               -F "file=@$JAR" \
               "https://api.modrinth.com/v2/version")
             HTTP_CODE=$(echo "$RESPONSE" | tail -1)
