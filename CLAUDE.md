@@ -67,6 +67,12 @@ Config is loaded on client startup via `HandycamMod.initClient(configDir)`.
 4. Register in `CameraShakeSystem.LAYERS` (order matters)
 5. Add to both config screens (Fabric + NeoForge) with `.setTooltip()`
 
+## Porting to a New MC Version
+
+See [VERSION_NOTES.md](docs/VERSION_NOTES.md) for a per-version log of API shapes, dependency versions, and a porting checklist.
+
+Quick pointer: when a new MC version drops, the first place to check is whether the `Camera`, `Gui`, and `GameRenderer` method signatures have changed — those are where every breaking mixin lives.
+
 ## Common Issues
 
 - **Transparent world in dev** → Gradle is using the wrong JDK. Set toolchain to Java 21 in `gradle.properties` and Project Structure.

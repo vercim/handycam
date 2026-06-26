@@ -1,0 +1,238 @@
+name: Publish
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'new_release — create tag & release | add_mc_version — add files to existing release'
+        required: true
+        default: 'new_release'
+        type: choice
+        options:
+          - new_release
+          - add_mc_version
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Parse versions from gradle.properties
+        id: vars
+        run: |
+          MC_VERSION=$(grep '^minecraft_version' gradle.properties | sed 's/minecraft_version *= *//')
+          MOD_VERSION=$(grep '^mod_version'       gradle.properties | sed 's/mod_version *= *//')
+          PLATFORMS=$(grep  '^enabled_platforms'  gradle.properties | sed 's/enabled_platforms *= *//' | tr -d ' ')
+
+          echo "mod_version=$MOD_VERSION"  >> $GITHUB_OUTPUT
+          echo "mc_version=$MC_VERSION"    >> $GITHUB_OUTPUT
+          echo "release_tag=v$MOD_VERSION" >> $GITHUB_OUTPUT
+          echo "platforms=$PLATFORMS"      >> $GITHUB_OUTPUT
+          echo "Mod: $MOD_VERSION | MC: $MC_VERSION | Platforms: $PLATFORMS"
+
+      # ── Валидация ─────────────────────────────────────────────────────────────
+      - name: Validate
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          MOD_VERSION="${{ steps.vars.outputs.mod_version }}"
+          RELEASE_TAG="${{ steps.vars.outputs.release_tag }}"
+          ACTION="${{ github.event.inputs.action }}"
+
+          ERRORS=0
+
+          # 1. Changelog must have an entry for this version
+          if ! grep -q "## \[$MOD_VERSION\]" CHANGELOG.md; then
+            echo "::error::No changelog entry for $MOD_VERSION in CHANGELOG.md"
+            echo "  → Add a '## [$MOD_VERSION]' section before publishing."
+            ERRORS=$((ERRORS + 1))
+          fi
+
+          # 2. Release existence check depends on mode
+          RELEASE_EXISTS=false
+          if gh release view "$RELEASE_TAG" > /dev/null 2>&1; then
+            RELEASE_EXISTS=true
+          fi
+
+          if [ "$ACTION" = "new_release" ] && [ "$RELEASE_EXISTS" = "true" ]; then
+            echo "::error::Release $RELEASE_TAG already exists."
+            echo "  → Did you forget to bump mod_version in gradle.properties?"
+            ERRORS=$((ERRORS + 1))
+          fi
+
+          if [ "$ACTION" = "add_mc_version" ] && [ "$RELEASE_EXISTS" = "false" ]; then
+            echo "::error::Release $RELEASE_TAG does not exist yet."
+            echo "  → Run the workflow on the main branch with 'new_release' first."
+            ERRORS=$((ERRORS + 1))
+          fi
+
+          if [ "$ERRORS" -gt 0 ]; then
+            echo "::error::$ERRORS validation error(s). Fix the issues above and re-run."
+            exit 1
+          fi
+
+          echo "All checks passed."
+
+      - name: Read changelog
+        id: changelog
+        run: |
+          VERSION="${{ steps.vars.outputs.mod_version }}"
+          {
+            echo 'content<<CHANGELOG_EOF'
+            python3 -c "
+import re
+v = '$VERSION'
+text = open('CHANGELOG.md').read()
+m = re.search(r'## \[' + re.escape(v) + r'\][^\n]*\n(.*?)(?=\n## \[|\Z)', text, re.DOTALL)
+print(m.group(1).strip() if m else text.strip())
+"
+            echo 'CHANGELOG_EOF'
+          } >> $GITHUB_OUTPUT
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Build
+        run: ./gradlew build
+
+      - name: Validate build output
+        run: |
+          MOD_VERSION="${{ steps.vars.outputs.mod_version }}"
+          MC_VERSION="${{ steps.vars.outputs.mc_version }}"
+          PLATFORMS="${{ steps.vars.outputs.platforms }}"
+
+          ERRORS=0
+          for LOADER in $(echo "$PLATFORMS" | tr ',' ' '); do
+            JAR="${LOADER}/build/libs/handycam-${MOD_VERSION}-${LOADER}-${MC_VERSION}.jar"
+            if [ ! -f "$JAR" ]; then
+              echo "::error::Expected JAR not found: $JAR"
+              ERRORS=$((ERRORS + 1))
+            else
+              echo "OK: $JAR"
+            fi
+          done
+
+          if [ "$ERRORS" -gt 0 ]; then
+            exit 1
+          fi
+
+      # ── Создать тег и GitHub Release (только new_release) ────────────────────
+      - name: Create tag and GitHub release
+        if: github.event.inputs.action == 'new_release'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          MOD_VERSION="${{ steps.vars.outputs.mod_version }}"
+          RELEASE_TAG="${{ steps.vars.outputs.release_tag }}"
+          CHANGELOG="${{ steps.changelog.outputs.content }}"
+
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag "$RELEASE_TAG"
+          git push origin "$RELEASE_TAG"
+
+          gh release create "$RELEASE_TAG" \
+            --title "Handycam $MOD_VERSION" \
+            --notes "$CHANGELOG" \
+            --prerelease
+          echo "Created release $RELEASE_TAG"
+
+      # ── Загрузить файлы в GitHub Release ─────────────────────────────────────
+      - name: Upload to GitHub release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          MOD_VERSION="${{ steps.vars.outputs.mod_version }}"
+          MC_VERSION="${{ steps.vars.outputs.mc_version }}"
+          RELEASE_TAG="${{ steps.vars.outputs.release_tag }}"
+          PLATFORMS="${{ steps.vars.outputs.platforms }}"
+
+          JARS=()
+          for LOADER in $(echo "$PLATFORMS" | tr ',' ' '); do
+            JARS+=("${LOADER}/build/libs/handycam-${MOD_VERSION}-${LOADER}-${MC_VERSION}.jar")
+          done
+
+          gh release upload "$RELEASE_TAG" "${JARS[@]}" --clobber
+          echo "GitHub: uploaded ${#JARS[@]} files to $RELEASE_TAG"
+
+      # ── Modrinth: все лоадеры в цикле ────────────────────────────────────────
+      - name: Publish to Modrinth
+        env:
+          MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
+        run: |
+          MOD_VERSION="${{ steps.vars.outputs.mod_version }}"
+          MC_VERSION="${{ steps.vars.outputs.mc_version }}"
+          CHANGELOG="${{ steps.changelog.outputs.content }}"
+          PLATFORMS="${{ steps.vars.outputs.platforms }}"
+
+          for LOADER in $(echo "$PLATFORMS" | tr ',' ' '); do
+            JAR="${LOADER}/build/libs/handycam-${MOD_VERSION}-${LOADER}-${MC_VERSION}.jar"
+
+            case "$LOADER" in
+              fabric)
+                DISPLAY="Fabric"
+                DEPS='[
+                  {"project_id": "P7dR8mSH", "dependency_type": "required"},
+                  {"project_id": "9s6osm5g", "dependency_type": "required"},
+                  {"project_id": "mOgUt4GM", "dependency_type": "optional"}
+                ]'
+                ;;
+              quilt)
+                DISPLAY="Quilt"
+                DEPS='[
+                  {"project_id": "qvIfYCYJ", "dependency_type": "required"},
+                  {"project_id": "9s6osm5g", "dependency_type": "required"}
+                ]'
+                ;;
+              neoforge)
+                DISPLAY="NeoForge"
+                DEPS='[{"project_id": "9s6osm5g", "dependency_type": "required"}]'
+                ;;
+              forge)
+                DISPLAY="Forge"
+                DEPS='[{"project_id": "9s6osm5g", "dependency_type": "required"}]'
+                ;;
+              *)
+                DISPLAY="$LOADER"
+                DEPS='[]'
+                ;;
+            esac
+
+            DATA=$(jq -n \
+              --arg name   "Handycam ${MOD_VERSION} ${DISPLAY}" \
+              --arg ver    "${MOD_VERSION}+${MC_VERSION}" \
+              --arg mc     "$MC_VERSION" \
+              --arg log    "$CHANGELOG" \
+              --arg loader "$LOADER" \
+              --argjson deps "$DEPS" \
+              '{
+                name:           $name,
+                version_number: $ver,
+                changelog:      $log,
+                dependencies:   $deps,
+                game_versions:  [$mc],
+                version_type:   "beta",
+                loaders:        [$loader],
+                featured:       true,
+                project_id:     "handycam",
+                file_parts:     ["file"],
+                primary_file:   "file"
+              }')
+
+            curl -sf -X POST \
+              -H "Authorization: $MODRINTH_TOKEN" \
+              -F "data=$DATA" \
+              -F "file=@$JAR" \
+              "https://api.modrinth.com/v2/version"
+            echo "Modrinth: $DISPLAY $MC_VERSION published"
+          done
