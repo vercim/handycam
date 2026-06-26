@@ -240,7 +240,7 @@ jobs:
               }')
 
             RESPONSE=$(curl -s -w "\n%{http_code}" -X POST \
-              -H "Authorization: $MODRINTH_TOKEN" \
+              -H "Authorization: Bearer $MODRINTH_TOKEN" \
               -F "data=$DATA" \
               -F "file=@$JAR" \
               "https://api.modrinth.com/v2/version")
