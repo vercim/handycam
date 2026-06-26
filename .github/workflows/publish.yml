@@ -229,10 +229,16 @@ jobs:
                 primary_file:   "file"
               }')
 
-            curl -sf -X POST \
+            RESPONSE=$(curl -s -w "\n%{http_code}" -X POST \
               -H "Authorization: $MODRINTH_TOKEN" \
               -F "data=$DATA" \
               -F "file=@$JAR" \
-              "https://api.modrinth.com/v2/version"
+              "https://api.modrinth.com/v2/version")
+            HTTP_CODE=$(echo "$RESPONSE" | tail -1)
+            BODY=$(echo "$RESPONSE" | head -n -1)
+            if [ "$HTTP_CODE" -ge 400 ]; then
+              echo "::error::Modrinth API error $HTTP_CODE: $BODY"
+              exit 1
+            fi
             echo "Modrinth: $DISPLAY $MC_VERSION published"
           done
