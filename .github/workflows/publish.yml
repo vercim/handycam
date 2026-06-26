@@ -12,6 +12,9 @@ on:
           - new_release
           - add_mc_version
 
+env:
+  RELEASE_TYPE: beta   # beta | release | alpha
+
 jobs:
   publish:
     runs-on: ubuntu-latest
@@ -214,20 +217,21 @@ jobs:
 
             # Write JSON to temp file to avoid shell quoting issues with multiline content
             jq -n \
-              --arg name   "Handycam ${MOD_VERSION} ${DISPLAY}" \
-              --arg ver    "${MOD_VERSION}+${MC_VERSION}" \
-              --arg mc     "$MC_VERSION" \
-              --arg log    "$CHANGELOG" \
-              --arg loader "$LOADER" \
-              --arg pid    "$PROJECT_ID" \
-              --argjson deps "$DEPS" \
+              --arg name         "Handycam ${MOD_VERSION} ${DISPLAY}" \
+              --arg ver          "${MOD_VERSION}+${MC_VERSION}" \
+              --arg mc           "$MC_VERSION" \
+              --arg log          "$CHANGELOG" \
+              --arg loader       "$LOADER" \
+              --arg pid          "$PROJECT_ID" \
+              --arg release_type "$RELEASE_TYPE" \
+              --argjson deps     "$DEPS" \
               '{
                 name:           $name,
                 version_number: $ver,
                 changelog:      $log,
                 dependencies:   $deps,
                 game_versions:  [$mc],
-                version_type:   "beta",
+                version_type:   $release_type,
                 loaders:        [$loader],
                 featured:       true,
                 project_id:     $pid,
