@@ -175,6 +175,12 @@ jobs:
           CHANGELOG="${{ steps.changelog.outputs.content }}"
           PLATFORMS="${{ steps.vars.outputs.platforms }}"
 
+          if [ -z "$MODRINTH_TOKEN" ]; then
+            echo "::error::MODRINTH_TOKEN secret is empty or not set"
+            exit 1
+          fi
+          echo "Token length: ${#MODRINTH_TOKEN} chars"
+
           for LOADER in $(echo "$PLATFORMS" | tr ',' ' '); do
             JAR="${LOADER}/build/libs/handycam-${MOD_VERSION}-${LOADER}-${MC_VERSION}.jar"
 
