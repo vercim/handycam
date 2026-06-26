@@ -1,4 +1,4 @@
-## [1.2.1] - 2026-06-26
+## [1.2.1] - 2026-06-25
 
 ### Overall
 - `Architectury API` is no longer required
