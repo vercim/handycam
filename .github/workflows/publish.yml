@@ -180,6 +180,8 @@ jobs:
             exit 1
           fi
           echo "Token length: ${#MODRINTH_TOKEN} chars"
+          echo "Auth check:"
+          curl -s -H "Authorization: $MODRINTH_TOKEN" "https://api.modrinth.com/v2/_private/user" | jq '{id, username}'
 
           for LOADER in $(echo "$PLATFORMS" | tr ',' ' '); do
             JAR="${LOADER}/build/libs/handycam-${MOD_VERSION}-${LOADER}-${MC_VERSION}.jar"
