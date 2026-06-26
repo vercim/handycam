@@ -180,8 +180,9 @@ jobs:
             exit 1
           fi
           echo "Token length: ${#MODRINTH_TOKEN} chars"
-          echo "Auth check:"
-          curl -s -H "Authorization: $MODRINTH_TOKEN" "https://api.modrinth.com/v2/_private/user" | jq '{id, username}'
+          PROJECT_ID=$(curl -s "https://api.modrinth.com/v2/project/handycam" | jq -r '.id')
+          echo "Project ID: $PROJECT_ID"
+          echo "project_id=$PROJECT_ID" >> $GITHUB_ENV
 
           for LOADER in $(echo "$PLATFORMS" | tr ',' ' '); do
             JAR="${LOADER}/build/libs/handycam-${MOD_VERSION}-${LOADER}-${MC_VERSION}.jar"
@@ -222,6 +223,7 @@ jobs:
               --arg mc     "$MC_VERSION" \
               --arg log    "$CHANGELOG" \
               --arg loader "$LOADER" \
+              --arg pid    "$PROJECT_ID" \
               --argjson deps "$DEPS" \
               '{
                 name:           $name,
@@ -232,7 +234,7 @@ jobs:
                 version_type:   "beta",
                 loaders:        [$loader],
                 featured:       true,
-                project_id:     "handycam",
+                project_id:     $pid,
                 file_parts:     ["file"],
                 primary_file:   "file"
               }')
