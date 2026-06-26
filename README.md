@@ -79,6 +79,7 @@ Each layer is **independent**: they don't call each other, just independently re
 
 - [Cloth Config](https://modrinth.com/mod/cloth-config)
 - [ModMenu](https://modrinth.com/mod/modmenu) *(Fabric only)*
+- [Fabric API](https://modrinth.com/mod/fabric-api) *(Fabric only)*
 
 ## Configuration
 
