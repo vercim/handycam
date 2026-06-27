@@ -16,6 +16,8 @@ public class HandycamConfig {
 
     
     
+    private static final int CURRENT_VERSION = 2;
+
     private static final Gson GSON = new GsonBuilder()
             .setPrettyPrinting()
             .registerTypeAdapter(HandycamConfig.class,
@@ -23,11 +25,14 @@ public class HandycamConfig {
             .create();
     private static HandycamConfig instance;
 
-    
-    public boolean disableInCreativeFlight   = true;   
-    public boolean enableEffectsThirdPerson  = false;  
-    public boolean enableEffectsSecondPerson = false;  
-    public boolean enableVanillaFov          = true;   
+
+    public int configVersion = 0;
+
+    public boolean effectsEnabled            = true;
+    public boolean disableInCreativeFlight   = true;
+    public boolean enableEffectsThirdPerson  = false;
+    public boolean enableEffectsSecondPerson = false;
+    public boolean enableVanillaFov          = true;
 
     
     public float masterIntensity = 2.0f;
@@ -64,10 +69,12 @@ public class HandycamConfig {
     public float   damageDecay     = 1.2f;
 
     
-    public float   turnSway           = 0.08f;  
-    public float   maxTurnRoll        = 2.5f;   
-    public boolean cameraSwayEnabled  = true;   
-    public boolean cameraSwayLead     = true;   
+    public float   turnSway           = 0.096f;
+    public float   maxTurnRoll        = 3.0f;
+    public boolean   cameraSwayEnabled  = true;
+    public SwayMode  cameraSwayMode     = SwayMode.LEAD;
+
+    public enum SwayMode { LAG, LEAD }
     public float   swayYawLag         = 0.08f;  
     public float   swayPitchLag       = 0.14f;  
 
@@ -78,12 +85,12 @@ public class HandycamConfig {
 
     
     public boolean strafeTiltEnabled   = true;
-    public float   strafeTiltIntensity = 3.0f;
+    public float   strafeTiltIntensity = 2.4f;
     public float   strafeTiltDecay    = 1.0f;
 
     
     public boolean forwardTiltEnabled   = true;
-    public float   forwardTiltIntensity = 3.0f;
+    public float   forwardTiltIntensity = 2.4f;
     public float   forwardTiltDecay    = 1.0f;
 
     
@@ -102,18 +109,28 @@ public class HandycamConfig {
     public float   hitDecay     = 20.0f;
 
     
-    public boolean eatEnabled    = true;
-    public float   eatIntensity  = 1.5f;  
-    public float   eatSwayAmount = 1.2f;  
+    public boolean          eatEnabled        = true;
+    public float            eatIntensity      = 1.5f;
+    public float            eatSwayAmount     = 1.2f;
+    public EatSwayDirection eatSwayDirection  = EatSwayDirection.RANDOM;
+
+    public enum EatSwayDirection { RIGHT, LEFT, RANDOM }
 
     
     public boolean bowEnabled        = true;
-    public float   bowRecoilIntensity = 2.5f;  
-    public float   bowRecoilDecay     = 9.0f;  
-    public float   bowConcentration       = 0.90f; 
-    public boolean bowDrawTiltEnabled     = false; 
-    public boolean bowCrosshairShrinkEnabled = false; 
-    public float   bowCrosshairShrink    = 0.20f; 
+    public float   bowRecoilIntensity = 2.5f;
+    public float   bowRecoilDecay     = 9.0f;
+    public float   bowConcentration       = 0.90f;
+    public boolean bowDrawTiltEnabled     = false;
+    public boolean bowCrosshairShrinkEnabled = false;
+    public float   bowCrosshairShrink    = 0.20f;
+
+    // Explosions
+    public boolean explosionEnabled     = true;
+    public boolean lightningEnabled     = true;
+    public float   explosionIntensity   = 1.5f;
+    public float   explosionMaxDistance = 20.0f;
+    public float   explosionDecay       = 0.6f;
 
     public static HandycamConfig get() {
         if (instance == null) instance = new HandycamConfig();
@@ -128,11 +145,23 @@ public class HandycamConfig {
             } catch (IOException e) {
                 instance = new HandycamConfig();
             }
-            save(configDir); 
+            instance.migrate();
         } else {
             instance = new HandycamConfig();
-            save(configDir);
         }
+        save(configDir);
+    }
+
+    private void migrate() {
+        if (configVersion < 1) {
+            strafeTiltIntensity  = 2.4f;
+            forwardTiltIntensity = 2.4f;
+        }
+        if (configVersion < 2) {
+            turnSway    = 0.096f;
+            maxTurnRoll = 3.0f;
+        }
+        configVersion = CURRENT_VERSION;
     }
 
     public static void save(Path configDir) {

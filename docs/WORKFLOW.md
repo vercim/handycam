@@ -72,14 +72,3 @@ The workflow stops immediately with a clear error if something is wrong:
 | Release `vX.Y.Z` already exists | Bump `mod_version` in `gradle.properties` |
 | Release `vX.Y.Z` does not exist | Run `new_release` on the main branch first |
 | Expected JAR not found | Check the build output for compilation errors |
-
----
-
-## File Reference
-
-| File | Purpose |
-|------|---------|
-| [`gradle.properties`](../gradle.properties) | Mod version, MC version, loader list |
-| [`CHANGELOG.md`](../CHANGELOG.md) | Release notes (picked up automatically) |
-| [`docs/DESCRIPTION.md`](DESCRIPTION.md) | Modrinth project page (update manually) |
-| [`.github/workflows/publish.yml`](../.github/workflows/publish.yml) | Publish workflow |

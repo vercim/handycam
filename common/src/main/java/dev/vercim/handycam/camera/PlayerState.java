@@ -22,7 +22,7 @@ public final class PlayerState {
     public final boolean crossbowFired;       
     public final float   crossbowDrawProgress; 
     public final boolean isCreativeFlying;    
-    public final boolean isEating;            
+    public final boolean isEating;
 
     private PlayerState(float horizontalSpeed, float verticalVelocity,
                         boolean isSprinting, boolean isOnGround, boolean isCrouching,

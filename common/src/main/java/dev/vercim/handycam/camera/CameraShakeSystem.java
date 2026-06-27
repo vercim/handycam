@@ -13,11 +13,13 @@ import java.util.List;
 public final class CameraShakeSystem {
 
     
-    private static final LandingImpactLayer LANDING = new LandingImpactLayer();
-    private static final DamageShakeLayer   DAMAGE  = new DamageShakeLayer();
-    private static final JumpShakeLayer     JUMP    = new JumpShakeLayer();
-    private static final HitImpactLayer     HIT     = new HitImpactLayer();
-    private static final BowShotLayer       BOW     = new BowShotLayer();
+    private static final LandingImpactLayer  LANDING   = new LandingImpactLayer();
+    private static final DamageShakeLayer    DAMAGE    = new DamageShakeLayer();
+    private static final JumpShakeLayer      JUMP      = new JumpShakeLayer();
+    private static final HitImpactLayer      HIT       = new HitImpactLayer();
+    private static final BowShotLayer        BOW       = new BowShotLayer();
+    private static final ExplosionShakeLayer EXPLOSION = new ExplosionShakeLayer();
+    private static final EatSwayLayer        EAT       = new EatSwayLayer();
 
     private static final List<ShakeLayer> LAYERS = List.of(
         new BreathLayer(),
@@ -27,12 +29,13 @@ public final class CameraShakeSystem {
         new ForwardTiltLayer(),
         new CrouchShakeLayer(),
         new MouseLeadLayer(),
-        new EatSwayLayer(),
+        EAT,
         JUMP,
         LANDING,
         DAMAGE,
         HIT,
         BOW,
+        EXPLOSION,
         new CameraSwayLayer()
     );
 
@@ -138,6 +141,10 @@ public final class CameraShakeSystem {
 
         
         HandycamConfig cfg = HandycamConfig.get();
+        if (!cfg.effectsEnabled) {
+            lastComputedOffset = CameraOffset.ZERO;
+            return CameraOffset.ZERO;
+        }
         float blendTarget = (cfg.disableInCreativeFlight && state.isCreativeFlying) ? 0f : 1f;
         if (creativeFadeBlend < blendTarget) {
             creativeFadeBlend = Math.min(blendTarget, creativeFadeBlend + CREATIVE_FADE_SPEED * dt);
@@ -180,5 +187,38 @@ public final class CameraShakeSystem {
     }
 
     public static float getCurrentRoll() { return currentRoll; }
+
+    public static void onExplosion(double ex, double ey, double ez) {
+        HandycamConfig cfg = HandycamConfig.get();
+        if (!cfg.explosionEnabled) return;
+        triggerExplosionShake(ex, ey, ez, cfg, 1.0f);
+    }
+
+    public static void onItemEaten() {
+        EAT.onItemEaten();
+    }
+
+    public static void onLightning(double ex, double ey, double ez) {
+        HandycamConfig cfg = HandycamConfig.get();
+        if (!cfg.lightningEnabled) return;
+        triggerExplosionShake(ex, ey, ez, cfg, 1.35f);
+    }
+
+    private static void triggerExplosionShake(double ex, double ey, double ez, HandycamConfig cfg, float severityMult) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player == null) return;
+
+        double dx = mc.player.getX() - ex;
+        double dy = mc.player.getEyeY() - ey;
+        double dz = mc.player.getZ() - ez;
+        float dist = (float) Math.sqrt(dx * dx + dy * dy + dz * dz);
+
+        float maxDist = cfg.explosionMaxDistance;
+        if (dist >= maxDist) return;
+
+        float t = 1f - dist / maxDist;
+        float severity = t * t * t * severityMult;
+        EXPLOSION.onExplosion(severity);
+    }
 
 }

@@ -6,8 +6,11 @@
   "client": [
     "CameraAccessor",
     "CameraMixin",
+    "ClientPacketListenerMixin",
     "GameRendererMixin",
-    "GuiMixin"
+    "GuiMixin",
+    "LightningBoltMixin",
+    "LocalPlayerMixin"
   ],
   "mixins": [
   ],
