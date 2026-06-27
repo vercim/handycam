@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Handycam — client-side Minecraft mod (1.21.4), procedural camera system. Fabric + NeoForge, Java 21, Mojang mappings.
+Handycam — client-side Minecraft mod, procedural camera system. Fabric + NeoForge, Java 21, Mojang mappings.
 
 ## Build
 
@@ -58,6 +58,25 @@ common/src/main/java/dev/vercim/handycam/
 **Important:** Update visual state variables (phase, blend, decay) in `compute()` with `dt`, not in `tick()`.
 
 Config is loaded on client startup via `HandycamMod.initClient(configDir)`.
+
+## Config Versioning
+
+`HandycamConfig` has a `configVersion` int field and a `CURRENT_VERSION` constant. On load, `migrate()` runs and applies changes sequentially by version number. Old configs without the field deserialize to `configVersion = 0`.
+
+**When changing a default value** that should propagate to existing users: bump `CURRENT_VERSION`, add an `if (configVersion < N) { field = newValue; }` block in `migrate()`.
+
+```java
+// Example: bumping to version 2
+private static final int CURRENT_VERSION = 2;
+
+private void migrate() {
+    if (configVersion < 1) { ... }
+    if (configVersion < 2) { someField = newDefault; }
+    configVersion = CURRENT_VERSION;
+}
+```
+
+If a default change is cosmetic/optional, no migration is needed — just update the field initializer.
 
 ## Adding a New Layer
 

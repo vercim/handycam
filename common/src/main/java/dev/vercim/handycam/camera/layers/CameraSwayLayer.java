@@ -38,7 +38,7 @@ public class CameraSwayLayer implements ShakeLayer {
         float targetPitch = 0f;
 
         if (cfg.cameraSwayEnabled) {
-            float dir = cfg.cameraSwayLead ? 1f : -1f;
+            float dir = cfg.cameraSwayMode == HandycamConfig.SwayMode.LEAD ? 1f : -1f;
             float turnContrib = state.turnRate * cfg.turnSway * sprintMult;
             targetRoll  = Math.max(-cfg.maxTurnRoll, Math.min(cfg.maxTurnRoll, turnContrib));
             targetYaw   = dir * state.turnRate   * cfg.swayYawLag   * sprintMult;

@@ -24,8 +24,14 @@ public class HandycamConfigScreen {
         HandycamConfig cfg = HandycamConfig.get();
         ConfigEntryBuilder e = builder.entryBuilder();
 
-        
+
         ConfigCategory general = builder.getOrCreateCategory(Component.literal("General"));
+
+        general.addEntry(e.startBooleanToggle(Component.literal("Effects Enabled"), cfg.effectsEnabled)
+            .setDefaultValue(true)
+            .setTooltip(Component.literal("Master on/off switch for all camera effects (F10 to toggle in-game)"))
+            .setSaveConsumer(v -> cfg.effectsEnabled = v)
+            .build());
 
         general.addEntry(e.startBooleanToggle(Component.literal("Disable in Creative Flight"), cfg.disableInCreativeFlight)
             .setDefaultValue(true)
@@ -274,11 +280,15 @@ public class HandycamConfigScreen {
             .setRequirement(Requirement.isTrue(cameraSwayToggle::getValue))
             .setSaveConsumer(v -> cfg.turnSway = denorm(v, 0.08f))
             .build());
-        mouse.addEntry(e.startBooleanToggle(Component.literal("Lead (on) / Lag (off)"), cfg.cameraSwayLead)
-            .setDefaultValue(true)
-            .setTooltip(Component.literal("Lead or lag camera behind mouse"))
+        mouse.addEntry(e.startEnumSelector(Component.literal("Sway Direction"),
+                HandycamConfig.SwayMode.class, cfg.cameraSwayMode)
+            .setDefaultValue(HandycamConfig.SwayMode.LEAD)
+            .setTooltip(Component.literal("Lead — camera leads the mouse; Lag — camera trails behind"))
             .setRequirement(Requirement.isTrue(cameraSwayToggle::getValue))
-            .setSaveConsumer(v -> cfg.cameraSwayLead = v)
+            .setEnumNameProvider(v -> Component.literal(
+                v == HandycamConfig.SwayMode.LEAD ? "Lead" : "Lag"
+            ))
+            .setSaveConsumer(v -> cfg.cameraSwayMode = v)
             .build());
         
         mouse.addEntry(e.startIntSlider(Component.literal("Max Turn Roll"),
@@ -360,6 +370,18 @@ public class HandycamConfigScreen {
             .setTooltip(Component.literal("How much the camera wanders while chewing"))
             .setRequirement(Requirement.isTrue(eatToggle::getValue))
             .setSaveConsumer(v -> cfg.eatSwayAmount = denorm(v, 1.2f))
+            .build());
+
+        eat.addEntry(e.startEnumSelector(Component.literal("Sway Direction"),
+                HandycamConfig.EatSwayDirection.class, cfg.eatSwayDirection)
+            .setDefaultValue(HandycamConfig.EatSwayDirection.RANDOM)
+            .setTooltip(Component.literal("Direction of camera tilt while eating: fixed left/right or random each time"))
+            .setRequirement(Requirement.isTrue(eatToggle::getValue))
+            .setEnumNameProvider(v -> Component.literal(
+                v == HandycamConfig.EatSwayDirection.RIGHT  ? "Right"  :
+                v == HandycamConfig.EatSwayDirection.LEFT   ? "Left"   : "Random"
+            ))
+            .setSaveConsumer(v -> cfg.eatSwayDirection = v)
             .build());
 
         
@@ -465,6 +487,45 @@ public class HandycamConfigScreen {
             .setTooltip(Component.literal("How much the crosshair shrinks at full draw"))
             .setRequirement(Requirement.isTrue(() -> bowToggle.getValue() && bowCrosshairToggle.getValue()))
             .setSaveConsumer(v -> cfg.bowCrosshairShrink = denorm(v, 0.2f))
+            .build());
+
+        ConfigCategory explosion = builder.getOrCreateCategory(Component.literal("Explosions"));
+
+        var explosionToggle = e.startBooleanToggle(Component.literal("Enabled"), cfg.explosionEnabled)
+            .setDefaultValue(true)
+            .setTooltip(Component.literal("Camera shockwave when a nearby explosion occurs"))
+            .setSaveConsumer(v -> cfg.explosionEnabled = v)
+            .build();
+        explosion.addEntry(explosionToggle);
+
+        explosion.addEntry(e.startBooleanToggle(Component.literal("Lightning Enabled"), cfg.lightningEnabled)
+            .setDefaultValue(true)
+            .setTooltip(Component.literal("Camera shake when lightning strikes nearby"))
+            .setSaveConsumer(v -> cfg.lightningEnabled = v)
+            .build());
+
+        explosion.addEntry(e.startIntSlider(Component.literal("Intensity"),
+                norm(cfg.explosionIntensity, 1.5f), 0, 200)
+            .setDefaultValue(100)
+            .setTooltip(Component.literal("Strength of the explosion shockwave"))
+            .setRequirement(Requirement.isTrue(explosionToggle::getValue))
+            .setSaveConsumer(v -> cfg.explosionIntensity = denorm(v, 1.5f))
+            .build());
+
+        explosion.addEntry(e.startIntSlider(Component.literal("Max Distance"),
+                norm(cfg.explosionMaxDistance, 20f), 10, 200)
+            .setDefaultValue(100)
+            .setTooltip(Component.literal("Blocks away — beyond this range the explosion has no effect"))
+            .setRequirement(Requirement.isTrue(explosionToggle::getValue))
+            .setSaveConsumer(v -> cfg.explosionMaxDistance = denorm(v, 20f))
+            .build());
+
+        explosion.addEntry(e.startIntSlider(Component.literal("Decay"),
+                norm(cfg.explosionDecay, 0.6f), 25, 300)
+            .setDefaultValue(100)
+            .setTooltip(Component.literal("How fast the shockwave shake fades"))
+            .setRequirement(Requirement.isTrue(explosionToggle::getValue))
+            .setSaveConsumer(v -> cfg.explosionDecay = denorm(v, 0.6f))
             .build());
 
         builder.setDefaultBackgroundTexture(null);
