@@ -168,6 +168,108 @@ jobs:
           gh release upload "$RELEASE_TAG" "${JARS[@]}" --clobber
           echo "GitHub: uploaded ${#JARS[@]} files to $RELEASE_TAG"
 
+      # ── CurseForge: все лоадеры в цикле ─────────────────────────────────────
+      - name: Publish to CurseForge
+        env:
+          CURSEFORGE_TOKEN: ${{ secrets.CURSEFORGE_TOKEN }}
+        run: |
+          MOD_VERSION="${{ steps.vars.outputs.mod_version }}"
+          MC_VERSION="${{ steps.vars.outputs.mc_version }}"
+          CHANGELOG="${{ steps.changelog.outputs.content }}"
+          PLATFORMS="${{ steps.vars.outputs.platforms }}"
+          PROJECT_ID="1588734"
+
+          GAME_VERSIONS=$(curl -s -H "X-Api-Token: $CURSEFORGE_TOKEN" \
+            "https://minecraft.curseforge.com/api/game/versions")
+
+          MC_VERSION_ID=$(echo "$GAME_VERSIONS" | jq --arg v "$MC_VERSION" \
+            '[.[] | select(.gameVersionTypeID == 1 and .name == $v)] | .[0].id')
+
+          if [ "$MC_VERSION_ID" = "null" ] || [ -z "$MC_VERSION_ID" ]; then
+            echo "::error::Could not find CurseForge game version ID for MC $MC_VERSION"
+            exit 1
+          fi
+
+          JAVA_21_ID=$(echo "$GAME_VERSIONS" | jq '[.[] | select(.name == "Java 21")] | .[0].id')
+
+          for LOADER in $(echo "$PLATFORMS" | tr ',' ' '); do
+            JAR="${LOADER}/build/libs/handycam-${MOD_VERSION}-${LOADER}-${MC_VERSION}.jar"
+
+            case "$LOADER" in
+              fabric)
+                LOADER_TYPE_ID=4780
+                DISPLAY="Fabric"
+                DEPS='{"projects":[
+                  {"slug":"fabric-api",  "type":"requiredDependency"},
+                  {"slug":"cloth-config","type":"requiredDependency"},
+                  {"slug":"modmenu",     "type":"optionalDependency"}
+                ]}'
+                ;;
+              neoforge)
+                LOADER_TYPE_ID=6756
+                DISPLAY="NeoForge"
+                DEPS='{"projects":[
+                  {"slug":"cloth-config","type":"requiredDependency"}
+                ]}'
+                ;;
+              forge)
+                LOADER_TYPE_ID=7498
+                DISPLAY="Forge"
+                DEPS='{"projects":[
+                  {"slug":"cloth-config","type":"requiredDependency"}
+                ]}'
+                ;;
+              *)
+                LOADER_TYPE_ID=0
+                DISPLAY="$LOADER"
+                DEPS='{"projects":[]}'
+                ;;
+            esac
+
+            # Build gameVersions array: MC + Java 21 + loader
+            GV_ARRAY="[$MC_VERSION_ID]"
+            if [ "$JAVA_21_ID" != "null" ] && [ -n "$JAVA_21_ID" ]; then
+              GV_ARRAY=$(echo "$GV_ARRAY" | jq ". + [$JAVA_21_ID]")
+            fi
+            if [ "$LOADER_TYPE_ID" != "0" ]; then
+              LOADER_VERSION_ID=$(echo "$GAME_VERSIONS" | jq --argjson tid "$LOADER_TYPE_ID" \
+                '[.[] | select(.gameVersionTypeID == $tid)] | .[0].id')
+              if [ "$LOADER_VERSION_ID" != "null" ] && [ -n "$LOADER_VERSION_ID" ]; then
+                GV_ARRAY=$(echo "$GV_ARRAY" | jq ". + [$LOADER_VERSION_ID]")
+              fi
+            fi
+
+            jq -n \
+              --arg name         "Handycam ${MOD_VERSION} ${DISPLAY}" \
+              --arg log          "$CHANGELOG" \
+              --arg release_type "$RELEASE_TYPE" \
+              --argjson gv       "$GV_ARRAY" \
+              --argjson deps     "$DEPS" \
+              '{
+                changelog:     $log,
+                changelogType: "markdown",
+                displayName:   $name,
+                gameVersions:  $gv,
+                releaseType:   $release_type,
+                relations:     $deps
+              }' > /tmp/curseforge_data.json
+
+            RESPONSE=$(curl -s -w "\n%{http_code}" \
+              -H "X-Api-Token: $CURSEFORGE_TOKEN" \
+              -F "metadata=</tmp/curseforge_data.json;type=application/json" \
+              -F "file=@$JAR" \
+              "https://minecraft.curseforge.com/api/projects/${PROJECT_ID}/upload-file")
+
+            HTTP_CODE=$(echo "$RESPONSE" | tail -1)
+            BODY=$(echo "$RESPONSE" | head -n -1)
+
+            if [ "$HTTP_CODE" -ge 400 ]; then
+              echo "::error::CurseForge API error $HTTP_CODE: $BODY"
+              exit 1
+            fi
+            echo "CurseForge: $DISPLAY $MC_VERSION published (file ID: $(echo "$BODY" | jq -r '.id'))"
+          done
+
       # ── Modrinth: все лоадеры в цикле ────────────────────────────────────────
       - name: Publish to Modrinth
         env:
@@ -192,13 +294,6 @@ jobs:
                   {"project_id": "P7dR8mSH", "dependency_type": "required"},
                   {"project_id": "9s6osm5g", "dependency_type": "required"},
                   {"project_id": "mOgUt4GM", "dependency_type": "optional"}
-                ]'
-                ;;
-              quilt)
-                DISPLAY="Quilt"
-                DEPS='[
-                  {"project_id": "qvIfYCYJ", "dependency_type": "required"},
-                  {"project_id": "9s6osm5g", "dependency_type": "required"}
                 ]'
                 ;;
               neoforge)
