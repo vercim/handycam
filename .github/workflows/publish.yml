@@ -190,14 +190,14 @@ jobs:
             exit 1
           fi
 
-          JAVA_21_ID=$(echo "$GAME_VERSIONS" | jq '[.[] | select(.name == "Java 21")] | .[0].id')
+          JAVA_21_ID=$(echo "$GAME_VERSIONS" | jq '[.[] | select(.gameVersionTypeID == 2 and .name == "Java 21")] | .[0].id')
 
           for LOADER in $(echo "$PLATFORMS" | tr ',' ' '); do
             JAR="${LOADER}/build/libs/handycam-${MOD_VERSION}-${LOADER}-${MC_VERSION}.jar"
 
             case "$LOADER" in
               fabric)
-                LOADER_TYPE_ID=4780
+                LOADER_CF_NAME="Fabric"
                 DISPLAY="Fabric"
                 DEPS='{"projects":[
                   {"slug":"fabric-api",  "type":"requiredDependency"},
@@ -206,34 +206,34 @@ jobs:
                 ]}'
                 ;;
               neoforge)
-                LOADER_TYPE_ID=6756
+                LOADER_CF_NAME="NeoForge"
                 DISPLAY="NeoForge"
                 DEPS='{"projects":[
                   {"slug":"cloth-config","type":"requiredDependency"}
                 ]}'
                 ;;
               forge)
-                LOADER_TYPE_ID=7498
+                LOADER_CF_NAME="Forge"
                 DISPLAY="Forge"
                 DEPS='{"projects":[
                   {"slug":"cloth-config","type":"requiredDependency"}
                 ]}'
                 ;;
               *)
-                LOADER_TYPE_ID=0
+                LOADER_CF_NAME=""
                 DISPLAY="$LOADER"
                 DEPS='{"projects":[]}'
                 ;;
             esac
 
-            # Build gameVersions array: MC + Java 21 + loader
+            # Build gameVersions array: MC + Java 21 + loader (all loaders share typeID 68441)
             GV_ARRAY="[$MC_VERSION_ID]"
             if [ "$JAVA_21_ID" != "null" ] && [ -n "$JAVA_21_ID" ]; then
               GV_ARRAY=$(echo "$GV_ARRAY" | jq ". + [$JAVA_21_ID]")
             fi
-            if [ "$LOADER_TYPE_ID" != "0" ]; then
-              LOADER_VERSION_ID=$(echo "$GAME_VERSIONS" | jq --argjson tid "$LOADER_TYPE_ID" \
-                '[.[] | select(.gameVersionTypeID == $tid)] | .[0].id')
+            if [ -n "$LOADER_CF_NAME" ]; then
+              LOADER_VERSION_ID=$(echo "$GAME_VERSIONS" | jq --arg name "$LOADER_CF_NAME" \
+                '[.[] | select(.gameVersionTypeID == 68441 and .name == $name)] | .[0].id')
               if [ "$LOADER_VERSION_ID" != "null" ] && [ -n "$LOADER_VERSION_ID" ]; then
                 GV_ARRAY=$(echo "$GV_ARRAY" | jq ". + [$LOADER_VERSION_ID]")
               fi
