@@ -4,7 +4,11 @@ on:
   workflow_dispatch:
     inputs:
       action:
-        description: 'new_release — tag + GitHub + all platforms | add_mc_version — add to existing release | curseforge_publish — only CurseForge | modrinth_publish — only Modrinth'
+        description: |
+          new_release        — create tag + GitHub release + publish everywhere
+          add_mc_version     — add files to an existing release
+          curseforge_publish — re-publish to CurseForge only
+          modrinth_publish   — re-publish to Modrinth only
         required: true
         default: 'new_release'
         type: choice
@@ -188,8 +192,6 @@ jobs:
           PLATFORMS="${{ steps.vars.outputs.platforms }}"
           PROJECT_ID="1588734"
 
-          VERSION_TYPES=$(curl -s -H "X-Api-Token: $CURSEFORGE_TOKEN" \
-            "https://minecraft.curseforge.com/api/game/version-types")
           GAME_VERSIONS=$(curl -s -H "X-Api-Token: $CURSEFORGE_TOKEN" \
             "https://minecraft.curseforge.com/api/game/versions")
 
@@ -202,7 +204,9 @@ jobs:
             exit 1
           fi
 
-          MODLOADER_TYPE_ID=$(echo "$VERSION_TYPES" | jq '[.[] | select(.slug == "modloader")] | .[0].id')
+          echo "=== DEBUG: loader-related game version entries ==="
+          echo "$GAME_VERSIONS" | jq '[.[] | select(.name | test("Neo|Forge|Fabric"; "i"))]'
+          echo "=== END DEBUG ==="
 
           for LOADER in $(echo "$PLATFORMS" | tr ',' ' '); do
             JAR="${LOADER}/build/libs/handycam-${MOD_VERSION}-${LOADER}-${MC_VERSION}.jar"
@@ -239,13 +243,6 @@ jobs:
             esac
 
             GV_ARRAY="[$MC_VERSION_ID]"
-            if [ -n "$LOADER_CF_NAME" ] && [ "$MODLOADER_TYPE_ID" != "null" ]; then
-              LOADER_VERSION_ID=$(echo "$GAME_VERSIONS" | jq --argjson tid "$MODLOADER_TYPE_ID" --arg name "$LOADER_CF_NAME" \
-                '[.[] | select(.gameVersionTypeID == $tid and .name == $name)] | .[0].id')
-              if [ "$LOADER_VERSION_ID" != "null" ] && [ -n "$LOADER_VERSION_ID" ]; then
-                GV_ARRAY=$(echo "$GV_ARRAY" | jq ". + [$LOADER_VERSION_ID]")
-              fi
-            fi
 
             jq -n \
               --arg name         "Handycam ${MOD_VERSION} ${DISPLAY}" \
