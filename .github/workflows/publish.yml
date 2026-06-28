@@ -195,9 +195,12 @@ jobs:
           GAME_VERSIONS=$(curl -s -H "X-Api-Token: $CURSEFORGE_TOKEN" \
             "https://minecraft.curseforge.com/api/game/versions")
 
-          # MC versions: typeID 3 (typeID 1 returns dependency entries, not version tags)
+          echo "=== DEBUG MC ==="
+          echo "$GAME_VERSIONS" | jq '[.[] | select(.name | test("1\\.21"; "i"))] | .[0:5]'
+          echo "=== END DEBUG MC ==="
+
           MC_VERSION_ID=$(echo "$GAME_VERSIONS" | jq --arg v "$MC_VERSION" \
-            '[.[] | select(.gameVersionTypeID == 3 and .name == $v)] | .[0].id')
+            '[.[] | select(.name == $v)] | .[0].id')
 
           if [ "$MC_VERSION_ID" = "null" ] || [ -z "$MC_VERSION_ID" ]; then
             echo "::error::Could not find CurseForge game version ID for MC $MC_VERSION"
