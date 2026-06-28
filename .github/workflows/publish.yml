@@ -134,10 +134,10 @@ jobs:
         if: github.event.inputs.action == 'new_release'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CHANGELOG: ${{ steps.changelog.outputs.content }}
         run: |
           MOD_VERSION="${{ steps.vars.outputs.mod_version }}"
           RELEASE_TAG="${{ steps.vars.outputs.release_tag }}"
-          CHANGELOG="${{ steps.changelog.outputs.content }}"
 
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -172,10 +172,10 @@ jobs:
       - name: Publish to CurseForge
         env:
           CURSEFORGE_TOKEN: ${{ secrets.CURSEFORGE_TOKEN }}
+          CHANGELOG: ${{ steps.changelog.outputs.content }}
         run: |
           MOD_VERSION="${{ steps.vars.outputs.mod_version }}"
           MC_VERSION="${{ steps.vars.outputs.mc_version }}"
-          CHANGELOG="${{ steps.changelog.outputs.content }}"
           PLATFORMS="${{ steps.vars.outputs.platforms }}"
           PROJECT_ID="1588734"
 
@@ -274,10 +274,10 @@ jobs:
       - name: Publish to Modrinth
         env:
           MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
+          CHANGELOG: ${{ steps.changelog.outputs.content }}
         run: |
           MOD_VERSION="${{ steps.vars.outputs.mod_version }}"
           MC_VERSION="${{ steps.vars.outputs.mc_version }}"
-          CHANGELOG="${{ steps.changelog.outputs.content }}"
           PLATFORMS="${{ steps.vars.outputs.platforms }}"
 
           # Fetch actual project ID (not slug) — create version API requires the real ID
