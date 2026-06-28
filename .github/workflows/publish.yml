@@ -13,7 +13,7 @@ on:
           - add_mc_version
 
 env:
-  RELEASE_TYPE: beta   # beta | release | alpha
+  RELEASE_TYPE: release   # beta | release | alpha — applies to GitHub, Modrinth, CurseForge
 
 jobs:
   publish:
@@ -144,10 +144,15 @@ jobs:
           git tag "$RELEASE_TAG"
           git push origin "$RELEASE_TAG"
 
+          PRERELEASE_FLAG=""
+          if [ "$RELEASE_TYPE" != "release" ]; then
+            PRERELEASE_FLAG="--prerelease"
+          fi
+
           gh release create "$RELEASE_TAG" \
             --title "Handycam $MOD_VERSION" \
             --notes "$CHANGELOG" \
-            --prerelease
+            $PRERELEASE_FLAG
           echo "Created release $RELEASE_TAG"
 
       # ── Загрузить файлы в GitHub Release ─────────────────────────────────────
