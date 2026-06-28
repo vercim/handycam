@@ -70,6 +70,7 @@ architectury-plugin      = 3.4-SNAPSHOT
 shadow                   = 8.3.6
 ```
 
+
 ### Camera.setup() signature
 ```java
 setup(BlockGetter level, Entity entity, boolean detached, boolean thirdPersonReverse, float partialTick)

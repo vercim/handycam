@@ -39,17 +39,25 @@ common/src/main/java/dev/vercim/handycam/
       CrouchShakeLayer.java    — camera dip when crouching
       EatSwayLayer.java        — tilt + noise sway while eating/drinking, crosshair comp
       BowShotLayer.java        — bow/crossbow recoil + draw-tilt with crosshair compensation
+      ExplosionShakeLayer.java — spring-damped shake on nearby explosions and lightning
     math/
       PerlinNoise.java         — 2D Perlin noise primitive
       FractalNoise.java        — multi-octave Perlin
       SpringSimulator.java     — underdamped spring for impact effects
-  config/HandycamConfig.java   — config loading and storage (handycam-config.json)
+  config/
+    HandycamConfig.java        — config loading and storage (handycam-config.json)
+    HandycamConfigScreen.java  — shared Cloth Config screen (used by both loaders)
   mixin/
-    CameraMixin.java           — injects pitch/yaw/roll offset into vanilla camera
-    CameraAccessor.java        — @Accessor/@Invoker for Camera fields and move()
-    GameRendererMixin.java     — blocks dynamic FOV modifiers when enableVanillaFov=false
-    GuiMixin.java              — offsets crosshair render position per CrosshairSwaySystem
+    CameraMixin.java               — injects pitch/yaw/roll offset into vanilla camera
+    CameraAccessor.java            — @Accessor/@Invoker for Camera fields and move()
+    GameRendererMixin.java         — blocks dynamic FOV modifiers when enableVanillaFov=false
+    GuiMixin.java                  — offsets crosshair render position per CrosshairSwaySystem
+    ClientPacketListenerMixin.java — intercepts explosion packets → CameraShakeSystem.onExplosion()
+    LightningBoltMixin.java        — intercepts lightning tick → CameraShakeSystem.onLightning()
+    LocalPlayerMixin.java          — intercepts item use completion → CameraShakeSystem.onItemEaten()
 ```
+
+Platform-specific entry points in `fabric/` and `neoforge/` are thin wrappers: they call `HandycamConfigScreen.create(parent, saveCallback)` with the loader-specific config directory.
 
 ## Architecture
 
@@ -78,13 +86,31 @@ private void migrate() {
 
 If a default change is cosmetic/optional, no migration is needed — just update the field initializer.
 
+## Localization
+
+Config screens use `Component.translatable("handycam.config.xxx")` — **never** `Component.literal()` for user-visible text. All translation keys live in two lang files that must be kept in sync:
+
+- `fabric/src/main/resources/assets/handycam/lang/en_us.json`
+- `fabric/src/main/resources/assets/handycam/lang/ru_ru.json`
+- `neoforge/src/main/resources/assets/handycam/lang/en_us.json`
+- `neoforge/src/main/resources/assets/handycam/lang/ru_ru.json`
+
+**When adding a new config entry**, add its label key (`handycam.config.xxx`) and tooltip key (`handycam.config.xxx.tooltip`) to **all four** files — both English and Russian translations.
+
+Key naming conventions:
+- Categories: `handycam.config.category.<name>`
+- Options: `handycam.config.<field_name>`
+- Tooltips: `handycam.config.<field_name>.tooltip`
+- Enum values: `handycam.config.<enum_type>.<value>`
+
 ## Adding a New Layer
 
 1. Create a class in `camera/layers/`, implements `ShakeLayer`
 2. Implement `compute(PlayerState, float time, float dt)` → `CameraOffset`
 3. Add config parameters to `HandycamConfig.java` if needed
 4. Register in `CameraShakeSystem.LAYERS` (order matters)
-5. Add to both config screens (Fabric + NeoForge) with `.setTooltip()`
+5. Add to the shared config screen in `common/src/main/java/dev/vercim/handycam/config/HandycamConfigScreen.java` with `.setTooltip()`
+6. Add translation keys (label + tooltip) to all four lang files (en_us + ru_ru, Fabric + NeoForge)
 
 ## Porting to a New MC Version
 
