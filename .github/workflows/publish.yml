@@ -192,15 +192,19 @@ jobs:
           PLATFORMS="${{ steps.vars.outputs.platforms }}"
           PROJECT_ID="1588734"
 
+          VERSION_TYPES=$(curl -s -H "X-Api-Token: $CURSEFORGE_TOKEN" \
+            "https://minecraft.curseforge.com/api/game/version-types")
           GAME_VERSIONS=$(curl -s -H "X-Api-Token: $CURSEFORGE_TOKEN" \
             "https://minecraft.curseforge.com/api/game/versions")
 
-          echo "=== DEBUG MC ==="
-          echo "$GAME_VERSIONS" | jq '[.[] | select(.name | test("1\\.21"; "i"))] | .[0:5]'
-          echo "=== END DEBUG MC ==="
+          # Minecraft versions span multiple version types (one per major release,
+          # slug "minecraft-1-21" etc.). typeID 1 holds dependency-flagged duplicates
+          # the upload API rejects, so resolve by collecting all "minecraft*" type IDs.
+          MC_TYPE_IDS=$(echo "$VERSION_TYPES" | jq -c '[.[] | select(.slug | startswith("minecraft")) | .id]')
+          MODLOADER_TYPE_ID=$(echo "$VERSION_TYPES" | jq '[.[] | select(.slug == "modloader") | .id] | .[0]')
 
-          MC_VERSION_ID=$(echo "$GAME_VERSIONS" | jq --arg v "$MC_VERSION" \
-            '[.[] | select(.name == $v)] | .[0].id')
+          MC_VERSION_ID=$(echo "$GAME_VERSIONS" | jq --arg v "$MC_VERSION" --argjson types "$MC_TYPE_IDS" \
+            '[.[] | select((.gameVersionTypeID as $t | $types | index($t)) != null and .name == $v)] | .[0].id')
 
           if [ "$MC_VERSION_ID" = "null" ] || [ -z "$MC_VERSION_ID" ]; then
             echo "::error::Could not find CurseForge game version ID for MC $MC_VERSION"
@@ -241,13 +245,13 @@ jobs:
                 ;;
             esac
 
-            # Loader IDs confirmed from API: Forge=7498, Fabric=7499, NeoForge=10150
-            LOADER_VERSION_ID=$(echo "$GAME_VERSIONS" | jq --arg name "$LOADER_CF_NAME" \
-              '[.[] | select(.gameVersionTypeID == 68441 and .name == $name)] | .[0].id')
-
             GV_ARRAY="[$MC_VERSION_ID]"
-            if [ "$LOADER_VERSION_ID" != "null" ] && [ -n "$LOADER_VERSION_ID" ] && [ -n "$LOADER_CF_NAME" ]; then
-              GV_ARRAY=$(echo "$GV_ARRAY" | jq ". + [$LOADER_VERSION_ID]")
+            if [ -n "$LOADER_CF_NAME" ] && [ "$MODLOADER_TYPE_ID" != "null" ]; then
+              LOADER_VERSION_ID=$(echo "$GAME_VERSIONS" | jq --argjson tid "$MODLOADER_TYPE_ID" --arg name "$LOADER_CF_NAME" \
+                '[.[] | select(.gameVersionTypeID == $tid and .name == $name)] | .[0].id')
+              if [ "$LOADER_VERSION_ID" != "null" ] && [ -n "$LOADER_VERSION_ID" ]; then
+                GV_ARRAY=$(echo "$GV_ARRAY" | jq ". + [$LOADER_VERSION_ID]")
+              fi
             fi
 
             jq -n \
