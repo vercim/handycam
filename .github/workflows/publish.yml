@@ -255,7 +255,7 @@ jobs:
             fi
 
             jq -n \
-              --arg name         "Handycam ${MOD_VERSION} ${DISPLAY}" \
+              --arg name         "${MOD_VERSION}+${MC_VERSION}" \
               --arg log          "$CHANGELOG" \
               --arg release_type "$RELEASE_TYPE" \
               --argjson gv       "$GV_ARRAY" \
