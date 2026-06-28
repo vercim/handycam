@@ -1,4 +1,14 @@
-## [1.3.0] - WIP
+## [1.3.0] - 2026-06-28
+
+### Overall
+- Keybind to disable effects
+
+### Effects
+- Random tilt direction for the `Eat & Drink` layer (configurable)
+- New `Explosions` layer (configurable)
+
+### Config
+- Added Russian translation for the configuration
 
 ## [1.2.1] - 2026-06-25
 
