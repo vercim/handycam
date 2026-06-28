@@ -195,18 +195,14 @@ jobs:
           GAME_VERSIONS=$(curl -s -H "X-Api-Token: $CURSEFORGE_TOKEN" \
             "https://minecraft.curseforge.com/api/game/versions")
 
-          # MC versions: typeID 1 confirmed working in previous runs
+          # MC versions: typeID 3 (typeID 1 returns dependency entries, not version tags)
           MC_VERSION_ID=$(echo "$GAME_VERSIONS" | jq --arg v "$MC_VERSION" \
-            '[.[] | select(.gameVersionTypeID == 1 and .name == $v)] | .[0].id')
+            '[.[] | select(.gameVersionTypeID == 3 and .name == $v)] | .[0].id')
 
           if [ "$MC_VERSION_ID" = "null" ] || [ -z "$MC_VERSION_ID" ]; then
             echo "::error::Could not find CurseForge game version ID for MC $MC_VERSION"
             exit 1
           fi
-
-          echo "=== DEBUG: loader-related game version entries ==="
-          echo "$GAME_VERSIONS" | jq '[.[] | select(.name | test("Neo|Forge|Fabric"; "i"))]'
-          echo "=== END DEBUG ==="
 
           for LOADER in $(echo "$PLATFORMS" | tr ',' ' '); do
             JAR="${LOADER}/build/libs/handycam-${MOD_VERSION}-${LOADER}-${MC_VERSION}.jar"
@@ -242,7 +238,14 @@ jobs:
                 ;;
             esac
 
+            # Loader IDs confirmed from API: Forge=7498, Fabric=7499, NeoForge=10150
+            LOADER_VERSION_ID=$(echo "$GAME_VERSIONS" | jq --arg name "$LOADER_CF_NAME" \
+              '[.[] | select(.gameVersionTypeID == 68441 and .name == $name)] | .[0].id')
+
             GV_ARRAY="[$MC_VERSION_ID]"
+            if [ "$LOADER_VERSION_ID" != "null" ] && [ -n "$LOADER_VERSION_ID" ] && [ -n "$LOADER_CF_NAME" ]; then
+              GV_ARRAY=$(echo "$GV_ARRAY" | jq ". + [$LOADER_VERSION_ID]")
+            fi
 
             jq -n \
               --arg name         "Handycam ${MOD_VERSION} ${DISPLAY}" \
