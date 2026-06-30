@@ -75,11 +75,11 @@ public class HandycamConfigScreen {
         tilt.addEntry(forwardTiltToggle);
 
         tilt.addEntry(e.startIntSlider(Component.translatable("handycam.config.forward_tilt_intensity"),
-                norm(cfg.forwardTiltIntensity, 3f), 0, 200)
+                norm(cfg.forwardTiltIntensity, 2.4f), 0, 200)
             .setDefaultValue(100)
             .setTooltip(Component.translatable("handycam.config.forward_tilt_intensity.tooltip"))
             .setRequirement(Requirement.isTrue(forwardTiltToggle::getValue))
-            .setSaveConsumer(v -> cfg.forwardTiltIntensity = denorm(v, 3f))
+            .setSaveConsumer(v -> cfg.forwardTiltIntensity = denorm(v, 2.4f))
             .build());
 
         tilt.addEntry(e.startIntSlider(Component.translatable("handycam.config.forward_tilt_decay"),
@@ -98,11 +98,11 @@ public class HandycamConfigScreen {
         tilt.addEntry(strafeTiltToggle);
 
         tilt.addEntry(e.startIntSlider(Component.translatable("handycam.config.strafe_tilt_intensity"),
-                norm(cfg.strafeTiltIntensity, 3f), 0, 200)
+                norm(cfg.strafeTiltIntensity, 2.4f), 0, 200)
             .setDefaultValue(100)
             .setTooltip(Component.translatable("handycam.config.strafe_tilt_intensity.tooltip"))
             .setRequirement(Requirement.isTrue(strafeTiltToggle::getValue))
-            .setSaveConsumer(v -> cfg.strafeTiltIntensity = denorm(v, 3f))
+            .setSaveConsumer(v -> cfg.strafeTiltIntensity = denorm(v, 2.4f))
             .build());
 
         tilt.addEntry(e.startIntSlider(Component.translatable("handycam.config.strafe_tilt_decay"),
@@ -271,11 +271,11 @@ public class HandycamConfigScreen {
         mouse.addEntry(cameraSwayToggle);
 
         mouse.addEntry(e.startIntSlider(Component.translatable("handycam.config.turn_sway"),
-                norm(cfg.turnSway, 0.08f), 0, 200)
+                norm(cfg.turnSway, 0.096f), 0, 200)
             .setDefaultValue(100)
             .setTooltip(Component.translatable("handycam.config.turn_sway.tooltip"))
             .setRequirement(Requirement.isTrue(cameraSwayToggle::getValue))
-            .setSaveConsumer(v -> cfg.turnSway = denorm(v, 0.08f))
+            .setSaveConsumer(v -> cfg.turnSway = denorm(v, 0.096f))
             .build());
         mouse.addEntry(e.startEnumSelector(Component.translatable("handycam.config.sway_direction"),
                 HandycamConfig.SwayMode.class, cfg.cameraSwayMode)
@@ -289,11 +289,11 @@ public class HandycamConfigScreen {
             .build());
 
         mouse.addEntry(e.startIntSlider(Component.translatable("handycam.config.max_turn_roll"),
-                norm(cfg.maxTurnRoll, 2.5f), 0, 200)
+                norm(cfg.maxTurnRoll, 3.0f), 0, 200)
             .setDefaultValue(100)
             .setTooltip(Component.translatable("handycam.config.max_turn_roll.tooltip"))
             .setRequirement(Requirement.isTrue(cameraSwayToggle::getValue))
-            .setSaveConsumer(v -> cfg.maxTurnRoll = denorm(v, 2.5f))
+            .setSaveConsumer(v -> cfg.maxTurnRoll = denorm(v, 3.0f))
             .build());
 
         mouse.addEntry(e.startIntSlider(Component.translatable("handycam.config.yaw_sway"),

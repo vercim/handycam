@@ -6,10 +6,7 @@ import dev.vercim.handycam.camera.ShakeLayer;
 import dev.vercim.handycam.camera.math.FractalNoise;
 import dev.vercim.handycam.camera.math.SpringSimulator;
 import dev.vercim.handycam.config.HandycamConfig;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 
-@Environment(EnvType.CLIENT)
 public class HitImpactLayer implements ShakeLayer {
 
     

@@ -2,14 +2,11 @@ package dev.vercim.handycam.camera;
 
 import dev.vercim.handycam.camera.layers.*;
 import dev.vercim.handycam.config.HandycamConfig;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 
 import java.util.List;
 
-@Environment(EnvType.CLIENT)
 public final class CameraShakeSystem {
 
     
