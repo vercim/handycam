@@ -1,3 +1,8 @@
+## [1.3.1] - 2026-06-30
+
+### Config
+- Renamed the `Tilt` config tab to `Directional`.
+
 ## [1.3.0] - 2026-06-28
 
 ### Overall
