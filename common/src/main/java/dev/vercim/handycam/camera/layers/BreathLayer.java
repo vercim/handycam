@@ -5,10 +5,7 @@ import dev.vercim.handycam.camera.PlayerState;
 import dev.vercim.handycam.camera.ShakeLayer;
 import dev.vercim.handycam.camera.math.FractalNoise;
 import dev.vercim.handycam.config.HandycamConfig;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 
-@Environment(EnvType.CLIENT)
 public class BreathLayer implements ShakeLayer {
 
     private static final float TWO_PI = (float) (2.0 * Math.PI);

@@ -2,6 +2,7 @@
 
 ### Config
 - Renamed the `Tilt` config tab to `Directional`.
+- Fixed slider defaults and config version migration.
 
 ## [1.3.0] - 2026-06-28
 
