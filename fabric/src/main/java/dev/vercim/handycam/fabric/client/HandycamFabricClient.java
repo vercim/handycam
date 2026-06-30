@@ -10,9 +10,13 @@ import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 
 public final class HandycamFabricClient implements ClientModInitializer {
 
+    private static final KeyMapping.Category HANDYCAM_CATEGORY = KeyMapping.Category.register(
+        Identifier.fromNamespaceAndPath(HandycamMod.MOD_ID, "handycam")
+    );
     private static KeyMapping toggleEffectsKey;
 
     @Override
@@ -22,7 +26,7 @@ public final class HandycamFabricClient implements ClientModInitializer {
         toggleEffectsKey = KeyBindingHelper.registerKeyBinding(new KeyMapping(
             "key.handycam.toggle_effects",
             InputConstants.KEY_F10,
-            "key.categories.handycam"
+            HANDYCAM_CATEGORY
         ));
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {

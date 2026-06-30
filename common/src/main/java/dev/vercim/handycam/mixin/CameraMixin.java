@@ -6,7 +6,7 @@ import dev.vercim.handycam.config.HandycamConfig;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
 import org.joml.Quaternionf;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -18,7 +18,7 @@ import net.minecraft.client.Camera;
 public abstract class CameraMixin {
 
     @Inject(method = "setup", at = @At("TAIL"))
-    private void handycam$applyShake(BlockGetter level, Entity entity,
+    private void handycam$applyShake(Level level, Entity entity,
                                       boolean detached, boolean thirdPersonReverse,
                                       float partialTick, CallbackInfo ci) {
         if (!(entity instanceof LocalPlayer player)) return;

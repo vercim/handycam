@@ -37,13 +37,13 @@ public abstract class GuiMixin {
         float cx = mc.getWindow().getGuiScaledWidth()  / 2f;
         float cy = mc.getWindow().getGuiScaledHeight() / 2f;
 
-        graphics.pose().pushPose();
-        if (hasTranslate) graphics.pose().translate(ox, oy, 0f);
+        graphics.pose().pushMatrix();
+        if (hasTranslate) graphics.pose().translate(ox, oy);
         if (hasScale) {
             
-            graphics.pose().translate( cx, cy, 0f);
-            graphics.pose().scale(scale, scale, 1f);
-            graphics.pose().translate(-cx, -cy, 0f);
+            graphics.pose().translate( cx, cy);
+            graphics.pose().scale(scale, scale);
+            graphics.pose().translate(-cx, -cy);
         }
     }
 
@@ -64,6 +64,6 @@ public abstract class GuiMixin {
         boolean hasScale     = scale < 0.9999f;
         if (!hasTranslate && !hasScale) return;
 
-        graphics.pose().popPose();
+        graphics.pose().popMatrix();
     }
 }
