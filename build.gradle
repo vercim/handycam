@@ -30,6 +30,10 @@ subprojects {
 
     loom {
         silentMojangMappingsLicense()
+        runConfigs.configureEach {
+            ideConfigGenerated true
+            runDir ".run/${project.name}"
+        }
     }
 
     dependencies {

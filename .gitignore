@@ -5,4 +5,5 @@ build/
 *.iml
 out/
 run/
+.run/
 .architectury-transformer
