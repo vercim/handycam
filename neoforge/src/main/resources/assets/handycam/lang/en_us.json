@@ -6,7 +6,7 @@
   "handycam.config.title": "Handycam Settings",
 
   "handycam.config.category.general": "General",
-  "handycam.config.category.directional_tilt": "Tilt",
+  "handycam.config.category.directional_tilt": "Directional",
   "handycam.config.category.breath_idle": "Breath & Idle",
   "handycam.config.category.walk_sprint": "Walk & Sprint",
   "handycam.config.category.jump_crouch": "Jump & Crouch",
