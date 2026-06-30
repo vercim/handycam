@@ -54,6 +54,82 @@ Per-version API nuances for Handycam. Read this before porting to a new Minecraf
 
 ---
 
+## [MC 1.21.11]  mod 1.3.0  —  2026-06-30
+
+### gradle.properties
+```
+minecraft_version        = 1.21.11
+fabric_loader_version    = 0.19.3
+fabric_api_version       = 0.141.4+1.21.11
+neoforge_version         = 21.11.42
+cloth-config-fabric      = 21.11.153
+cloth-config-neoforge    = 21.11.153
+modmenu                  = 17.0.0
+architectury-loom        = 1.13.469
+architectury-plugin      = 3.4-SNAPSHOT
+shadow                   = 8.3.6
+```
+
+### Camera.setup() signature
+```java
+setup(Level level, Entity entity, boolean detached, boolean thirdPersonReverse, float partialTick)
+```
+Changed vs. 1.21.4: first parameter is now `net.minecraft.world.level.Level`, not `BlockGetter`.
+
+### Camera fields (@Accessor)
+| Field | Java name | Notes |
+|-------|-----------|-------|
+| `xRot` | `xRot` | unchanged |
+| `yRot` | `yRot` | unchanged |
+| `rotation` | `rotation` | unchanged, still `org.joml.Quaternionf` |
+
+### Camera.move() (@Invoker)
+```java
+move(float distanceOffset, float verticalOffset, float horizontalOffset)
+```
+Unchanged.
+
+### GameRenderer.getFov() signature
+```java
+getFov(Camera camera, float partialTick, boolean useFov) : float
+```
+Unchanged parameters; return type is primitive `float`.
+
+### Gui.renderCrosshair() signature
+```java
+renderCrosshair(GuiGraphics graphics, DeltaTracker tracker)
+```
+Unchanged parameters. `GuiGraphics.pose()` now returns `org.joml.Matrix3x2fStack`; use `pushMatrix()` / `popMatrix()` and 2D `translate(x, y)` / `scale(x, y)`.
+
+### LocalPlayer APIs used in PlayerState
+| API | Notes |
+|-----|-------|
+| `getDeltaMovement()` | unchanged |
+| `isUsingItem()` / `getUseItem()` / `getTicksUsingItem()` | unchanged |
+| `swinging` / `swingTime` | unchanged, inherited public fields on `LivingEntity` |
+| `hurtTime` | unchanged, inherited public field on `LivingEntity` |
+| `isCrouching()` / `isSprinting()` / `onGround()` | unchanged |
+| `getAbilities().flying` / `.mayfly` | unchanged |
+
+### CrossbowItem / BowItem APIs
+| API | Notes |
+|-----|-------|
+| `CrossbowItem.isCharged(ItemStack)` | unchanged, still static |
+| `BowItem` | unchanged for `instanceof` usage |
+| `ItemUseAnimation.EAT` / `.DRINK` | unchanged |
+
+### CameraType enum
+```java
+Minecraft.getInstance().options.getCameraType() != CameraType.FIRST_PERSON
+```
+Unchanged.
+
+### Notes
+- Fabric API, ModMenu, Cloth Config, and NeoForge versions were selected from their published Maven/Modrinth metadata for Minecraft 1.21.11.
+- `KeyMapping` category is now `KeyMapping.Category`; custom categories are registered with `KeyMapping.Category.register(Identifier)`.
+
+---
+
 ## [MC 1.21.4]  mod 1.2.x  —  2026-06-26
 
 ### gradle.properties

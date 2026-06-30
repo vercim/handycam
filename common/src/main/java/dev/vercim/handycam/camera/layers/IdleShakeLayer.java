@@ -6,12 +6,9 @@ import dev.vercim.handycam.camera.ShakeLayer;
 import dev.vercim.handycam.camera.math.FractalNoise;
 import dev.vercim.handycam.camera.math.SpringSimulator;
 import dev.vercim.handycam.config.HandycamConfig;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 
 import java.util.Random;
 
-@Environment(EnvType.CLIENT)
 public class IdleShakeLayer implements ShakeLayer {
 
     

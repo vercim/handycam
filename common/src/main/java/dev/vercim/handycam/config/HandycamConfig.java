@@ -2,8 +2,6 @@ package dev.vercim.handycam.config;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -11,12 +9,11 @@ import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-@Environment(EnvType.CLIENT)
 public class HandycamConfig {
 
     
     
-    private static final int CURRENT_VERSION = 2;
+    private static final int CURRENT_VERSION = 3;
 
     private static final Gson GSON = new GsonBuilder()
             .setPrettyPrinting()
@@ -145,10 +142,11 @@ public class HandycamConfig {
             } catch (IOException e) {
                 instance = new HandycamConfig();
             }
-            instance.migrate();
         } else {
             instance = new HandycamConfig();
         }
+        if (instance == null) instance = new HandycamConfig();
+        instance.migrate();
         save(configDir);
     }
 
@@ -161,7 +159,17 @@ public class HandycamConfig {
             turnSway    = 0.096f;
             maxTurnRoll = 3.0f;
         }
+        if (configVersion < 3) {
+            if (sameValue(forwardTiltIntensity, 3.0f)) forwardTiltIntensity = 2.4f;
+            if (sameValue(strafeTiltIntensity, 3.0f)) strafeTiltIntensity = 2.4f;
+            if (sameValue(turnSway, 0.08f)) turnSway = 0.096f;
+            if (sameValue(maxTurnRoll, 2.5f)) maxTurnRoll = 3.0f;
+        }
         configVersion = CURRENT_VERSION;
+    }
+
+    private static boolean sameValue(float a, float b) {
+        return Math.abs(a - b) < 0.0001f;
     }
 
     public static void save(Path configDir) {
