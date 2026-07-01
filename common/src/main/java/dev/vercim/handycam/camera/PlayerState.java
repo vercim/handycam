@@ -60,7 +60,6 @@ public final class PlayerState {
         float dx = (float) player.getDeltaMovement().x;
         float dz = (float) player.getDeltaMovement().z;
         float dy = (float) player.getDeltaMovement().y;
-        float hSpeed = Math.min((float) Math.sqrt(dx * dx + dz * dz) / 0.3f, 1f);
 
         float currentYRot = player.getYRot();
         float turnRate    = currentYRot - prevYRot;
@@ -76,21 +75,14 @@ public final class PlayerState {
         if (pitchDelta < -20f) pitchDelta = -20f;
         prevXRot = currentXRot;
 
-        // On 1.20.1, directional tilt feels much more stable when driven from local input
-        // instead of world velocity, which can get damped or delayed by movement physics.
-        float forward;
-        float strafe;
-        if (player.input != null) {
-            forward = Math.max(-1f, Math.min(1f, player.input.forwardImpulse));
-            strafe = Math.max(-1f, Math.min(1f, player.input.leftImpulse));
-        } else {
-            float yawRad = (float) Math.toRadians(currentYRot);
-            float sinYaw = (float) Math.sin(yawRad);
-            float cosYaw = (float) Math.cos(yawRad);
-            float norm = 0.3f;
-            forward = Math.max(-1f, Math.min(1f, (cosYaw * dz - sinYaw * dx) / norm));
-            strafe = Math.max(-1f, Math.min(1f, (cosYaw * dx + sinYaw * dz) / norm));
-        }
+        // 1.20.1 keeps the live movement intent on the entity itself.
+        // Using xxa/zza avoids stale or remapped client input values that can
+        // break directional effects like strafe tilt on this version.
+        float forward = Math.max(-1f, Math.min(1f, player.zza));
+        float strafe = Math.max(-1f, Math.min(1f, player.xxa));
+        float inputSpeed = Math.min((float) Math.sqrt(forward * forward + strafe * strafe), 1f);
+        float velocitySpeed = Math.min((float) Math.sqrt(dx * dx + dz * dz) / 0.3f, 1f);
+        float hSpeed = Math.max(inputSpeed, velocitySpeed);
 
         
         float bowDraw = 0f;
