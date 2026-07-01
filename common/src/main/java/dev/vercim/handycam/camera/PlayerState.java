@@ -5,7 +5,7 @@ import net.minecraft.world.entity.player.Abilities;
 import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.ItemUseAnimation;
+import net.minecraft.world.item.UseAnim;
 
 public final class PlayerState {
 
@@ -125,8 +125,8 @@ public final class PlayerState {
         boolean isEating = false;
         if (player.isUsingItem()) {
             ItemStack use = player.getUseItem();
-            ItemUseAnimation anim = use.getItem().getUseAnimation(use);
-            isEating = (anim == ItemUseAnimation.EAT || anim == ItemUseAnimation.DRINK);
+            UseAnim anim = use.getItem().getUseAnimation(use);
+            isEating = (anim == UseAnim.EAT || anim == UseAnim.DRINK);
         }
 
         return new PlayerState(hSpeed, dy, player.isSprinting(), player.onGround(),

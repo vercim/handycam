@@ -16,21 +16,21 @@ Cinematic camera shake for Minecraft
 [[dependencies.handycam]]
 modId = "neoforge"
 type = "required"
-versionRange = "[21.4.0,)"
+versionRange = "[21.1.0,21.2.0)"
 ordering = "NONE"
 side = "CLIENT"
 
 [[dependencies.handycam]]
 modId = "minecraft"
 type = "required"
-versionRange = "[1.21.4,)"
+versionRange = "[1.21.1,1.21.2)"
 ordering = "NONE"
 side = "CLIENT"
 
 [[dependencies.handycam]]
 modId = "cloth_config"
 type = "required"
-versionRange = "[17,)"
+versionRange = "[15,)"
 ordering = "AFTER"
 side = "CLIENT"
 

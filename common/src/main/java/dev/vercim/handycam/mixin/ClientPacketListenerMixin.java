@@ -13,6 +13,6 @@ public class ClientPacketListenerMixin {
 
     @Inject(method = "handleExplosion", at = @At("HEAD"))
     private void handycam$onExplosion(ClientboundExplodePacket packet, CallbackInfo ci) {
-        CameraShakeSystem.onExplosion(packet.center().x, packet.center().y, packet.center().z);
+        CameraShakeSystem.onExplosion(packet.getX(), packet.getY(), packet.getZ());
     }
 }
