@@ -140,6 +140,9 @@ fabric_api_version       = 0.92.2+1.20.1
 forge_version            = 1.20.1-47.2.0
 cloth_config_version     = 11.1.136
 modmenu_version          = 7.2.2
+architectury-loom        = 1.11.458
+architectury-plugin      = 3.4.164
+shadow                   = 8.3.6
 ```
 
 ### Camera.setup() signature
@@ -147,6 +150,16 @@ modmenu_version          = 7.2.2
 setup(BlockGetter level, Entity entity, boolean detached, boolean thirdPersonReverse, float partialTick)
 ```
 Unchanged from newer branches.
+
+### Camera fields (@Accessor)
+| Field | Java name | Notes |
+|-------|-----------|-------|
+| `xRot` | `xRot` | unchanged |
+| `yRot` | `yRot` | unchanged |
+| `rotation` | `rotation` | unchanged, still `org.joml.Quaternionf` |
+| `forwards` | `forwards` | required on 1.20.1 to rebuild the camera basis after custom roll |
+| `up` | `up` | required for basis rebuild |
+| `left` | `left` | required for basis rebuild |
 
 ### Camera.move() (@Invoker)
 ```java
@@ -158,6 +171,7 @@ Uses `double` parameters on 1.20.1.
 ```java
 getFov(Camera camera, float partialTick, boolean useFov) : double
 ```
+Return type is primitive `double` on this branch.
 
 ### Gui.renderCrosshair() signature
 ```java
@@ -165,9 +179,26 @@ renderCrosshair(GuiGraphics graphics)
 ```
 No `DeltaTracker` yet on 1.20.1.
 
+### LocalPlayer APIs used in PlayerState
+| API | Notes |
+|-----|-------|
+| `getDeltaMovement()` | unchanged |
+| `isUsingItem()` / `getUseItem()` / `getTicksUsingItem()` | unchanged |
+| `swinging` / `swingTime` | unchanged, inherited public fields on `LivingEntity` |
+| `hurtTime` | unchanged, inherited public field on `LivingEntity` |
+| `isCrouching()` / `isSprinting()` / `onGround()` | unchanged |
+| `getAbilities().flying` / `.mayfly` | unchanged |
+| `xxa` / `zza` | preferred over `player.input.leftImpulse` / `forwardImpulse` for directional effects on 1.20.1 |
+
 ### Notes
-- This branch targets `Fabric + Forge`.
-- Java target level is `17`.
+- This branch targets `Fabric + Forge`; `settings.gradle` includes `common`, `fabric`, and `forge` only.
+- Java target level is `17`, but current `Architectury Loom 1.11.458` resolves dependencies that require the Gradle JVM to be `21+`. Runtime for Minecraft 1.20.1 still needs Java `17`.
+- Keep the mixin compatibility level at `JAVA_17` in `handycam.mixins.json`; `JAVA_21` crashes Fabric 1.20.1 during bootstrap.
+- `Cloth Config` on 1.20.1 crashes if `builder.setDefaultBackgroundTexture(null)` is used; leave the default background untouched instead.
+- Config loading needed a defensive `sanitize()` pass because GSON can deserialize stale or invalid values from older configs.
+- Camera roll cannot be applied the same way as on newer branches. On 1.20.1, vanilla `Camera.setRotation(yRot, xRot)` internally builds `rotation.rotationYXZ(-yaw, pitch, 0)`, so the stable fix is to build the full camera orientation in that same order as `rotation.rotationYXZ(-yaw, pitch, -roll)` and then rebuild `forwards` / `up` / `left`.
+- `StrafeTiltLayer` should remain a pure `roll` effect on 1.20.1. Adding a `yaw` component there makes the left-right tilt feel like horizontal steering instead of camera banking.
+- Directional tilt on 1.20.1 should read movement intent from `LocalPlayer.xxa` / `zza`; relying on `player.input.leftImpulse` / `forwardImpulse` can break or misroute strafe tilt.
 
 ---
 
@@ -294,3 +325,4 @@ When moving to a new MC version, go through each item:
 - [ ] Test FOV override (`enableVanillaFov = false`)
 - [ ] Test crosshair offset (mouse lead + bow draw shrink)
 - [ ] Publish with `new_release` on main, then `add_mc_version` on older branches
+
