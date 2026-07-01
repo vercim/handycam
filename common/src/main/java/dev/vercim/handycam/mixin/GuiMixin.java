@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(Hud.class)
 public abstract class GuiMixin {
 
-    @Inject(method = "extractRenderState", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Hud;extractCrosshair(Lnet/minecraft/client/gui/GuiGraphicsExtractor;Lnet/minecraft/client/DeltaTracker;)V", shift = At.Shift.BEFORE))
+    @Inject(method = "extractCrosshair", at = @At("HEAD"))
     private void handycam$crosshairPush(GuiGraphicsExtractor graphics, DeltaTracker tracker, CallbackInfo ci) {
         if (Minecraft.getInstance().options.getCameraType() != CameraType.FIRST_PERSON) return;
 
@@ -45,7 +45,7 @@ public abstract class GuiMixin {
         }
     }
 
-    @Inject(method = "extractRenderState", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Hud;extractCrosshair(Lnet/minecraft/client/gui/GuiGraphicsExtractor;Lnet/minecraft/client/DeltaTracker;)V", shift = At.Shift.AFTER))
+    @Inject(method = "extractCrosshair", at = @At("TAIL"))
     private void handycam$crosshairPop(GuiGraphicsExtractor graphics, DeltaTracker tracker, CallbackInfo ci) {
         if (Minecraft.getInstance().options.getCameraType() != CameraType.FIRST_PERSON) return;
 
