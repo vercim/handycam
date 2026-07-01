@@ -3,7 +3,7 @@ package dev.vercim.handycam.mixin;
 import dev.vercim.handycam.camera.CrosshairSwaySystem;
 import dev.vercim.handycam.config.HandycamConfig;
 import net.minecraft.client.DeltaTracker;
-import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.Hud;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
@@ -12,10 +12,10 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(Gui.class)
+@Mixin(Hud.class)
 public abstract class GuiMixin {
 
-    @Inject(method = "extractCrosshair", at = @At("HEAD"))
+    @Inject(method = "extractRenderState", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Hud;extractCrosshair(Lnet/minecraft/client/gui/GuiGraphicsExtractor;Lnet/minecraft/client/DeltaTracker;)V", shift = At.Shift.BEFORE))
     private void handycam$crosshairPush(GuiGraphicsExtractor graphics, DeltaTracker tracker, CallbackInfo ci) {
         if (Minecraft.getInstance().options.getCameraType() != CameraType.FIRST_PERSON) return;
 
@@ -45,7 +45,7 @@ public abstract class GuiMixin {
         }
     }
 
-    @Inject(method = "extractCrosshair", at = @At("TAIL"))
+    @Inject(method = "extractRenderState", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Hud;extractCrosshair(Lnet/minecraft/client/gui/GuiGraphicsExtractor;Lnet/minecraft/client/DeltaTracker;)V", shift = At.Shift.AFTER))
     private void handycam$crosshairPop(GuiGraphicsExtractor graphics, DeltaTracker tracker, CallbackInfo ci) {
         if (Minecraft.getInstance().options.getCameraType() != CameraType.FIRST_PERSON) return;
 
