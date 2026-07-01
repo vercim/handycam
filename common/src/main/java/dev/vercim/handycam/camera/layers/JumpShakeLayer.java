@@ -33,7 +33,7 @@ public class JumpShakeLayer implements ShakeLayer {
         if (!cfg.jumpEnabled) return;
 
         
-        pitchTarget = 1.0f;
+        pitchTarget = -1.0f;
         rollTarget  = 0.35f;
         yawTarget   = 0.25f;
     }
