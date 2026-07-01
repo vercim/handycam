@@ -16,7 +16,7 @@ import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.common.NeoForge;
 
-@EventBusSubscriber(modid = HandycamMod.MOD_ID, value = Dist.CLIENT)
+@EventBusSubscriber(modid = HandycamMod.MOD_ID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public final class HandycamNeoForgeClient {
 
     private static final KeyMapping TOGGLE_EFFECTS_KEY = new KeyMapping(
