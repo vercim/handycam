@@ -42,7 +42,7 @@ The version number in the header must exactly match `mod_version` in `gradle.pro
 The workflow will:
 - verify the changelog entry exists and the release does not already exist
 - create tag `v1.2.2` and the GitHub Release
-- build and upload Fabric and NeoForge JARs
+- build and upload Fabric and Forge JARs
 - publish both to Modrinth
 
 ---

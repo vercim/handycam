@@ -26,5 +26,5 @@ public interface CameraAccessor {
 
     
     @Invoker("move")
-    void invokeMove(float distanceOffset, float verticalOffset, float horizontalOffset);
+    void invokeMove(double distanceOffset, double verticalOffset, double horizontalOffset);
 }

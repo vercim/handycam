@@ -2,7 +2,6 @@ package dev.vercim.handycam.mixin;
 
 import dev.vercim.handycam.camera.CrosshairSwaySystem;
 import dev.vercim.handycam.config.HandycamConfig;
-import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiGraphics;
@@ -16,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class GuiMixin {
 
     @Inject(method = "renderCrosshair", at = @At("HEAD"))
-    private void handycam$crosshairPush(GuiGraphics graphics, DeltaTracker tracker, CallbackInfo ci) {
+    private void handycam$crosshairPush(GuiGraphics graphics, CallbackInfo ci) {
         
         if (Minecraft.getInstance().options.getCameraType() != CameraType.FIRST_PERSON) return;
 
@@ -48,7 +47,7 @@ public abstract class GuiMixin {
     }
 
     @Inject(method = "renderCrosshair", at = @At("TAIL"))
-    private void handycam$crosshairPop(GuiGraphics graphics, DeltaTracker tracker, CallbackInfo ci) {
+    private void handycam$crosshairPop(GuiGraphics graphics, CallbackInfo ci) {
         if (Minecraft.getInstance().options.getCameraType() != CameraType.FIRST_PERSON) return;
 
         HandycamConfig cfg = HandycamConfig.get();
