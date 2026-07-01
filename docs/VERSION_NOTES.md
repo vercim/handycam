@@ -1,5 +1,40 @@
 # Version Porting Notes
 
+## [MC 26.1]  mod 1.3.1  -  2026-07-01
+
+### gradle.properties
+```
+minecraft_version        = 26.1
+fabric_loader_version    = 0.19.3
+fabric_api_version       = 0.145.1+26.1
+neoforge_version         = 26.1.0.19-beta
+cloth-config-fabric      = 26.1.154
+cloth-config-neoforge    = 26.1.154
+modmenu                  = 18.0.0-alpha.8
+architectury-loom        = 1.17.487
+architectury-plugin      = 3.4-SNAPSHOT
+shadow                   = 8.3.6
+java                     = 25
+gradle-wrapper           = 9.6.1
+```
+
+### Status
+- Dependency and metadata port completed.
+- Build verification completed on the exact `26.1` line.
+
+### Tooling notes
+- `26.1` is present in Mojang's version manifest and requires Java 25.
+- Fabric API `0.145.1+26.1` is the exact top-level Fabric line used for this port.
+- NeoForge `26.1.0.19-beta` is the exact NeoForge line used for this port.
+
+### Known blocker
+- `./gradlew build` succeeds.
+- `./gradlew :fabric:runClient` starts on Minecraft `26.1`.
+- `./gradlew :neoforge:runClient` starts on Minecraft `26.1`.
+- Fabric runtime helper dependencies were pinned where needed so dev-runtime resolution stays on the `26.1` module line instead of drifting to later `26.1.x` Fabric submodule revisions.
+
+---
+
 Per-version API nuances for Handycam. Read this before porting to a new Minecraft version.
 
 ---

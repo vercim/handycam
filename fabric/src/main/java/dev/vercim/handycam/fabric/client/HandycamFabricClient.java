@@ -6,24 +6,29 @@ import dev.vercim.handycam.camera.CameraShakeSystem;
 import dev.vercim.handycam.config.HandycamConfig;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 
 public final class HandycamFabricClient implements ClientModInitializer {
 
+    private static final KeyMapping.Category HANDYCAM_CATEGORY = KeyMapping.Category.register(
+        Identifier.fromNamespaceAndPath(HandycamMod.MOD_ID, "handycam")
+    );
     private static KeyMapping toggleEffectsKey;
 
     @Override
     public void onInitializeClient() {
         HandycamMod.initClient(FabricLoader.getInstance().getConfigDir());
 
-        toggleEffectsKey = KeyBindingHelper.registerKeyBinding(new KeyMapping(
+        toggleEffectsKey = new KeyMapping(
             "key.handycam.toggle_effects",
             InputConstants.KEY_F10,
-            "key.categories.handycam"
-        ));
+            HANDYCAM_CATEGORY
+        );
+        toggleEffectsKey = KeyMappingHelper.registerKeyMapping(toggleEffectsKey);
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if (client.player != null) CameraShakeSystem.tick(client.player);
@@ -33,8 +38,8 @@ public final class HandycamFabricClient implements ClientModInitializer {
                 cfg.effectsEnabled = !cfg.effectsEnabled;
                 HandycamConfig.save(FabricLoader.getInstance().getConfigDir());
                 if (client.player != null) {
-                    client.player.displayClientMessage(
-                        Component.literal("Handycam: " + (cfg.effectsEnabled ? "ON" : "OFF")), true);
+                    client.player.sendOverlayMessage(
+                        Component.literal("Handycam: " + (cfg.effectsEnabled ? "ON" : "OFF")));
                 }
             }
         });

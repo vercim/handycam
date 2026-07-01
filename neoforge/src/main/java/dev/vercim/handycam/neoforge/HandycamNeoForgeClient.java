@@ -7,6 +7,7 @@ import dev.vercim.handycam.config.HandycamConfig;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -19,10 +20,13 @@ import net.neoforged.neoforge.common.NeoForge;
 @EventBusSubscriber(modid = HandycamMod.MOD_ID, value = Dist.CLIENT)
 public final class HandycamNeoForgeClient {
 
+    private static final KeyMapping.Category HANDYCAM_CATEGORY = KeyMapping.Category.register(
+        Identifier.fromNamespaceAndPath(HandycamMod.MOD_ID, "handycam")
+    );
     private static final KeyMapping TOGGLE_EFFECTS_KEY = new KeyMapping(
         "key.handycam.toggle_effects",
         InputConstants.KEY_F10,
-        "key.categories.handycam"
+        HANDYCAM_CATEGORY
     );
 
     @SubscribeEvent
@@ -42,8 +46,8 @@ public final class HandycamNeoForgeClient {
                 cfg.effectsEnabled = !cfg.effectsEnabled;
                 HandycamConfig.save(FMLPaths.CONFIGDIR.get());
                 if (mc.player != null) {
-                    mc.player.displayClientMessage(
-                        Component.literal("Handycam: " + (cfg.effectsEnabled ? "ON" : "OFF")), true);
+                    mc.player.sendOverlayMessage(
+                        Component.literal("Handycam: " + (cfg.effectsEnabled ? "ON" : "OFF")));
                 }
             }
         });
