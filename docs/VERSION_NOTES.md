@@ -130,6 +130,47 @@ Unchanged.
 
 ---
 
+## [MC 1.20.1]  mod 1.3.1  —  2026-07-01
+
+### gradle.properties
+```
+minecraft_version        = 1.20.1
+fabric_loader_version    = 0.15.11
+fabric_api_version       = 0.92.2+1.20.1
+forge_version            = 1.20.1-47.2.0
+cloth_config_version     = 11.1.136
+modmenu_version          = 7.2.2
+```
+
+### Camera.setup() signature
+```java
+setup(BlockGetter level, Entity entity, boolean detached, boolean thirdPersonReverse, float partialTick)
+```
+Unchanged from newer branches.
+
+### Camera.move() (@Invoker)
+```java
+move(double distanceOffset, double verticalOffset, double horizontalOffset)
+```
+Uses `double` parameters on 1.20.1.
+
+### GameRenderer.getFov() signature
+```java
+getFov(Camera camera, float partialTick, boolean useFov) : double
+```
+
+### Gui.renderCrosshair() signature
+```java
+renderCrosshair(GuiGraphics graphics)
+```
+No `DeltaTracker` yet on 1.20.1.
+
+### Notes
+- This branch targets `Fabric + Forge`.
+- Java target level is `17`.
+
+---
+
 ## [MC 1.21.4]  mod 1.2.x  —  2026-06-26
 
 ### gradle.properties

@@ -15,9 +15,9 @@ public abstract class GameRendererMixin {
     
     @Inject(method = "getFov", at = @At("RETURN"), cancellable = true)
     private void handycam$blockDynamicFov(Camera camera, float partialTick, boolean useFov,
-                                          CallbackInfoReturnable<Float> cir) {
+                                          CallbackInfoReturnable<Double> cir) {
         if (!HandycamConfig.get().enableVanillaFov && useFov) {
-            cir.setReturnValue((float) (int) Minecraft.getInstance().options.fov().get());
+            cir.setReturnValue((double) (int) Minecraft.getInstance().options.fov().get());
         }
     }
 }
