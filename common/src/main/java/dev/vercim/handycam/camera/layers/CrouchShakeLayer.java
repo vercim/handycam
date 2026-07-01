@@ -35,8 +35,7 @@ public class CrouchShakeLayer implements ShakeLayer {
         HandycamConfig cfg = HandycamConfig.get();
         if (!cfg.crouchEnabled) return;
 
-        
-        pitchTarget = -cfg.crouchIntensity * 0.7f;
+        pitchTarget = cfg.crouchIntensity * 0.7f;
         rollTarget  = cfg.crouchIntensity * 0.15f;
     }
 
@@ -44,8 +43,7 @@ public class CrouchShakeLayer implements ShakeLayer {
         HandycamConfig cfg = HandycamConfig.get();
         if (!cfg.crouchEnabled) return;
 
-        
-        pitchTarget =  cfg.crouchIntensity * 0.5f;
+        pitchTarget = -cfg.crouchIntensity * 0.5f;
         rollTarget  = -cfg.crouchIntensity * 0.15f;
     }
 

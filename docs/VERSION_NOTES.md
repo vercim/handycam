@@ -22,6 +22,9 @@ java                     = 25
 - On Minecraft `26.2`, the crosshair compensation hook lives in `Hud.extractRenderState(...)`, not in the old `Gui.extractCrosshair(...)` location used by earlier ports.
 - The `GuiMixin` was updated to inject around `Hud.extractCrosshair(...)` from inside `Hud.extractRenderState(...)` so the crosshair transform still applies in the new UI pipeline.
 
+### Camera motion note
+- `CrouchShakeLayer` pitch targets are intentionally signed so that crouching dips the camera down and standing back up lifts it back into place. If this ever feels inverted again, check the `onCrouch()` / `onStand()` pitch signs first.
+
 ---
 
 ## [MC 26.1]  mod 1.3.1  -  2026-07-01
