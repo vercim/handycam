@@ -18,6 +18,10 @@ java                     = 25
 - Dependency and metadata port completed from branch `26.1`.
 - Build verification pending below.
 
+### Fabric UI note
+- On Minecraft `26.2`, the crosshair compensation hook lives in `Hud.extractRenderState(...)`, not in the old `Gui.extractCrosshair(...)` location used by earlier ports.
+- The `GuiMixin` was updated to inject around `Hud.extractCrosshair(...)` from inside `Hud.extractRenderState(...)` so the crosshair transform still applies in the new UI pipeline.
+
 ---
 
 ## [MC 26.1]  mod 1.3.1  -  2026-07-01
