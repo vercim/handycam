@@ -76,22 +76,21 @@ public final class PlayerState {
         if (pitchDelta < -20f) pitchDelta = -20f;
         prevXRot = currentXRot;
 
-        
-        float yawRad   = (float) Math.toRadians(currentYRot);
-        float sinYaw   = (float) Math.sin(yawRad);
-        float cosYaw   = (float) Math.cos(yawRad);
-        
-        
-        
-        
-        
-        
-        float forward = cosYaw * dz - sinYaw * dx;
-        float strafe  =   cosYaw * dx + sinYaw * dz;
-        
-        float norm    = 0.3f;
-        forward = Math.max(-1f, Math.min(1f, forward / norm));
-        strafe  = Math.max(-1f, Math.min(1f, strafe  / norm));
+        // On 1.20.1, directional tilt feels much more stable when driven from local input
+        // instead of world velocity, which can get damped or delayed by movement physics.
+        float forward;
+        float strafe;
+        if (player.input != null) {
+            forward = Math.max(-1f, Math.min(1f, player.input.forwardImpulse));
+            strafe = Math.max(-1f, Math.min(1f, player.input.leftImpulse));
+        } else {
+            float yawRad = (float) Math.toRadians(currentYRot);
+            float sinYaw = (float) Math.sin(yawRad);
+            float cosYaw = (float) Math.cos(yawRad);
+            float norm = 0.3f;
+            forward = Math.max(-1f, Math.min(1f, (cosYaw * dz - sinYaw * dx) / norm));
+            strafe = Math.max(-1f, Math.min(1f, (cosYaw * dx + sinYaw * dz) / norm));
+        }
 
         
         float bowDraw = 0f;

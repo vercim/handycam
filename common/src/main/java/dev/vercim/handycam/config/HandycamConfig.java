@@ -151,6 +151,8 @@ public class HandycamConfig {
     }
 
     private void migrate() {
+        sanitize();
+
         if (configVersion < 1) {
             strafeTiltIntensity  = 2.4f;
             forwardTiltIntensity = 2.4f;
@@ -166,6 +168,62 @@ public class HandycamConfig {
             if (sameValue(maxTurnRoll, 2.5f)) maxTurnRoll = 3.0f;
         }
         configVersion = CURRENT_VERSION;
+        sanitize();
+    }
+
+    private void sanitize() {
+        if (cameraSwayMode == null) {
+            cameraSwayMode = SwayMode.LEAD;
+        }
+        if (eatSwayDirection == null) {
+            eatSwayDirection = EatSwayDirection.RANDOM;
+        }
+
+        masterIntensity = finiteOrDefault(masterIntensity, 2.0f);
+        breathIntensity = finiteOrDefault(breathIntensity, 1.0f);
+        idleIntensity = finiteOrDefault(idleIntensity, 1.5f);
+        idleFrequency = finiteOrDefault(idleFrequency, 0.5f);
+        idleTremorScale = finiteOrDefault(idleTremorScale, 0.75f);
+        walkBobIntensity = finiteOrDefault(walkBobIntensity, 2.5f);
+        walkBobFrequency = finiteOrDefault(walkBobFrequency, 0.90f);
+        walkBobVerticalMult = finiteOrDefault(walkBobVerticalMult, 2.0f);
+        walkNoiseAmount = finiteOrDefault(walkNoiseAmount, 0.25f);
+        sprintBobMult = finiteOrDefault(sprintBobMult, 1.80f);
+        landingIntensity = finiteOrDefault(landingIntensity, 3.85f);
+        landingPitchMax = finiteOrDefault(landingPitchMax, 9.0f);
+        landingRollMax = finiteOrDefault(landingRollMax, 3.5f);
+        landingYawMax = finiteOrDefault(landingYawMax, 2.5f);
+        damageIntensity = finiteOrDefault(damageIntensity, 2.0f);
+        damageDecay = finiteOrDefault(damageDecay, 1.2f);
+        turnSway = finiteOrDefault(turnSway, 0.096f);
+        maxTurnRoll = finiteOrDefault(maxTurnRoll, 3.0f);
+        swayYawLag = finiteOrDefault(swayYawLag, 0.08f);
+        swayPitchLag = finiteOrDefault(swayPitchLag, 0.14f);
+        jumpIntensity = finiteOrDefault(jumpIntensity, 4.1f);
+        jumpDecay = finiteOrDefault(jumpDecay, 5.1f);
+        strafeTiltIntensity = finiteOrDefault(strafeTiltIntensity, 2.4f);
+        strafeTiltDecay = finiteOrDefault(strafeTiltDecay, 1.0f);
+        forwardTiltIntensity = finiteOrDefault(forwardTiltIntensity, 2.4f);
+        forwardTiltDecay = finiteOrDefault(forwardTiltDecay, 1.0f);
+        crouchIntensity = finiteOrDefault(crouchIntensity, 3.2f);
+        mouseSwayScale = finiteOrDefault(mouseSwayScale, 0.30f);
+        verticalDriftIntensity = finiteOrDefault(verticalDriftIntensity, 0.9f);
+        mouseSwaySmoothing = finiteOrDefault(mouseSwaySmoothing, 0.09f);
+        hitIntensity = finiteOrDefault(hitIntensity, 2.0f);
+        hitDecay = finiteOrDefault(hitDecay, 20.0f);
+        eatIntensity = finiteOrDefault(eatIntensity, 1.5f);
+        eatSwayAmount = finiteOrDefault(eatSwayAmount, 1.2f);
+        bowRecoilIntensity = finiteOrDefault(bowRecoilIntensity, 2.5f);
+        bowRecoilDecay = finiteOrDefault(bowRecoilDecay, 9.0f);
+        bowConcentration = finiteOrDefault(bowConcentration, 0.90f);
+        bowCrosshairShrink = finiteOrDefault(bowCrosshairShrink, 0.20f);
+        explosionIntensity = finiteOrDefault(explosionIntensity, 1.5f);
+        explosionMaxDistance = finiteOrDefault(explosionMaxDistance, 20.0f);
+        explosionDecay = finiteOrDefault(explosionDecay, 0.6f);
+    }
+
+    private static float finiteOrDefault(float value, float fallback) {
+        return Float.isFinite(value) ? value : fallback;
     }
 
     private static boolean sameValue(float a, float b) {
