@@ -32,7 +32,7 @@ All effects are independently configurable or can be disabled entirely.
 Jar files follow this naming pattern:
 
 ```
-handycam-1.3.1-fabric-26.1.jar
+handycam-1.3.1-fabric-26.2.jar
            │         │      │
            │         │      └─ Minecraft version this jar targets
            │         └─ Mod loader (fabric or neoforge)

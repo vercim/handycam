@@ -1,5 +1,25 @@
 # Version Porting Notes
 
+## [MC 26.2]  mod 1.3.1  -  2026-07-01
+
+### gradle.properties
+```
+minecraft_version        = 26.2
+fabric_loader_version    = 0.19.3
+fabric_api_version       = 0.145.4+26.2
+neoforge_version         = 26.2.0.7-beta
+cloth-config-fabric      = 26.2.155
+cloth-config-neoforge    = 26.2.155
+modmenu                  = 20.0.0-alpha.1
+java                     = 25
+```
+
+### Status
+- Dependency and metadata port completed from branch `26.1`.
+- Build verification pending below.
+
+---
+
 ## [MC 26.1]  mod 1.3.1  -  2026-07-01
 
 ### gradle.properties
