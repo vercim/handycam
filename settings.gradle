@@ -6,7 +6,6 @@ pluginManagement {
         gradlePluginPortal()
     }
 }
-
 rootProject.name = 'handycam'
 
 include 'common'
