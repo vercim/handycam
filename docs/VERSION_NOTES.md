@@ -6,7 +6,7 @@
 ```
 minecraft_version        = 26.2
 fabric_loader_version    = 0.19.3
-fabric_api_version       = 0.145.4+26.2
+fabric_api_version       = 0.152.1+26.2
 neoforge_version         = 26.2.0.7-beta
 cloth-config-fabric      = 26.2.155
 cloth-config-neoforge    = 26.2.155
