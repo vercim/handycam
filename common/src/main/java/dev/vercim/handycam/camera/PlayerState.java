@@ -75,6 +75,7 @@ public final class PlayerState {
         if (pitchDelta >  20f) pitchDelta =  20f;
         if (pitchDelta < -20f) pitchDelta = -20f;
         prevXRot = currentXRot;
+        prevXRot = currentXRot;
 
         
         float yawRad   = (float) Math.toRadians(currentYRot);

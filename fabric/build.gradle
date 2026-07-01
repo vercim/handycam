@@ -2,6 +2,14 @@ plugins {
     id 'com.gradleup.shadow'
 }
 
+def fabric26_1PinnedModules = [
+    'net.fabricmc.fabric-api:fabric-api-base:2.0.3+ece0632347',
+    'net.fabricmc.fabric-api:fabric-key-mapping-api-v1:2.0.4+e2bdee7847',
+    'net.fabricmc.fabric-api:fabric-lifecycle-events-v1:4.0.6+a9b9c17647',
+    'net.fabricmc.fabric-api:fabric-resource-loader-v1:2.0.9+d871b99e47',
+    'net.fabricmc.fabric-api:fabric-screen-api-v1:5.0.1+d871b99e47',
+]
+
 architectury {
     platformSetupLoomIde()
     fabric()
@@ -16,27 +24,35 @@ configurations {
     runtimeClasspath.extendsFrom common
     developmentFabric.extendsFrom common
 
-    // Files in this configuration will be bundled into your mod using the Shadow plugin.
-    // Don't use the `shadow` configuration from the plugin itself as it's meant for excluding files.
     shadowBundle {
         canBeResolved = true
         canBeConsumed = false
     }
+
+    apiElements {
+        outgoing.artifacts.clear()
+        outgoing.artifact(shadowJar)
+    }
+    runtimeElements {
+        outgoing.artifacts.clear()
+        outgoing.artifact(shadowJar)
+    }
+}
+
+configurations.configureEach {
+    resolutionStrategy.force(*fabric26_1PinnedModules)
 }
 
 dependencies {
-    modImplementation "net.fabricmc:fabric-loader:$rootProject.fabric_loader_version"
+    api "net.fabricmc:fabric-loader:$rootProject.fabric_loader_version"
+    api "net.fabricmc.fabric-api:fabric-api:$rootProject.fabric_api_version"
+    api "net.fabricmc.fabric-api:fabric-key-mapping-api-v1:2.0.4+e2bdee7847"
+    api "me.shedaniel.cloth:cloth-config-fabric:26.1.154"
 
-    // Fabric API. This is technically optional, but you probably want it anyway.
-    modImplementation "net.fabricmc.fabric-api:fabric-api:$rootProject.fabric_api_version"
+    compileOnly "com.terraformersmc:modmenu:18.0.0-alpha.8"
+    localRuntime "com.terraformersmc:modmenu:18.0.0-alpha.8"
 
-    // Cloth Config
-    modImplementation "me.shedaniel.cloth:cloth-config-fabric:17.0.144"
-
-    // ModMenu
-    modImplementation "com.terraformersmc:modmenu:13.0.4"
-
-    common(project(path: ':common', configuration: 'namedElements')) { transitive = false }
+    common(project(path: ':common')) { transitive = false }
     shadowBundle project(path: ':common', configuration: 'transformProductionFabric')
 }
 
@@ -48,12 +64,16 @@ processResources {
     }
 }
 
-shadowJar {
-    configurations = [project.configurations.shadowBundle]
-    archiveClassifier = 'dev-shadow'
+jar {
+    archiveClassifier = 'raw'
 }
 
-remapJar {
-    inputFile.set shadowJar.archiveFile
+shadowJar {
+    dependsOn(jar)
+    mainSpec.sourcePaths.clear()
+    from(zipTree(jar.archiveFile))
+
+    configurations = [project.configurations.shadowBundle]
+    archiveClassifier = null
     archiveFileName = "${rootProject.archives_name}-${rootProject.mod_version}-${project.name}-${rootProject.minecraft_version}.jar"
 }
