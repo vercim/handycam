@@ -196,10 +196,11 @@ No `DeltaTracker` yet on 1.20.1.
 - Keep the mixin compatibility level at `JAVA_17` in `handycam.mixins.json`; `JAVA_21` crashes Fabric 1.20.1 during bootstrap.
 - `Cloth Config` on 1.20.1 crashes if `builder.setDefaultBackgroundTexture(null)` is used; leave the default background untouched instead.
 - Config loading needed a defensive `sanitize()` pass because GSON can deserialize stale or invalid values from older configs.
-- Camera roll needs two 1.20.1-specific hooks. `Camera.setRotation(yRot, xRot)` internally builds `rotation.rotationYXZ(-yaw, pitch, 0)`, so `CameraMixin` must rebuild orientation in that same order as `rotation.rotationYXZ(-yaw, pitch, -roll)` and refresh `forwards` / `up` / `left`.
-- That alone is not enough for visible world tilt on 1.20.1: `GameRenderer.renderLevel(...)` builds the view matrix from `camera.getYRot()` and `camera.getXRot()` only. The visible roll fix is an extra `GameRendererMixin` injection that applies `CameraShakeSystem.getCurrentRoll()` to the `PoseStack` after vanilla yaw/pitch rotations.
+- `CameraMixin` should stay as close to `main` as possible on this branch: apply local `rotateX(pitch)`, `rotateY(-yaw)`, and `rotateZ(roll)` directly to `Camera.rotation`, then rebuild `forwards` / `up` / `left` because 1.20.1 still uses those cached basis vectors for camera movement.
+- 1.20.1 still renders the world from a yaw/pitch-only view matrix, so visible strafe banking needs one extra bridge in `GameRendererMixin`: inject right before `RenderSystem.setInverseViewRotationMatrix(...)` and apply `CameraShakeSystem.getCurrentRoll()` with `PoseStack.Pose.pose().rotateLocalZ(...)` and `normal().rotateLocalZ(...)`. Using local Z is important; world-space Z rotations make the effect depend on cardinal direction.
 - `StrafeTiltLayer` should remain a pure `roll` effect on 1.20.1. Adding a `yaw` component there makes the left-right tilt feel like horizontal steering instead of camera banking.
 - `WalkBobLayer` should not add a lateral `yaw` sway on this branch; that subtle left-right steering visually masks strafe banking and makes roll issues harder to diagnose.
+- `ForwardTiltLayer`, `JumpShakeLayer`, and `LandingImpactLayer` needed sign corrections on 1.20.1 after the camera port. Forward/backward lean and jump/landing pitch should be verified in-game after any future camera-math changes.
 - Directional tilt on 1.20.1 should read movement intent from `LocalPlayer.xxa` / `zza`; relying on `player.input.leftImpulse` / `forwardImpulse` can break or misroute strafe tilt.
 
 ---
