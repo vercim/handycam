@@ -46,20 +46,13 @@ public abstract class CameraMixin {
         
         CameraAccessor self = (CameraAccessor) (Object) this;
 
-        // Let vanilla rebuild yaw/pitch first, then add a direct Z-roll on top.
-        // On 1.20.1 this preserves visible banking without relying on a fully custom
-        // quaternion rebuild.
-        float newXRot = self.getXRot() - offset.pitch;
-        float newYRot = self.getYRot() + offset.yaw;
-        self.invokeSetRotation(newYRot, newXRot);
-
         Quaternionf rotation = self.getRotation();
         Vector3f forwards = self.getForwards();
         Vector3f up = self.getUp();
         Vector3f left = self.getLeft();
-        if (Math.abs(offset.roll) > 1.0e-4f) {
-            rotation.rotateZ(offset.roll * Mth.DEG_TO_RAD);
-        }
+        if (Math.abs(offset.pitch) > 1.0e-4f) rotation.rotateX( offset.pitch * Mth.DEG_TO_RAD);
+        if (Math.abs(offset.yaw)   > 1.0e-4f) rotation.rotateY(-offset.yaw   * Mth.DEG_TO_RAD);
+        if (Math.abs(offset.roll)  > 1.0e-4f) rotation.rotateZ( offset.roll  * Mth.DEG_TO_RAD);
         forwards.set(0f, 0f, 1f).rotate(rotation);
         up.set(0f, 1f, 0f).rotate(rotation);
         left.set(1f, 0f, 0f).rotate(rotation);
@@ -69,8 +62,8 @@ public abstract class CameraMixin {
         }
 
         if (isFirstPerson) {
-            self.setXRot(newXRot);
-            self.setYRot(newYRot);
+            self.setXRot(self.getXRot() + offset.pitch);
+            self.setYRot(self.getYRot() + offset.yaw);
         }
     }
 }

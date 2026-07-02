@@ -196,8 +196,10 @@ No `DeltaTracker` yet on 1.20.1.
 - Keep the mixin compatibility level at `JAVA_17` in `handycam.mixins.json`; `JAVA_21` crashes Fabric 1.20.1 during bootstrap.
 - `Cloth Config` on 1.20.1 crashes if `builder.setDefaultBackgroundTexture(null)` is used; leave the default background untouched instead.
 - Config loading needed a defensive `sanitize()` pass because GSON can deserialize stale or invalid values from older configs.
-- Camera roll cannot be applied the same way as on newer branches. On 1.20.1, vanilla `Camera.setRotation(yRot, xRot)` internally builds `rotation.rotationYXZ(-yaw, pitch, 0)`, so the stable fix is to build the full camera orientation in that same order as `rotation.rotationYXZ(-yaw, pitch, -roll)` and then rebuild `forwards` / `up` / `left`.
+- Camera roll needs two 1.20.1-specific hooks. `Camera.setRotation(yRot, xRot)` internally builds `rotation.rotationYXZ(-yaw, pitch, 0)`, so `CameraMixin` must rebuild orientation in that same order as `rotation.rotationYXZ(-yaw, pitch, -roll)` and refresh `forwards` / `up` / `left`.
+- That alone is not enough for visible world tilt on 1.20.1: `GameRenderer.renderLevel(...)` builds the view matrix from `camera.getYRot()` and `camera.getXRot()` only. The visible roll fix is an extra `GameRendererMixin` injection that applies `CameraShakeSystem.getCurrentRoll()` to the `PoseStack` after vanilla yaw/pitch rotations.
 - `StrafeTiltLayer` should remain a pure `roll` effect on 1.20.1. Adding a `yaw` component there makes the left-right tilt feel like horizontal steering instead of camera banking.
+- `WalkBobLayer` should not add a lateral `yaw` sway on this branch; that subtle left-right steering visually masks strafe banking and makes roll issues harder to diagnose.
 - Directional tilt on 1.20.1 should read movement intent from `LocalPlayer.xxa` / `zza`; relying on `player.input.leftImpulse` / `forwardImpulse` can break or misroute strafe tilt.
 
 ---

@@ -33,7 +33,7 @@ public class LandingImpactLayer implements ShakeLayer {
 
         side = -side;
 
-        pitchTarget = -strength;
+        pitchTarget = strength;
         rollTarget  =  side * strength;
         yawTarget   =  side * strength * 0.5f;
     }

@@ -40,7 +40,7 @@ public class ForwardTiltLayer implements ShakeLayer {
         float i = cfg.forwardTiltIntensity * sprintMult * 0.6f;
 
         
-        float targetPitch = -smoothForward * i;
+        float targetPitch = smoothForward * i;
         
         float targetRoll  =  smoothForward * i * 0.3f;
 
