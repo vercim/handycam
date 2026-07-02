@@ -1,4 +1,4 @@
-![handycam-mod-title](https://cdn.modrinth.com/data/cached_images/677d32c3bc55e06c5c266f059cc81f9b2a2fa019.png)
+[![handycam-mod-title](https://cdn.modrinth.com/data/cached_images/677d32c3bc55e06c5c266f059cc81f9b2a2fa019.png)](https://modrinth.com/mod/handycam)
 
 > Procedural camera motion for Minecraft — Fabric, NeoForge and Forge
 
