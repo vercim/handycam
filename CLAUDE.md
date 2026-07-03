@@ -14,6 +14,13 @@ Handycam — client-side Minecraft mod, procedural camera system. Fabric + NeoFo
 
 Artifacts: `fabric/build/libs/`, `neoforge/build/libs/`.
 
+## Release Checklist
+
+- Do not trust IDE-only runs for loader integration changes. Always validate the packaged loader jar from `build/libs/` in a clean external client profile.
+- When working with Mixins, verify that each loader registers `handycam.mixins.json` the way that loader expects.
+- Fabric registers Mixins via `fabric.mod.json`; Forge/NeoForge may require explicit loader/build configuration in addition to bundling the JSON file itself.
+- Before release, inspect the final jar metadata if Mixin behavior differs between IDE and production. A missing manifest/config entry can make the mod load while all injections silently do nothing.
+
 ## Structure
 
 ```
