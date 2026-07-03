@@ -1,3 +1,8 @@
+## [1.3.2] - 2026-07-03
+
+### Fixes
+- Fixed release packaging so `handycam.mixins.json` is registered in the packaged jar. Effects could work in IDE testing but not in a real game client.
+
 ## [1.3.1] - 2026-06-30
 
 ### Config
