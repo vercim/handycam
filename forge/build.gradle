@@ -7,6 +7,12 @@ architectury {
     forge()
 }
 
+loom {
+    forge {
+        mixinConfig 'handycam.mixins.json'
+    }
+}
+
 configurations {
     common {
         canBeResolved = true
