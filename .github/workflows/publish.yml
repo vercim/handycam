@@ -5,14 +5,16 @@ on:
     inputs:
       action:
         description: |
-          new_release        - create MC-specific tag + GitHub release + publish everywhere
-          curseforge_publish - publish to CurseForge only
-          modrinth_publish   - publish to Modrinth only
+          new_release        - create tag + GitHub release + publish everywhere
+          add_mc_version     - add files to an existing release
+          curseforge_publish - re-publish to CurseForge only
+          modrinth_publish   - re-publish to Modrinth only
         required: true
         default: "new_release"
         type: choice
         options:
           - new_release
+          - add_mc_version
           - curseforge_publish
           - modrinth_publish
 
@@ -44,7 +46,7 @@ jobs:
 
           echo "mod_version=$MOD_VERSION" >> "$GITHUB_OUTPUT"
           echo "mc_version=$MC_VERSION" >> "$GITHUB_OUTPUT"
-          echo "release_tag=v$MOD_VERSION+$MC_VERSION" >> "$GITHUB_OUTPUT"
+          echo "release_tag=v$MOD_VERSION" >> "$GITHUB_OUTPUT"
           echo "platforms=$PLATFORMS" >> "$GITHUB_OUTPUT"
           echo "Mod: $MOD_VERSION | MC: $MC_VERSION | Platforms: $PLATFORMS"
 
@@ -72,6 +74,12 @@ jobs:
           if [ "$ACTION" = "new_release" ] && [ "$RELEASE_EXISTS" = "true" ]; then
             echo "::error::Release $RELEASE_TAG already exists."
             echo "  -> Did you forget to bump mod_version in gradle.properties?"
+            ERRORS=$((ERRORS + 1))
+          fi
+
+          if [ "$ACTION" = "add_mc_version" ] && [ "$RELEASE_EXISTS" = "false" ]; then
+            echo "::error::Release $RELEASE_TAG does not exist yet."
+            echo "  -> Run the workflow on the main branch with 'new_release' first."
             ERRORS=$((ERRORS + 1))
           fi
 
@@ -131,7 +139,6 @@ jobs:
           CHANGELOG: ${{ steps.changelog.outputs.content }}
         run: |
           MOD_VERSION="${{ steps.vars.outputs.mod_version }}"
-          MC_VERSION="${{ steps.vars.outputs.mc_version }}"
           RELEASE_TAG="${{ steps.vars.outputs.release_tag }}"
 
           git config user.name "github-actions[bot]"
@@ -145,13 +152,13 @@ jobs:
           fi
 
           gh release create "$RELEASE_TAG" \
-            --title "Handycam $MOD_VERSION for $MC_VERSION" \
+            --title "Handycam $MOD_VERSION" \
             --notes "$CHANGELOG" \
             $PRERELEASE_FLAG
           echo "Created release $RELEASE_TAG"
 
       - name: Upload to GitHub release
-        if: github.event.inputs.action == 'new_release'
+        if: github.event.inputs.action == 'new_release' || github.event.inputs.action == 'add_mc_version'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
