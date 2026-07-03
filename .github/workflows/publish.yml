@@ -6,7 +6,6 @@ on:
       action:
         description: |
           new_release        - create MC-specific tag + GitHub release + publish everywhere
-          add_mc_version     - deprecated for MC-specific tags; fails with guidance
           curseforge_publish - publish to CurseForge only
           modrinth_publish   - publish to Modrinth only
         required: true
@@ -14,7 +13,6 @@ on:
         type: choice
         options:
           - new_release
-          - add_mc_version
           - curseforge_publish
           - modrinth_publish
 
@@ -74,12 +72,6 @@ jobs:
           if [ "$ACTION" = "new_release" ] && [ "$RELEASE_EXISTS" = "true" ]; then
             echo "::error::Release $RELEASE_TAG already exists."
             echo "  -> Did you forget to bump mod_version in gradle.properties?"
-            ERRORS=$((ERRORS + 1))
-          fi
-
-          if [ "$ACTION" = "add_mc_version" ]; then
-            echo "::error::The add_mc_version mode is not supported with MC-specific tags."
-            echo "  -> Publish each Minecraft branch as its own release tag, for example v1.3.2+1.20.1."
             ERRORS=$((ERRORS + 1))
           fi
 
@@ -153,7 +145,7 @@ jobs:
           fi
 
           gh release create "$RELEASE_TAG" \
-            --title "Handycam $MOD_VERSION for Minecraft $MC_VERSION" \
+            --title "Handycam $MOD_VERSION for $MC_VERSION" \
             --notes "$CHANGELOG" \
             $PRERELEASE_FLAG
           echo "Created release $RELEASE_TAG"
