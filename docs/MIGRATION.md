@@ -84,6 +84,112 @@ The current publish workflow reads one version from `gradle.properties`, builds 
 
 This can simplify release consistency, but it also means the current CI assumptions would need to be reworked.
 
+### Auto-Release Workflow
+
+The release workflow would be one of the most visible process changes after a Stonecutter migration.
+
+Today, the current automation model is branch-driven:
+
+- the checked out branch implies the Minecraft version
+- `gradle.properties` contains the active target version
+- the workflow builds exactly that target
+- tags and release artifacts are created from the branch-specific build context
+
+That model works well when each supported Minecraft version lives in its own branch. It becomes less natural once multiple supported targets live in one repository.
+
+After migration, the workflow would likely become target-driven instead:
+
+- the workflow explicitly selects one or more Minecraft targets to build
+- the build system resolves the correct dependencies and source variants for each target
+- release jobs no longer rely on branch identity to determine the Minecraft version
+- artifact names, release metadata, and publishing payloads are derived from the selected target matrix
+
+In other words, the source of truth would shift from:
+
+> "which branch is running?"
+
+to:
+
+> "which target or set of targets is this release job building?"
+
+This changes the shape of CI in a few important ways.
+
+#### What Would Stop Being True
+
+Several assumptions in the current workflow would no longer be reliable:
+
+- `main` would no longer mean one fixed Minecraft version by itself
+- reading a single `minecraft_version` from top-level `gradle.properties` would no longer describe the whole repository
+- "run the release workflow on branch `X`" would no longer be enough to define the release target
+- some validation logic that is currently branch-aware would need to become matrix-aware
+
+#### What Would Likely Replace It
+
+A Stonecutter-friendly release workflow would usually center around an explicit build matrix.
+
+That typically means the workflow would:
+
+- define the list of supported Minecraft targets in one place
+- choose whether a given release builds all supported targets or only a selected subset
+- run one build per target
+- collect jars across targets and loaders
+- publish them under a shared mod version with target-specific filenames and metadata
+
+For Handycam, this would fit the existing artifact model well because the jars are already version- and loader-specific. The main difference is that the workflow would compute those combinations from a target list rather than inheriting them from the checked out branch.
+
+#### Release Semantics Would Need A Policy Decision
+
+The current workflow assumes a fairly simple release story: one branch, one Minecraft target, one release action.
+
+After migration, the project would need to decide which of these models it wants:
+
+- one mod release triggers publication for every supported Minecraft target
+- one mod release can publish only a chosen subset of supported targets
+- stable targets publish automatically, while legacy targets publish only on demand
+
+This is not just an implementation detail. It becomes part of the maintenance policy.
+
+If Handycam wants to support many old versions, the third model is often the healthiest one. It keeps the pipeline flexible without forcing every old line to ship on every release.
+
+#### Validation Would Become More Important
+
+A multi-target release pipeline needs stronger validation than a branch-based one because mistakes are easier to hide inside the matrix.
+
+The workflow would likely need to validate things such as:
+
+- which Minecraft targets are currently marked as releasable
+- which loaders are supported for each target
+- whether every expected jar was produced for every selected target
+- whether changelog or release notes apply to the whole release or only part of the matrix
+- whether a target is stable, beta, or legacy before publishing it automatically
+
+This is extra CI work, but it is also one of the places where Stonecutter can improve safety once the structure is in place.
+
+#### GitHub Releases And Platform Publishing Would Also Shift
+
+The current workflow already creates version-specific jars and publishes them to GitHub Releases, CurseForge, and Modrinth. That basic idea does not need to change.
+
+What changes is how the metadata is assembled:
+
+- GitHub release assets would likely be uploaded from several target builds in one workflow
+- Modrinth and CurseForge payloads would be generated per target rather than per branch
+- tags would need a clear naming policy that does not depend on the branch layout
+
+For example, the repository could keep a release tag centered on the mod version and attach multiple Minecraft-targeted artifacts to it, or it could continue using tags that include both mod version and Minecraft version. Either choice can work, but it should be explicit.
+
+#### The Main Benefit
+
+The biggest workflow gain is that release behavior becomes consistent across versions because it is described centrally.
+
+Instead of maintaining parallel automation logic implicitly through several long-lived branches, the repository would have one release system that knows:
+
+- which targets exist
+- which of them are supported
+- which loaders belong to each one
+- which of them should publish automatically
+
+That is usually easier to reason about in the long term, especially if the project wants to keep adding or reviving older Minecraft lines.
+
 ### Day-to-Day Development
 
 Normal feature work becomes more centralized because the default question is no longer "which branch gets the fix first?" but "is this shared or version-specific?"
