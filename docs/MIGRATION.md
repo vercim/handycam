@@ -175,7 +175,7 @@ What changes is how the metadata is assembled:
 - Modrinth and CurseForge payloads would be generated per target rather than per branch
 - tags would need a clear naming policy that does not depend on the branch layout
 
-For example, the repository could keep a release tag centered on the mod version and attach multiple Minecraft-targeted artifacts to it, or it could continue using tags that include both mod version and Minecraft version. Either choice can work, but it should be explicit.
+For example, the current branch-based workflow keeps a release tag centered on the mod version and can attach additional Minecraft-targeted artifacts to that same release. A Stonecutter migration could keep that policy or replace it with a different tag scheme, but the choice should stay explicit.
 
 #### The Main Benefit
 
