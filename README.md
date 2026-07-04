@@ -24,6 +24,7 @@ Handycam adds subtle, physics-inspired camera movement that makes Minecraft feel
 | **Crouch shake** | Small camera dip when crouching |
 | **Eat sway** | Camera tilts and sways while eating food or drinking potions |
 | **Bow shot recoil** | Camera kick on bow and crossbow release, with draw-tilt compensation |
+| **Explosions** | The camera shakes during an explosion or a nearby lightning strike. The intensity depends on the distance. |
 
 All effects are independently configurable or can be disabled entirely.
 
