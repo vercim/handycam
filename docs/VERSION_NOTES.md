@@ -54,6 +54,35 @@ Per-version API nuances for Handycam. Read this before porting to a new Minecraf
 
 ---
 
+## [MC 1.21.10]  mod 1.3.2  —  2026-07-07
+
+### gradle.properties
+```
+minecraft_version        = 1.21.10
+fabric_loader_version    = 0.19.3
+fabric_api_version       = 0.134.1+1.21.10
+neoforge_version         = 21.10.64
+cloth-config-fabric      = 21.11.153
+cloth-config-neoforge    = 21.11.153
+modmenu                  = 16.0.1
+architectury-loom        = 1.14.476
+architectury-plugin      = 3.4-SNAPSHOT
+shadow                   = 8.3.6
+```
+
+### Port basis
+- Branched from the maintained `1.21.11` line and downgraded one patch level to `1.21.10`.
+- Kept the `GuiGraphics.pose()` 2D matrix stack methods and `KeyMapping.Category` registration from `1.21.11`, but `Camera.setup(...)` had to be reverted back to the `BlockGetter` signature on `1.21.10`.
+
+### Notes
+- Fabric API `0.134.1+1.21.10` and NeoForge `21.10.64` were selected from their published Maven metadata.
+- Cloth Config does not publish a distinct `21.10.x` artifact line in the current Maven metadata; the port keeps `21.11.153`, which remains the shared Cloth line used by this branch family.
+- ModMenu `16.0.1` is the compatible Fabric line for Minecraft `1.21.10`; `17.0.0` requires `1.21.11+`.
+- Fabric dev runtime on this branch needs the helper-module pins `fabric-screen-api-v1:3.0.3+86b3ae5787` and `fabric-lifecycle-events-v1:2.6.9+33df5e6e87` to avoid `No refMap loaded` mixin-remap failures in the newer `1.21.10` helper artifacts.
+- With those helper-module pins in place and `CameraMixin` reverted to `setup(BlockGetter, Entity, boolean, boolean, float)`, both `./gradlew build` and `./gradlew :fabric:runClient` complete successfully for local dev use. The remaining log noise is the usual unauthenticated Realms/session warnings from Fabric dev launch.
+
+---
+
 ## [MC 1.21.11]  mod 1.3.0  —  2026-06-30
 
 ### gradle.properties

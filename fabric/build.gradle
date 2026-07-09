@@ -22,19 +22,28 @@ configurations {
         canBeResolved = true
         canBeConsumed = false
     }
+
+    configureEach {
+        resolutionStrategy {
+            force "net.fabricmc.fabric-api:fabric-screen-api-v1:3.0.3+86b3ae5787"
+            force "net.fabricmc.fabric-api:fabric-lifecycle-events-v1:2.6.9+33df5e6e87"
+            force "net.fabricmc.fabric-api:fabric-item-api-v1:11.5.20+d0c46b9e3e"
+            force "net.fabricmc.fabric-api:fabric-loot-api-v3:2.0.20+78c8b4663e"
+        }
+    }
 }
 
 dependencies {
     modImplementation "net.fabricmc:fabric-loader:$rootProject.fabric_loader_version"
 
-    // Fabric API. This is technically optional, but you probably want it anyway.
+    // Fabric API
     modImplementation "net.fabricmc.fabric-api:fabric-api:$rootProject.fabric_api_version"
 
     // Cloth Config
-    modImplementation "me.shedaniel.cloth:cloth-config-fabric:21.11.153"
+    modImplementation "me.shedaniel.cloth:cloth-config-fabric:20.0.149"
 
     // ModMenu
-    modImplementation "com.terraformersmc:modmenu:17.0.0"
+    modImplementation "com.terraformersmc:modmenu:16.0.1"
 
     common(project(path: ':common', configuration: 'namedElements')) { transitive = false }
     shadowBundle project(path: ':common', configuration: 'transformProductionFabric')

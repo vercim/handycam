@@ -7,7 +7,7 @@ import dev.vercim.handycam.config.HandycamConfig;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -21,7 +21,7 @@ import net.neoforged.neoforge.common.NeoForge;
 public final class HandycamNeoForgeClient {
 
     private static final KeyMapping.Category HANDYCAM_CATEGORY = KeyMapping.Category.register(
-        Identifier.fromNamespaceAndPath(HandycamMod.MOD_ID, "handycam")
+        ResourceLocation.fromNamespaceAndPath(HandycamMod.MOD_ID, "handycam")
     );
     private static final KeyMapping TOGGLE_EFFECTS_KEY = new KeyMapping(
         "key.handycam.toggle_effects",
