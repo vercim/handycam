@@ -40,7 +40,7 @@ dependencies {
     modImplementation "net.fabricmc.fabric-api:fabric-api:$rootProject.fabric_api_version"
 
     // Cloth Config
-    modImplementation "me.shedaniel.cloth:cloth-config-fabric:20.0.149"
+    modImplementation "me.shedaniel.cloth:cloth-config-fabric:21.11.153"
 
     // ModMenu
     modImplementation "com.terraformersmc:modmenu:16.0.1"
