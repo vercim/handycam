@@ -19,7 +19,7 @@ on:
           - modrinth_publish
 
 env:
-  RELEASE_TYPE: release   # beta | release | alpha — applies to GitHub, Modrinth, CurseForge
+  RELEASE_TYPE: beta   # beta | release | alpha — applies to GitHub, Modrinth, CurseForge
 
 jobs:
   publish:
