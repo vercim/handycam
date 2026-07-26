@@ -6,45 +6,9 @@ Handycam adds subtle, physics-inspired camera movement that makes Minecraft feel
 
 [<img alt="modrinth" height="56" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/available/modrinth_vector.svg">](https://modrinth.com/mod/handycam/) [<img alt="curseforge" height="56" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/available/curseforge_vector.svg">](https://www.curseforge.com/minecraft/mc-mods/handycam) [<img alt="cloth-config-api" height="56" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/requires/cloth-config-api_vector.svg">](https://modrinth.com/mod/cloth-config) [<img alt="fabric-api" height="56" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/requires/fabric-api_vector.svg">](https://modrinth.com/mod/fabric-api)
 
-## Effects
-
-| Effect | Description |
-|---|---|
-| **Walk bob** | Vertical and lateral oscillation tied to footstep frequency and speed |
-| **Sprint sway** | Roll and lateral drift while sprinting, driven by fractal Perlin noise |
-| **Strafe tilt** | Camera rolls slightly when strafing left or right |
-| **Forward tilt** | Subtle pitch forward while moving |
-| **Mouse lead** | Camera shifts slightly toward the look direction |
-| **Idle shake** | Low-amplitude micro-movement when standing still |
-| **Breath** | Slow vertical camera bob simulating breathing (sine wave, ~0.4 Hz) |
-| **Damage shake** | Spring-simulated camera jolt on incoming damage |
-| **Hit impact** | Multi-axis camera impact when hitting entities |
-| **Landing impact** | Brief downward pitch proportional to fall height |
-| **Jump shake** | Camera response to jumping and landing |
-| **Crouch shake** | Small camera dip when crouching |
-| **Eat sway** | Camera tilts and sways while eating food or drinking potions |
-| **Bow shot recoil** | Camera kick on bow and crossbow release, with draw-tilt compensation |
-| **Explosions** | The camera shakes during an explosion or a nearby lightning strike. The intensity depends on the distance. |
-
-All effects are independently configurable or can be disabled entirely.
-
-## File Name Format
-
-Jar files follow this naming pattern:
-
-```
-handycam-1.3.1-fabric-1.21.4.jar
-           │         │      │
-           │         │      └─ Minecraft version this jar targets
-           │         └─ Mod loader (fabric or neoforge)
-           └─ Mod version
-```
-
-Make sure the Minecraft version in the filename matches your game version. Fabric and NeoForge jars are separate downloads even for the same Minecraft version.
-
 ## Structure
 
-The mod is organized around **independent, composable camera shake layers**, each handling a specific input and outputting a camera offset:
+The mod is organized around independent, composable camera shake layers, each handling a specific input and outputting a camera offset:
 
 ```
 camera/
@@ -74,16 +38,54 @@ camera/
      └─ FractalNoise       — Multi-octave Perlin for smooth sway
 ```
 
-Each layer is **independent**: they don't call each other, just independently read player state and output their own offset. All offsets are summed by `CameraShakeSystem` and fed into the vanilla camera via Mixin.
+Each layer is independent: they don't call each other, just independently read player state and output their own offset. All offsets are summed by `CameraShakeSystem` and fed into the vanilla camera via Mixin.
+
+## File Name Format
+
+Jar files follow this naming pattern:
+
+```
+handycam-1.3.1-fabric-1.21.4.jar
+           │         │      │
+           │         │      └─ Minecraft version this jar targets
+           │         └─ Mod loader (fabric or neoforge)
+           └─ Mod version
+```
+
+## Multi-loader setup
+Handycam supports Fabric and NeoForge from a single codebase using Architectury Loom.
+This keeps the gameplay behaviour identical across loaders while limiting platform-specific code to thin integration layers.
 
 ## Requirements
 
 - [Cloth Config](https://modrinth.com/mod/cloth-config)
-- [ModMenu](https://modrinth.com/mod/modmenu) *(Fabric only)*
 - [Fabric API](https://modrinth.com/mod/fabric-api) *(Fabric only)*
+- [ModMenu](https://modrinth.com/mod/modmenu) *(Recommended)*
 
 ## Configuration
 
-Open the config screen via ModMenu (Fabric) or the in-game mod list (NeoForge). Settings are saved to `config/handycam-config.json`.
+Handycam stores its settings in `config/handycam-config.json`, which can be edited directly while the game is closed.
+
+You can also change settings in-game:
+
+- Fabric: open Handycam’s configuration screen through [Mod Menu](https://modrinth.com/mod/modmenu).
+- NeoForge: open the Mods menu, select Handycam, and click Config.
+
+Changes made through the in-game screen are saved automatically.
+
+## Build
+
+Use the Gradle wrapper to build both loader variants or a specific platform:
+
+```powershell
+# Build Fabric and NeoForge jars
+.\gradlew.bat build
+
+# Build one loader only
+.\gradlew.bat :fabric:build
+.\gradlew.bat :neoforge:build
+```
+
+---
 
 > If you've found a bug or a version incompatibility, or if you have a suggestion, please [post it here](https://github.com/vercim/handycam/issues). Here is a [simple guide](https://youtu.be/CVqOHDpVwDc) on how to do that.
