@@ -1,94 +1,86 @@
-[![handycam-mod-title](https://cdn.modrinth.com/data/cached_images/677d32c3bc55e06c5c266f059cc81f9b2a2fa019.png)](https://modrinth.com/mod/handycam)
+[![Handycam](https://cdn.modrinth.com/data/cached_images/677d32c3bc55e06c5c266f059cc81f9b2a2fa019.png)](https://modrinth.com/mod/handycam)
 
-> Procedural camera motion for Minecraft — Fabric, NeoForge and Forge
+> Procedural camera motion for Minecraft — Fabric, NeoForge, and Forge
 
-Handycam adds subtle, physics-inspired camera movement that makes Minecraft feel like it's being filmed with a real handheld camera. Every step, sprint, hit, and landing is reflected in the camera with spring-simulated, noise-driven motion.
+Handycam adds subtle, physics-inspired camera movement that makes Minecraft feel like it is being filmed with a real handheld camera. Every step, sprint, hit, and landing is reflected in the camera with spring-simulated, noise-driven motion.
 
 [<img alt="modrinth" height="56" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/available/modrinth_vector.svg">](https://modrinth.com/mod/handycam/)
 [<img alt="curseforge" height="56" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/available/curseforge_vector.svg">](https://www.curseforge.com/minecraft/mc-mods/handycam)
 [<img alt="cloth-config-api" height="56" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/requires/cloth-config-api_vector.svg">](https://modrinth.com/mod/cloth-config)
 [<img alt="fabric-api" height="56" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/requires/fabric-api_vector.svg">](https://modrinth.com/mod/fabric-api)
 
-## Structure
+## Effects
 
-The mod is organized around independent, composable camera shake layers, each handling a specific input and outputting a camera offset:
+- Walk bob, sprint sway, strafe and forward tilt
+- Mouse lead, idle shake, and breathing
+- Damage, hit, bow, explosion, jump, and landing impacts
+- Crouch and eating/drinking motion
+- Crosshair compensation for draw and eating effects
 
-```
-camera/
-  ├─ CameraShakeSystem     — Main orchestrator, sums all layer outputs each tick
-  ├─ ShakeLayer            — Interface; all effects extend this
-  ├─ CameraOffset          — Immutable container (pitch, yaw, roll, x, y, z)
-  ├─ PlayerState           — Read-only snapshot of player input/state per tick
-  ├─ CrosshairSwaySystem   — Tracks UI compensation for draw-tilt and eat-tilt
-  ├─ layers/
-  │  ├─ WalkBobLayer       — Footstep-driven up/down and side-to-side bob
-  │  ├─ CameraSwayLayer    — Noise-driven roll and drift while sprinting
-  │  ├─ IdleShakeLayer     — Subtle micro-motion when standing still
-  │  ├─ BreathLayer        — Slow vertical sine-wave bob simulating breathing
-  │  ├─ DamageShakeLayer   — Spring-damped impulse on damage
-  │  ├─ HitImpactLayer     — Multi-axis hit detection and response
-  │  ├─ LandingImpactLayer — Downward pitch proportional to fall distance
-  │  ├─ JumpShakeLayer     — Jump and land event detection
-  │  ├─ StrafeTiltLayer    — Roll when strafing left or right
-  │  ├─ ForwardTiltLayer   — Pitch forward when moving
-  │  ├─ MouseLeadLayer     — Offset toward look direction
-  │  ├─ CrouchShakeLayer   — Dip when toggling crouch
-  │  ├─ EatSwayLayer       — Tilt and noise sway while eating/drinking
-  │  └─ BowShotLayer       — Recoil, draw-tilt, and crosshair compensation
-  └─ math/
-     ├─ SpringSimulator    — Underdamped spring for impact effects
-     ├─ PerlinNoise        — 2D Perlin noise primitive
-     └─ FractalNoise       — Multi-octave Perlin for smooth sway
-```
+Every effect can be configured or disabled independently.
 
-Each layer is independent: they don't call each other, just independently read player state and output their own offset. All offsets are summed by `CameraShakeSystem` and fed into the vanilla camera via Mixin.
+## Configuration
 
-## File Name Format
+Handycam stores its settings in `config/handycam-config.json`.
 
-Jar files follow this naming pattern:
+- Fabric: open the configuration screen through [Mod Menu](https://modrinth.com/mod/modmenu).
+- NeoForge: open the Mods menu, select Handycam, and click Config.
 
-```
-handycam-1.3.1-fabric-1.21.4.jar
-           │         │      │
-           │         │      └─ Minecraft version this jar targets
-           │         └─ Mod loader (fabric or neoforge)
-           └─ Mod version
-```
-
-## Multi-loader setup
-Handycam supports Fabric and NeoForge from a single codebase using Architectury Loom.
-This keeps the gameplay behaviour identical across loaders while limiting platform-specific code to thin integration layers.
+Existing 1.x configuration files remain compatible with `2.0.0-alpha`.
 
 ## Requirements
 
 - [Cloth Config](https://modrinth.com/mod/cloth-config)
-- [Fabric API](https://modrinth.com/mod/fabric-api) *(Fabric only)*
-- [ModMenu](https://modrinth.com/mod/modmenu) *(Recommended)*
+- [Fabric API](https://modrinth.com/mod/fabric-api) — Fabric only
+- [Mod Menu](https://modrinth.com/mod/modmenu) — recommended on Fabric
 
-## Configuration
+## Stonecutter architecture
 
-Handycam stores its settings in `config/handycam-config.json`, which can be edited directly while the game is closed.
+Handycam 2.x uses [Stonecutter](https://stonecutter.kikugie.dev/) for multi-loader and multiversion development. The shared `src/main/` tree is the source of truth, and Stonecutter generates one Gradle target for every Minecraft/loader pair.
 
-You can also change settings in-game:
+The initial `2.0.0-alpha` matrix contains:
 
-- Fabric: open Handycam’s configuration screen through [Mod Menu](https://modrinth.com/mod/modmenu).
-- NeoForge: open the Mods menu, select Handycam, and click Config.
+- Minecraft 1.21.1 Fabric
+- Minecraft 1.21.1 NeoForge
 
-Changes made through the in-game screen are saved automatically.
+Future Minecraft versions will be added to this matrix instead of being maintained on long-lived version branches.
 
-## Build
+Release JARs follow this format:
 
-Use the Gradle wrapper to build both loader variants or a specific platform:
+```text
+handycam-2.0.0-alpha+1.21.1-fabric.jar
+          |           |      |
+          |           |      +-- Mod loader
+          |           +--------- Minecraft version
+          +--------------------- Mod version
+```
+
+## Building
+
+On Windows:
 
 ```powershell
-# Build Fabric and NeoForge jars
-.\gradlew.bat build
+# Build both targets and collect release JARs in build/libs
+.\gradlew.bat buildAndCollect
 
-# Build one loader only
-.\gradlew.bat :fabric:build
-.\gradlew.bat :neoforge:build
+# Build one target
+.\gradlew.bat :1.21.1-fabric:build
+.\gradlew.bat :1.21.1-neoforge:build
+
+# Run the target selected in .sc_active_version
+.\gradlew.bat runActiveClient
 ```
+
+On Linux or macOS, replace `.\gradlew.bat` with `./gradlew`.
+
+`clean` is unnecessary for normal development. For a fresh verification:
+
+```powershell
+.\gradlew.bat clean buildAndCollect
+```
+
+Artifacts are collected in `build/libs/`.
 
 ---
 
-> If you've found a bug or a version incompatibility, or if you have a suggestion, please [post it here](https://github.com/vercim/handycam/issues). Here is a [simple guide](https://youtu.be/CVqOHDpVwDc) on how to do that.
+Found a bug or version incompatibility? [Open an issue](https://github.com/vercim/handycam/issues). A short reporting guide is available [here](https://youtu.be/CVqOHDpVwDc).

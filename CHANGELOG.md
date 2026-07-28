@@ -1,3 +1,18 @@
+## [2.0.0-alpha] - 2026-07-28
+
+### Architecture
+- Replaced the Architectury multi-project layout with Stonecutter.
+- Added a single shared source tree for Minecraft 1.21.1 Fabric and NeoForge.
+- Added aggregate `buildAndCollect`, active-target development tasks, and tag-driven publishing.
+
+### Compatibility
+- Preserved the existing Minecraft 1.21.1 camera behavior and configuration format.
+- Kept Fabric API, Cloth Config, and Mod Menu integration on Fabric.
+- Kept Cloth Config and the native config screen integration on NeoForge.
+
+### Documentation
+- Updated build, development, release, and future multiversion guidance for Stonecutter.
+
 ## [1.3.2] - 2026-07-03
 
 ### Fixes
