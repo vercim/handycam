@@ -1,0 +1,39 @@
+modLoader = "javafml"
+loaderVersion = "${neoforge_loader_version_range}"
+license = "LGPL-3.0"
+
+[[mods]]
+modId = "handycam"
+version = "${version}"
+displayName = "Handycam"
+logoFile = "icon.png"
+logoBlur = false
+displayURL = "https://modrinth.com/mod/handycam"
+authors = "vercim"
+description = '''
+Cinematic camera shake for Minecraft
+'''
+
+[[dependencies.handycam]]
+modId = "neoforge"
+type = "required"
+versionRange = "[${neoforge_version},)"
+ordering = "NONE"
+side = "CLIENT"
+
+[[dependencies.handycam]]
+modId = "minecraft"
+type = "required"
+versionRange = "[${minecraft_version},1.21.2)"
+ordering = "NONE"
+side = "CLIENT"
+
+[[dependencies.handycam]]
+modId = "cloth_config"
+type = "required"
+versionRange = "[15,)"
+ordering = "AFTER"
+side = "CLIENT"
+
+[[mixins]]
+config = "handycam.mixins.json"

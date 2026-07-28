@@ -354,19 +354,40 @@ Used in `GuiMixin` to skip crosshair offset in third-person. `CameraType` is in 
 ### Known Porting Pain Points
 
 - **GSON + config**: GSON uses `Unsafe` and bypasses constructors, so field initializers are ignored. Register an `InstanceCreator` for every config class to supply defaults.
-- **Architectury Loom SNAPSHOT**: Check the Architectury changelog before upgrading to ensure the SNAPSHOT for the new MC version is published.
+- **Stonecutter / loader plugins**: Check Stonecutter, Loom Back Compat, Fabric Loom, and NeoForge ModDev compatibility before changing the Gradle wrapper.
 - **NeoForge `@Mixin` scan**: NeoForge requires mixins to be listed in `META-INF/neoforge.mods.toml` under `[[mixins]]`. Fabric uses `fabric.mod.json` → `"mixins"`.
 - **Cloth Config version**: The version scheme is `<cloth-major>.<cloth-minor>.<patch>` — the major tracks an internal API generation, not MC version. Check the [Cloth Config releases](https://github.com/shedaniel/cloth-config/releases) for the correct version for the target MC.
 - **ModMenu**: Only required on Fabric. NeoForge uses its own in-game mod list; the config screen is registered via `IModConfigScreenFactory` (NeoForge) vs. `ModMenuApi` (Fabric).
 
 ---
 
-## [MC 1.21.1]  (not maintained, reference only)
+## [MC 1.21.1]  mod 2.0.0-alpha — 2026-07-28
 
-### Differences vs. 1.21.4
-- `Gui.renderCrosshair` signature was `renderCrosshair(GuiGraphics, float partialTick)` — no `DeltaTracker`.
-- `fabric_api_version` was `0.107.0+1.21.1`, `neoforge_version` was `21.1.x`.
-- `modmenu` was `11.0.x`.
+### Stonecutter targets
+- `1.21.1-fabric`
+- `1.21.1-neoforge`
+
+### Dependencies
+```properties
+minecraft_version=1.21.1
+fabric_loader_version=0.16.4
+fabric_api_version=0.116.6+1.21.1
+neoforge_version=21.1.172
+cloth_config_version=15.0.140
+modmenu_version=11.0.3
+java_version=21
+```
+
+### API notes
+- `Gui.renderCrosshair` uses `renderCrosshair(GuiGraphics, DeltaTracker)` on the maintained 1.21.1 source.
+- Food and drink detection uses `UseAnim.EAT` / `UseAnim.DRINK`.
+- Explosion packets expose coordinates through `getX()`, `getY()`, and `getZ()`.
+- NeoForge client lifecycle subscribers use the MOD event bus.
+
+### Build notes
+- Architectury is no longer used.
+- `buildAndCollect` builds both targets and collects their release JARs in `build/libs/`.
+- Both packaged JARs register `handycam.mixins.json`.
 
 ---
 
@@ -374,7 +395,7 @@ Used in `GuiMixin` to skip crosshair offset in third-person. `CameraType` is in 
 
 When moving to a new MC version, go through each item:
 
-- [ ] Update `gradle.properties` (minecraft, fabric-loader, fabric-api, neoforge, cloth-config, modmenu)
+- [ ] Add the target to `settings.gradle.kts` and configure its loader dependencies
 - [ ] Verify `Camera.setup()` parameters haven't changed (check Mojang diff or mcp-reborn)
 - [ ] Verify `Camera` field names (`xRot`, `yRot`, `rotation`) — run `./gradlew build` and watch for mixin errors
 - [ ] Verify `Camera.move()` method name and parameter order
@@ -389,4 +410,4 @@ When moving to a new MC version, go through each item:
 - [ ] Test creative flight fade-out
 - [ ] Test FOV override (`enableVanillaFov = false`)
 - [ ] Test crosshair offset (mouse lead + bow draw shrink)
-- [ ] Publish with `new_release` on main, then `add_mc_version` on older branches
+- [ ] Build the complete Stonecutter matrix and publish it from one matching release tag

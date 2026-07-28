@@ -1,0 +1,108 @@
+name: Release
+run-name: Release ${{ github.ref_name }}
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Build and publish Minecraft 1.21.1
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out release tag
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Validate release metadata
+        id: release
+        shell: bash
+        run: |
+          version="$(grep '^mod_version=' gradle.properties | cut -d= -f2)"
+          expected_tag="v${version}"
+          if [ "$GITHUB_REF_NAME" != "$expected_tag" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match mod_version=$version"
+            exit 1
+          fi
+
+          if ! grep -q "^## \\[$version\\]" CHANGELOG.md; then
+            echo "::error::CHANGELOG.md has no section for $version"
+            exit 1
+          fi
+
+          case "$version" in
+            *-alpha*) release_type=alpha ;;
+            *-beta*) release_type=beta ;;
+            *) release_type=release ;;
+          esac
+
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "release_type=$release_type" >> "$GITHUB_OUTPUT"
+
+      - name: Build and collect all Stonecutter targets
+        run: |
+          chmod +x gradlew
+          ./gradlew buildAndCollect --no-daemon
+
+      - name: Verify artifacts
+        shell: bash
+        run: |
+          version="${{ steps.release.outputs.version }}"
+          test -f "build/libs/handycam-${version}+1.21.1-fabric.jar"
+          test -f "build/libs/handycam-${version}+1.21.1-neoforge.jar"
+
+      - name: Read changelog
+        id: changelog
+        shell: bash
+        run: |
+          version="${{ steps.release.outputs.version }}"
+          content="$(sed -n "/^## \\[$version\\]/,/^## \\[/{/^## \\[/!p}" CHANGELOG.md)"
+          {
+            echo "content<<CHANGELOG_EOF"
+            printf '%s\n' "$content"
+            echo "CHANGELOG_EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CHANGELOG: ${{ steps.changelog.outputs.content }}
+        shell: bash
+        run: |
+          options=(
+            --title "Handycam ${{ steps.release.outputs.version }}"
+            --notes "$CHANGELOG"
+          )
+          if [ "${{ steps.release.outputs.release_type }}" != "release" ]; then
+            options+=(--prerelease)
+          fi
+          gh release create "$GITHUB_REF_NAME" build/libs/*.jar "${options[@]}"
+
+      - name: Publish to Modrinth and CurseForge
+        env:
+          MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
+          CURSEFORGE_TOKEN: ${{ secrets.CURSEFORGE_TOKEN }}
+          ORG_GRADLE_PROJECT_modrinth_project_id: kONpDzH3
+          ORG_GRADLE_PROJECT_curseforge_project_id: "1588734"
+          ORG_GRADLE_PROJECT_release_type: ${{ steps.release.outputs.release_type }}
+          RELEASE_CHANGELOG: ${{ steps.changelog.outputs.content }}
+        run: ./gradlew publishMods --no-daemon

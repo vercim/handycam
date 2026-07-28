@@ -1,74 +1,113 @@
-# Publishing a New Version
+# Development and Release Workflow
 
-## One-time Setup
+Handycam 2.x uses one Stonecutter repository instead of one long-lived branch per Minecraft version.
 
-Add a secret to the repository:
-**GitHub → Settings → Secrets and variables → Actions → New repository secret**
+## Target Matrix
 
-| Name | Where to get it |
-|------|-----------------|
-| `MODRINTH_TOKEN` | modrinth.com → Settings → Security → Personal access tokens (scopes: `CREATE_VERSION`, `MANAGE_PROJECT`) |
+`2.0.0-alpha` supports:
 
----
+| Target | Loader | Java |
+|---|---|---:|
+| `1.21.1-fabric` | Fabric | 21 |
+| `1.21.1-neoforge` | NeoForge | 21 |
 
-## Releasing a New Version
+The matrix is declared in `settings.gradle.kts`. Add future targets there instead of creating version branches.
 
-### 1. Bump the mod version
+## Daily Development
 
-In [`gradle.properties`](../gradle.properties):
-```
-mod_version = 1.2.2
-```
+The target in `.sc_active_version` is used by the active convenience tasks:
 
-### 2. Write the changelog
-
-In [`CHANGELOG.md`](../CHANGELOG.md), add a new section at the top:
-```markdown
-## [1.2.2] - 2026-07-01
-
-### Added
-- New feature
-
-### Fixed
-- Bug fix
+```powershell
+Set-Content -NoNewline .sc_active_version "1.21.1-fabric"
+.\gradlew.bat runActiveClient
+.\gradlew.bat buildActive
 ```
 
-The version number in the header must exactly match `mod_version` in `gradle.properties`.
+Use `1.21.1-neoforge` to switch the active target.
 
-### 3. Run the workflow
+Build a target explicitly when investigating loader integration:
 
-**GitHub → Actions → Publish → Run workflow → select branch `main` → action: `new_release` → Run workflow**
+```powershell
+.\gradlew.bat :1.21.1-fabric:build
+.\gradlew.bat :1.21.1-neoforge:build
+```
 
-The workflow will:
-- verify the changelog entry exists and the release does not already exist
-- create tag `v1.2.2` and the GitHub Release
-- build and upload Fabric and NeoForge JARs
-- publish both to Modrinth
+Build the complete matrix and collect distributable JARs:
 
----
+```powershell
+.\gradlew.bat buildAndCollect
+```
 
-## Adding Another Minecraft Version
+Outputs:
 
-Once the mod is ready on another MC version branch (e.g. `1.20.1`):
+```text
+build/libs/handycam-2.0.0-alpha+1.21.1-fabric.jar
+build/libs/handycam-2.0.0-alpha+1.21.1-neoforge.jar
+```
 
-**GitHub → Actions → Publish → Run workflow → select branch `1.20.1` → action: `add_mc_version` → Run workflow**
+Do not use `clean` routinely because it discards Gradle and Minecraft preparation work. Use `clean buildAndCollect` only for a fresh release verification.
 
-The workflow will:
-- verify the release `v1.2.2` already exists
-- build and add the 1.20.1 JARs to the same GitHub Release
-- publish Fabric and Forge to Modrinth
+## Conditional Sources
 
-> Always run `new_release` on the main branch first. Then run `add_mc_version` on the others.
+Shared code remains ordinary Java. Loader-specific code uses Stonecutter conditions:
 
----
+```java
+//? fabric {
+fabricOnlyCall();
+//?} else {
+/*neoForgeOnlyCall();
+*///?}
+```
 
-## Validation Errors
+Keep conditions as narrow as practical. If an entire entry point is loader-specific, keep its package declaration outside the conditional block so the inactive target generates a valid, otherwise empty source file.
 
-The workflow stops immediately with a clear error if something is wrong:
+## Pull Requests and CI
 
-| Error | Fix |
-|-------|-----|
-| No changelog entry for `X.Y.Z` | Add `## [X.Y.Z]` section to `CHANGELOG.md` |
-| Release `vX.Y.Z` already exists | Bump `mod_version` in `gradle.properties` |
-| Release `vX.Y.Z` does not exist | Run `new_release` on the main branch first |
-| Expected JAR not found | Check the build output for compilation errors |
+Pushes to `main` and pull requests run `.github/workflows/build.yml`. CI builds both targets with `buildAndCollect`, verifies both expected JARs, and uploads them as one workflow artifact.
+
+A change is ready to merge when:
+
+- both targets compile;
+- both distributable JARs are produced;
+- metadata contains `handycam.mixins.json`;
+- loader-specific classes do not leak into the other loader's JAR;
+- camera and config behavior remain compatible with the 1.21.1 release.
+
+## Publishing 2.0.0-alpha
+
+1. Update `mod_version` in `gradle.properties`.
+2. Add the matching `## [version]` section to `CHANGELOG.md`.
+3. Run `.\gradlew.bat clean buildAndCollect`.
+4. Test both packaged JARs in clean external Minecraft profiles.
+5. Create and push the matching tag:
+
+```powershell
+git tag v2.0.0-alpha
+git push origin v2.0.0-alpha
+```
+
+The release workflow:
+
+- validates the tag and changelog;
+- builds both Stonecutter targets;
+- creates a prerelease on GitHub;
+- uploads both JARs;
+- publishes both targets to Modrinth and CurseForge.
+
+Required repository secrets:
+
+- `MODRINTH_TOKEN`
+- `CURSEFORGE_TOKEN`
+
+Project IDs are configured in the workflow. Do not put publishing tokens in repository files.
+
+## Packaged-JAR Validation
+
+IDE runs are not enough for loader or Mixin changes. Before publishing:
+
+- launch the Fabric JAR with Fabric API, Cloth Config, and Mod Menu;
+- launch the NeoForge JAR with Cloth Config;
+- verify config loading and saving;
+- verify the F10 effects toggle;
+- verify first-person camera, crosshair compensation, damage, bow, food, explosion, jump, and landing effects;
+- inspect both JARs if a Mixin works in development but not in the packaged mod.

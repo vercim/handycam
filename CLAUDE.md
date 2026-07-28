@@ -5,14 +5,16 @@ Handycam — client-side Minecraft mod, procedural camera system. Fabric + NeoFo
 ## Build
 
 ```bash
-./gradlew build                    # both loaders
-./gradlew runClient                # Fabric (primary dev target)
-./gradlew :neoforge:runClient      # NeoForge
-./gradlew clean
-./gradlew idea                     # refresh IntelliJ project files
+./gradlew buildAndCollect                  # all Stonecutter targets
+./gradlew buildActive                      # target in .sc_active_version
+./gradlew runActiveClient                  # run target in .sc_active_version
+./gradlew :1.21.1-fabric:build             # Fabric only
+./gradlew :1.21.1-neoforge:build           # NeoForge only
+./gradlew clean buildAndCollect            # fresh full build
 ```
 
-Artifacts: `fabric/build/libs/`, `neoforge/build/libs/`.
+Collected release artifacts: `build/libs/`.
+Per-target artifacts: `versions/<minecraft-loader>/build/libs/`.
 
 ## Release Checklist
 
@@ -24,7 +26,7 @@ Artifacts: `fabric/build/libs/`, `neoforge/build/libs/`.
 ## Structure
 
 ```
-common/src/main/java/dev/vercim/handycam/
+src/main/java/dev/vercim/handycam/
   camera/
     CameraShakeSystem.java     — orchestrates all layers
     ShakeLayer.java            — abstract base interface
@@ -64,7 +66,9 @@ common/src/main/java/dev/vercim/handycam/
     LocalPlayerMixin.java          — intercepts item use completion → CameraShakeSystem.onItemEaten()
 ```
 
-Platform-specific entry points in `fabric/` and `neoforge/` are thin wrappers: they call `HandycamConfigScreen.create(parent, saveCallback)` with the loader-specific config directory.
+Platform-specific entry points live in the shared source tree and are guarded by `//? fabric` or `//? neoforge` Stonecutter conditions. They call `HandycamConfigScreen.create(parent, saveCallback)` with the loader-specific config directory.
+
+The current target matrix is declared once in `settings.gradle.kts`. Do not create a long-lived branch for a new Minecraft version; add a Stonecutter target and keep version differences next to the affected source.
 
 ## Architecture
 
@@ -97,12 +101,10 @@ If a default change is cosmetic/optional, no migration is needed — just update
 
 Config screens use `Component.translatable("handycam.config.xxx")` — **never** `Component.literal()` for user-visible text. All translation keys live in two lang files that must be kept in sync:
 
-- `fabric/src/main/resources/assets/handycam/lang/en_us.json`
-- `fabric/src/main/resources/assets/handycam/lang/ru_ru.json`
-- `neoforge/src/main/resources/assets/handycam/lang/en_us.json`
-- `neoforge/src/main/resources/assets/handycam/lang/ru_ru.json`
+- `src/main/resources/assets/handycam/lang/en_us.json`
+- `src/main/resources/assets/handycam/lang/ru_ru.json`
 
-**When adding a new config entry**, add its label key (`handycam.config.xxx`) and tooltip key (`handycam.config.xxx.tooltip`) to **all four** files — both English and Russian translations.
+**When adding a new config entry**, add its label key (`handycam.config.xxx`) and tooltip key (`handycam.config.xxx.tooltip`) to both files — English and Russian.
 
 Key naming conventions:
 - Categories: `handycam.config.category.<name>`
@@ -116,19 +118,19 @@ Key naming conventions:
 2. Implement `compute(PlayerState, float time, float dt)` → `CameraOffset`
 3. Add config parameters to `HandycamConfig.java` if needed
 4. Register in `CameraShakeSystem.LAYERS` (order matters)
-5. Add to the shared config screen in `common/src/main/java/dev/vercim/handycam/config/HandycamConfigScreen.java` with `.setTooltip()`
-6. Add translation keys (label + tooltip) to all four lang files (en_us + ru_ru, Fabric + NeoForge)
+5. Add to the shared config screen in `src/main/java/dev/vercim/handycam/config/HandycamConfigScreen.java` with `.setTooltip()`
+6. Add translation keys (label + tooltip) to both shared lang files (en_us + ru_ru)
 
 ## Porting to a New MC Version
 
-See [VERSION_NOTES.md](docs/VERSION_NOTES.md) for a per-version log of API shapes, dependency versions, and a porting checklist.
+See [VERSION_NOTES.md](docs/VERSION_NOTES.md) for a per-version log of API shapes, dependency versions, and the Stonecutter porting checklist.
 
-Quick pointer: when a new MC version drops, the first place to check is whether the `Camera`, `Gui`, and `GameRenderer` method signatures have changed — those are where every breaking mixin lives.
+Add the new version/loader pair to `settings.gradle.kts`, configure its dependencies in the relevant loader build script or properties, and express API differences with Stonecutter conditions. The first places to check are `Camera`, `Gui`, and `GameRenderer`, where the breaking mixins live.
 
 ## Common Issues
 
 - **Transparent world in dev** → Gradle is using the wrong JDK. Set toolchain to Java 21 in `gradle.properties` and Project Structure.
-- **"Cannot find symbol" in common/** → Clear IDE cache and re-sync Gradle.
-- **Gradle sync fails** → Run `./gradlew idea`.
+- **"Cannot find symbol" in generated target** → Verify the active Stonecutter target and its conditional source blocks, then re-sync Gradle.
+- **Wrong client runs** → Update `.sc_active_version` and use `./gradlew runActiveClient`.
 - **GSON ignores field defaults** → GSON uses `Unsafe` and bypasses constructors; always register `InstanceCreator` for config classes.
 - **Camera position broken after writing `Camera.position`** → Never write position directly; use `Camera.move()` via `@Invoker` in `CameraAccessor`.
