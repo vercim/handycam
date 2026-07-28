@@ -9,6 +9,8 @@ plugins {
 
 val minecraftVersion = stonecutter.current.version
 val modVersion = project.property("mod_version") as String
+val publicModVersion = modVersion.substringBefore('-')
+val publishVersion = "$publicModVersion+$minecraftVersion"
 val javaVersion = (project.property("java_version") as String).toInt()
 val releaseType = providers.gradleProperty("release_type")
     .orElse(if ("-alpha" in modVersion) "alpha" else if ("-beta" in modVersion) "beta" else "release")
@@ -84,7 +86,7 @@ tasks.register<Copy>("buildAndCollect") {
 publishMods {
     val releaseJar = tasks.named<AbstractArchiveTask>("jar")
     file.set(releaseJar.flatMap { it.archiveFile })
-    displayName.set("Handycam $modVersion NeoForge $minecraftVersion")
+    version.set(publishVersion)
     changelog.set(providers.environmentVariable("RELEASE_CHANGELOG").orElse("See the GitHub release notes."))
     type.set(when (releaseType) {
         "release" -> STABLE
@@ -97,6 +99,7 @@ publishMods {
     curseforge {
         projectId.set(providers.gradleProperty("curseforge_project_id"))
         accessToken.set(providers.environmentVariable("CURSEFORGE_TOKEN"))
+        displayName.set(publishVersion)
         minecraftVersions.add(minecraftVersion)
         client.set(true)
         server.set(false)
@@ -106,6 +109,7 @@ publishMods {
     modrinth {
         projectId.set(providers.gradleProperty("modrinth_project_id"))
         accessToken.set(providers.environmentVariable("MODRINTH_TOKEN"))
+        displayName.set("Handycam $publicModVersion NeoForge")
         minecraftVersions.add(minecraftVersion)
         requires("cloth-config")
     }

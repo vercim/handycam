@@ -6,9 +6,13 @@ on:
       - main
   pull_request:
 
+concurrency:
+  group: build-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
-    name: Build Minecraft 1.21.1
+    name: Build all supported targets
     runs-on: ubuntu-latest
 
     steps:
@@ -32,12 +36,10 @@ jobs:
       - name: Verify artifacts
         shell: bash
         run: |
-          version="$(grep '^mod_version=' gradle.properties | cut -d= -f2)"
-          test -f "build/libs/handycam-${version}+1.21.1-fabric.jar"
-          test -f "build/libs/handycam-${version}+1.21.1-neoforge.jar"
-
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: handycam-2.0.0-alpha-1.21.1
-          path: build/libs/*.jar
+          mapfile -t target_dirs < <(find versions -mindepth 1 -maxdepth 1 -type d | sort)
+          mapfile -t artifacts < <(find versions -path '*/build/libs/*.jar' -type f ! -name '*-sources.jar' ! -name '*-dev.jar' | sort)
+          test "${#target_dirs[@]}" -gt 0 || { echo "::error::No Stonecutter targets were found"; exit 1; }
+          test "${#artifacts[@]}" -eq "${#target_dirs[@]}" || {
+            echo "::error::Expected one release JAR per Stonecutter target, found ${#artifacts[@]} JARs for ${#target_dirs[@]} targets"
+            exit 1
+          }
