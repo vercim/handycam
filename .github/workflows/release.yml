@@ -24,11 +24,15 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Make Gradle wrapper executable
+        run: chmod +x gradlew
+
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "21"
+          cache: gradle
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
@@ -52,23 +56,49 @@ jobs:
           case "$version" in
             *-alpha*) release_type=alpha ;;
             *-beta*) release_type=beta ;;
+            *-*)
+              echo "::error::Pre-release versions must contain -alpha or -beta"
+              exit 1
+              ;;
             *) release_type=release ;;
           esac
 
           echo "version=$version" >> "$GITHUB_OUTPUT"
           echo "release_type=$release_type" >> "$GITHUB_OUTPUT"
 
-      - name: Build and collect all Stonecutter targets
-        run: |
-          chmod +x gradlew
-          ./gradlew buildAndCollect --no-daemon
+      - name: Build all supported Stonecutter targets
+        run: ./gradlew clean build --no-daemon
 
-      - name: Verify artifacts
+      - name: Verify publishing configuration
+        env:
+          CURSEFORGE_PROJECT_ID: ${{ vars.CURSEFORGE_PROJECT_ID }}
+          CURSEFORGE_TOKEN: ${{ secrets.CURSEFORGE_TOKEN }}
+          MODRINTH_PROJECT_ID: ${{ vars.MODRINTH_PROJECT_ID }}
+          MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
         shell: bash
         run: |
-          version="${{ steps.release.outputs.version }}"
-          test -f "build/libs/handycam-${version}+1.21.1-fabric.jar"
-          test -f "build/libs/handycam-${version}+1.21.1-neoforge.jar"
+          test -n "$CURSEFORGE_PROJECT_ID" || { echo "::error::Missing CURSEFORGE_PROJECT_ID repository variable"; exit 1; }
+          test -n "$CURSEFORGE_TOKEN" || { echo "::error::Missing CURSEFORGE_TOKEN repository secret"; exit 1; }
+          test -n "$MODRINTH_PROJECT_ID" || { echo "::error::Missing MODRINTH_PROJECT_ID repository variable"; exit 1; }
+          test -n "$MODRINTH_TOKEN" || { echo "::error::Missing MODRINTH_TOKEN repository secret"; exit 1; }
+
+      - name: Verify release has not been published
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            echo "::error::GitHub release $GITHUB_REF_NAME already exists. Publish a new version and tag instead."
+            exit 1
+          fi
+
+          mapfile -t target_dirs < <(find versions -mindepth 1 -maxdepth 1 -type d | sort)
+          mapfile -t artifacts < <(find versions -path '*/build/libs/*.jar' -type f ! -name '*-sources.jar' ! -name '*-dev.jar' | sort)
+          test "${#target_dirs[@]}" -gt 0 || { echo "::error::No Stonecutter targets were found"; exit 1; }
+          test "${#artifacts[@]}" -eq "${#target_dirs[@]}" || {
+            echo "::error::Expected one release JAR per Stonecutter target, found ${#artifacts[@]} JARs for ${#target_dirs[@]} targets"
+            exit 1
+          }
 
       - name: Read changelog
         id: changelog
@@ -82,12 +112,23 @@ jobs:
             echo "CHANGELOG_EOF"
           } >> "$GITHUB_OUTPUT"
 
+      - name: Publish to Modrinth and CurseForge
+        env:
+          MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
+          CURSEFORGE_TOKEN: ${{ secrets.CURSEFORGE_TOKEN }}
+          ORG_GRADLE_PROJECT_modrinth_project_id: ${{ vars.MODRINTH_PROJECT_ID }}
+          ORG_GRADLE_PROJECT_curseforge_project_id: ${{ vars.CURSEFORGE_PROJECT_ID }}
+          ORG_GRADLE_PROJECT_release_type: ${{ steps.release.outputs.release_type }}
+          RELEASE_CHANGELOG: ${{ steps.changelog.outputs.content }}
+        run: ./gradlew publishMods --no-daemon
+
       - name: Create GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
           CHANGELOG: ${{ steps.changelog.outputs.content }}
         shell: bash
         run: |
+          mapfile -t artifacts < <(find versions -path '*/build/libs/*.jar' -type f ! -name '*-sources.jar' ! -name '*-dev.jar' | sort)
           options=(
             --title "Handycam ${{ steps.release.outputs.version }}"
             --notes "$CHANGELOG"
@@ -95,14 +136,4 @@ jobs:
           if [ "${{ steps.release.outputs.release_type }}" != "release" ]; then
             options+=(--prerelease)
           fi
-          gh release create "$GITHUB_REF_NAME" build/libs/*.jar "${options[@]}"
-
-      - name: Publish to Modrinth and CurseForge
-        env:
-          MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
-          CURSEFORGE_TOKEN: ${{ secrets.CURSEFORGE_TOKEN }}
-          ORG_GRADLE_PROJECT_modrinth_project_id: kONpDzH3
-          ORG_GRADLE_PROJECT_curseforge_project_id: "1588734"
-          ORG_GRADLE_PROJECT_release_type: ${{ steps.release.outputs.release_type }}
-          RELEASE_CHANGELOG: ${{ steps.changelog.outputs.content }}
-        run: ./gradlew publishMods --no-daemon
+          gh release create "$GITHUB_REF_NAME" "${artifacts[@]}" "${options[@]}"
