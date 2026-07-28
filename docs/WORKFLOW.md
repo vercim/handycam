@@ -89,17 +89,25 @@ git push origin v2.0.0-alpha
 The release workflow:
 
 - validates the tag and changelog;
-- builds both Stonecutter targets;
-- creates a prerelease on GitHub;
-- uploads both JARs;
-- publishes both targets to Modrinth and CurseForge.
+- rejects unsupported prerelease suffixes;
+- builds every Stonecutter target with `clean build`;
+- verifies that all publishing variables and secrets exist;
+- refuses to overwrite an existing GitHub release;
+- requires exactly one release JAR for every Stonecutter target;
+- publishes every target to Modrinth and CurseForge;
+- creates the GitHub release only after platform publishing succeeds.
+
+Required repository variables:
+
+- `MODRINTH_PROJECT_ID` (`kONpDzH3`)
+- `CURSEFORGE_PROJECT_ID` (`1588734`)
 
 Required repository secrets:
 
 - `MODRINTH_TOKEN`
 - `CURSEFORGE_TOKEN`
 
-Project IDs are configured in the workflow. Do not put publishing tokens in repository files.
+Do not put publishing tokens in repository files.
 
 ## Packaged-JAR Validation
 
