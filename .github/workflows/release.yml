@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   publish:
-    name: Build and publish Minecraft 1.21.1
+    name: Build and publish all supported targets
     runs-on: ubuntu-latest
 
     steps:
@@ -67,7 +67,7 @@ jobs:
           echo "release_type=$release_type" >> "$GITHUB_OUTPUT"
 
       - name: Build all supported Stonecutter targets
-        run: ./gradlew clean build --no-daemon
+        run: ./gradlew clean buildAndCollect --no-daemon
 
       - name: Verify publishing configuration
         env:
