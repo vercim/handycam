@@ -311,9 +311,9 @@ Also update `xRot`/`yRot` scalars (first-person only) so the crosshair stays in 
 
 ### GameRenderer.getFov() signature
 ```java
-getFov(Camera camera, float partialTick, boolean useFov) : Float
+getFov(Camera camera, float partialTick, boolean useFov) : double
 ```
-Inject at `@At("RETURN")`, `cancellable = true`. When `enableVanillaFov = false`, return the raw FOV option value cast to `(float)(int)` to strip the dynamic modifier.
+Inject at `@At("RETURN")`, `cancellable = true`. When `enableVanillaFov = false`, return the raw FOV option value as `double` to strip the dynamic modifier. The callback must be `CallbackInfoReturnable<Double>`.
 
 ### Gui.renderCrosshair() signature
 ```java
