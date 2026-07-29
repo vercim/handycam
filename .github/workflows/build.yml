@@ -4,7 +4,29 @@ on:
   push:
     branches:
       - main
+    paths:
+      - '.github/workflows/build.yml'
+      - 'src/**'
+      - 'build.fabric.gradle.kts'
+      - 'build.neoforge.gradle.kts'
+      - 'settings.gradle.kts'
+      - 'stonecutter.gradle.kts'
+      - 'gradle.properties'
+      - 'gradle/wrapper/**'
+      - 'gradlew'
+      - 'gradlew.bat'
   pull_request:
+    paths:
+      - '.github/workflows/build.yml'
+      - 'src/**'
+      - 'build.fabric.gradle.kts'
+      - 'build.neoforge.gradle.kts'
+      - 'settings.gradle.kts'
+      - 'stonecutter.gradle.kts'
+      - 'gradle.properties'
+      - 'gradle/wrapper/**'
+      - 'gradlew'
+      - 'gradlew.bat'
 
 concurrency:
   group: build-${{ github.event.pull_request.number || github.ref }}
