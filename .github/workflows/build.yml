@@ -28,10 +28,10 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Build and collect all Stonecutter targets
+      - name: Build all Stonecutter targets
         run: |
           chmod +x gradlew
-          ./gradlew buildAndCollect --no-daemon
+          ./gradlew build --no-daemon
 
       - name: Verify artifacts
         shell: bash

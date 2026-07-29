@@ -67,7 +67,7 @@ jobs:
           echo "release_type=$release_type" >> "$GITHUB_OUTPUT"
 
       - name: Build all supported Stonecutter targets
-        run: ./gradlew clean buildAndCollect --no-daemon
+        run: ./gradlew clean build --no-daemon
 
       - name: Verify publishing configuration
         env:

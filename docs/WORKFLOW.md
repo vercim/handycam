@@ -63,7 +63,7 @@ Keep conditions as narrow as practical. If an entire entry point is loader-speci
 
 ## Pull Requests and CI
 
-Pushes to `main` and pull requests run `.github/workflows/build.yml`. CI builds both targets with `buildAndCollect`, verifies both expected JARs, and uploads them as one workflow artifact.
+Pushes to `main` and pull requests run `.github/workflows/build.yml`. CI builds both targets with `build`, verifies both expected JARs, and uploads them as one workflow artifact.
 
 A change is ready to merge when:
 
