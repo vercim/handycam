@@ -4,30 +4,10 @@
 
 Handycam adds subtle, physics-inspired camera movement that makes Minecraft feel like it is being filmed with a real handheld camera. Every step, sprint, hit, and landing is reflected in the camera with spring-simulated, noise-driven motion.
 
-[<img alt="modrinth" height="56" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/available/modrinth_vector.svg">](https://modrinth.com/mod/handycam/)
-[<img alt="curseforge" height="56" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/available/curseforge_vector.svg">](https://www.curseforge.com/minecraft/mc-mods/handycam)
-[<img alt="cloth-config-api" height="56" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/requires/cloth-config-api_vector.svg">](https://modrinth.com/mod/cloth-config)
+[<img alt="Modrinth" height="56" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/available/modrinth_vector.svg">](https://modrinth.com/mod/handycam/)
+[<img alt="CurseForge" height="56" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/available/curseforge_vector.svg">](https://www.curseforge.com/minecraft/mc-mods/handycam)
 [<img alt="fabric-api" height="56" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/requires/fabric-api_vector.svg">](https://modrinth.com/mod/fabric-api)
-
-## Effects
-
-- Walk bob, sprint sway, strafe and forward tilt
-- Mouse lead, idle shake, and breathing
-- Damage, hit, bow, explosion, jump, and landing impacts
-- Crouch and eating/drinking motion
-- Crosshair compensation for draw and eating effects
-
-Every effect can be configured or disabled independently.
-
-## Configuration
-
-Handycam stores its settings in `config/handycam-config.json`.
-
-- Fabric: open the configuration screen through [Mod Menu](https://modrinth.com/mod/modmenu).
-- NeoForge: open the Mods menu, select Handycam, and click Config.
-- `F10`: toggle all effects.
-
-Existing 1.x configuration files remain compatible with `2.0.0-alpha`.
+[<img alt="cloth-config-api" height="56" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/requires/cloth-config-api_vector.svg">](https://modrinth.com/mod/cloth-config)
 
 ## Requirements
 
