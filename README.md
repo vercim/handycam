@@ -36,32 +36,4 @@ handycam-2.0.0-alpha+1.21.1-fabric.jar
           +--------------------- Mod version
 ```
 
-## Building
-
-On Windows:
-
-```powershell
-# Build both targets and collect release JARs in build/libs
-.\gradlew.bat buildAndCollect
-
-# Build one target
-.\gradlew.bat :1.21.1-fabric:build
-.\gradlew.bat :1.21.1-neoforge:build
-
-# Run the target selected in .sc_active_version
-.\gradlew.bat runActiveClient
-```
-
-On Linux or macOS, replace `.\gradlew.bat` with `./gradlew`.
-
-`clean` is unnecessary for normal development. For a fresh verification:
-
-```powershell
-.\gradlew.bat clean buildAndCollect
-```
-
-Artifacts are collected in `build/libs/`.
-
----
-
 Found a bug or version incompatibility? [Open an issue](https://github.com/vercim/handycam/issues). A short reporting guide is available [here](https://youtu.be/CVqOHDpVwDc).
