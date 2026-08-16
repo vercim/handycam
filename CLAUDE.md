@@ -1,6 +1,6 @@
 # Handycam
 
-Client-side procedural camera mod for Minecraft 1.21.1. Targets: Fabric and NeoForge; Java 21; Mojang mappings.
+Client-side procedural camera mod for Minecraft. Targets: Fabric, NeoForge, and Forge on older versions; Mojang mappings.
 
 ## Build
 
