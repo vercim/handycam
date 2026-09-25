@@ -10,7 +10,6 @@
 The matrix is defined in `settings.gradle.kts`. Select the active target in `.sc_active_version`.
 
 ```powershell
-Set-Content -NoNewline .sc_active_version "1.21.1-fabric"
 .\gradlew.bat runActiveClient
 .\gradlew.bat buildActive
 .\gradlew.bat buildAndCollect

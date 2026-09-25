@@ -12,6 +12,19 @@
     "sources": "https://github.com/vercim/handycam",
     "issues": "https://github.com/vercim/handycam/issues"
   },
+
+  
+  "custom": {
+    "modmenu": {
+      "links": {
+        "modmenu.discord": "https://discord.gg/JfttnVcczU"
+      },
+      "badges": [ "deprecated" ],
+      "update_checker": true
+    }
+  },
+
+
   "license": "LGPL-3.0-only",
   "icon": "icon.png",
   "environment": "client",
