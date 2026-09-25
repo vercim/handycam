@@ -3,7 +3,7 @@
   "key.category.handycam.handycam": "Handycam",
   "key.handycam.toggle_effects": "Переключить эффекты",
 
-  "handycam.config.title": "Настройки Handycam",
+  "handycam.config.title": "Настройки",
 
   "handycam.config.category.general": "Основные",
   "handycam.config.category.directional_tilt": "Наклон",
@@ -17,19 +17,19 @@
   "handycam.config.category.explosions": "Взрывы",
 
   "handycam.config.effects_enabled": "Эффекты включены",
-  "handycam.config.effects_enabled.tooltip": "Главный переключатель эффектов (F10)",
+  "handycam.config.effects_enabled.tooltip": "Главный переключатель эффектов",
   "handycam.config.disable_in_creative_flight": "Отключить в полёте (креатив)",
   "handycam.config.disable_in_creative_flight.tooltip": "Отключить эффекты при полёте в креативе",
   "handycam.config.enable_effects_third_person": "Эффекты от 3-го лица",
-  "handycam.config.enable_effects_third_person.tooltip": "Эффекты тряски от 3-го лица (F5 × 1)",
+  "handycam.config.enable_effects_third_person.tooltip": "Эффекты тряски от 3-го лица",
   "handycam.config.enable_effects_second_person": "Эффекты от 2-го лица",
-  "handycam.config.enable_effects_second_person.tooltip": "Эффекты тряски от 2-го лица (F5 × 2)",
+  "handycam.config.enable_effects_second_person.tooltip": "Эффекты тряски от 2-го лица",
   "handycam.config.enable_vanilla_fov": "Ванильное поле зрения",
-  "handycam.config.enable_vanilla_fov.tooltip": "Ванильные модификаторы PoV (бег, скорость)",
+  "handycam.config.enable_vanilla_fov.tooltip": "Ванильные модификаторы FOV (бег, скорость)",
   "handycam.config.global_intensity": "Общая интенсивность",
   "handycam.config.global_intensity.tooltip": "Общая громкость всех эффектов",
   "handycam.config.detail_layers": "Слои детализации",
-  "handycam.config.detail_layers.tooltip": "Детализация сложности движения",
+  "handycam.config.detail_layers.tooltip": "Детализация шума при движении",
 
   "handycam.config.forward_tilt_enabled": "Наклон вперёд/назад",
   "handycam.config.forward_tilt_enabled.tooltip": "Наклон камеры при разгоне и торможении",
