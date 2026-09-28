@@ -11,7 +11,7 @@ Every effect has its own intensity slider and can be toggled off independently. 
 - [Mod Menu](https://modrinth.com/mod/modmenu) — recommended on Fabric
 
 ![Important](https://cdn.modrinth.com/data/cached_images/a00b60dec758b6e059c69cacb4cb278b9ee1d1b9_0.webp)
-Found a bug or version incompatibility? [Open an issue](https://github.com/vercim/handycam/issues). A short reporting guide is available [here](https://youtu.be/CVqOHDpVwDc).
+Found a bug or version incompatibility? [Open an issue](https://github.com/vercim/handycam/issues).
 
 [<img alt="modrinth" height="56" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/available/modrinth_vector.svg">](https://modrinth.com/mod/handycam)
 [<img alt="curseforge" height="56" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/available/curseforge_vector.svg">](https://www.curseforge.com/minecraft/mc-mods/handycam)
