@@ -15,7 +15,7 @@ Handycam — client-side Minecraft mod, procedural handheld-camera effects. Fabr
 ## Current state
 
 - Version `2.0.0-alpha` (first Stonecutter release); last Architectury release is `1.3.2`.
-- Targets: `1.21.1-fabric`, `1.21.1-neoforge`, declared once in `settings.gradle.kts`. Older versions (1.20.1, 1.21.10, 1.21.11, 26.1, 26.2) exist only as read-only references in the `archive/*` branches and are not in the matrix yet. Never add new long-lived version branches.
+- Targets: `1.21.1-fabric`, `1.21.1-neoforge`, declared once in `settings.gradle.kts`. Older versions (1.20.1, 1.21.10, 1.21.11, 26.1, 26.2) exist only as read-only references in the `archive/<version>` git tags (the old per-version branches were deleted) and are not in the matrix yet. Inspect one with `git checkout archive/<version>` or `git show archive/<version>:<path>`. Never add new long-lived version branches.
 - `vcsVersion = 1.21.1-fabric`: commit with `.sc_active_version` set to `1.21.1-fabric`.
 
 ## Rules that must not be forgotten
@@ -111,7 +111,7 @@ Exact Minecraft signatures per version are in [docs/VERSION_NOTES.md](docs/VERSI
 
 ## Config versioning
 
-`HandycamConfig.CURRENT_VERSION` is currently `3`. `migrate()` applies changes sequentially by `configVersion`; configs without the field deserialize to `0`.
+`HandycamConfig.CURRENT_VERSION` is currently `4`. `migrate()` applies changes sequentially by `configVersion`; configs without the field deserialize to `0`.
 
 To propagate a changed default to existing users, bump `CURRENT_VERSION` and add an `if (configVersion < N) { ... }` block in `migrate()`. Cosmetic default changes need no migration — just change the field initializer. Keep the config file name and format stable across releases.
 

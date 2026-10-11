@@ -23,13 +23,14 @@ public final class PlayerState {
     public final float   crossbowDrawProgress; 
     public final boolean isCreativeFlying;    
     public final boolean isEating;
+    public final boolean isSleeping;
 
     private PlayerState(float horizontalSpeed, float verticalVelocity,
                         boolean isSprinting, boolean isOnGround, boolean isCrouching,
                         float turnRate, float pitchDelta,
                         float strafeSpeed, float forwardSpeed,
                         float bowDrawProgress, boolean crossbowFired, float crossbowDrawProgress,
-                        boolean isCreativeFlying, boolean isEating) {
+                        boolean isCreativeFlying, boolean isEating, boolean isSleeping) {
         this.horizontalSpeed  = horizontalSpeed;
         this.verticalVelocity = verticalVelocity;
         this.isSprinting      = isSprinting;
@@ -44,6 +45,7 @@ public final class PlayerState {
         this.crossbowDrawProgress = crossbowDrawProgress;
         this.isCreativeFlying     = isCreativeFlying;
         this.isEating             = isEating;
+        this.isSleeping           = isSleeping;
     }
 
     private static float   prevYRot         = 0f;
@@ -57,6 +59,8 @@ public final class PlayerState {
     }
 
     public static PlayerState from(LocalPlayer player) {
+        if (player.isSleeping()) return sleeping(player);
+
         float dx = (float) player.getDeltaMovement().x;
         float dz = (float) player.getDeltaMovement().z;
         float dy = (float) player.getDeltaMovement().y;
@@ -131,6 +135,15 @@ public final class PlayerState {
 
         return new PlayerState(hSpeed, dy, player.isSprinting(), player.onGround(),
                                player.isCrouching(), turnRate, pitchDelta, strafe, forward,
-                               bowDraw, crossbowFired, crossbowDraw, creativeFlying, isEating);
+                               bowDraw, crossbowFired, crossbowDraw, creativeFlying, isEating, false);
+    }
+
+    // Vanilla locks the camera to the bed, yet the player's yaw still follows the mouse and the bed
+    // bounces the player; report a neutral state so no layer reacts to either.
+    private static PlayerState sleeping(LocalPlayer player) {
+        sync(player);
+        prevCrossbowCharged = false;
+        return new PlayerState(0f, 0f, false, true, false, 0f, 0f, 0f, 0f,
+                               0f, false, 0f, false, false, true);
     }
 }

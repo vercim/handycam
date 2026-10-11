@@ -55,8 +55,8 @@ public final class CameraShakeSystem {
     
     private static final float[] scratch = new float[5]; 
 
-    private static float creativeFadeBlend = 1f; 
-    private static final float CREATIVE_FADE_SPEED = 3f; 
+    private static float fadeBlend = 1f; 
+    private static final float FADE_SPEED = 3f; 
 
     private CameraShakeSystem() {}
 
@@ -74,7 +74,8 @@ public final class CameraShakeSystem {
             wasPaused = false;
         }
 
-        boolean onGround = player.onGround();
+        boolean sleeping = player.isSleeping();
+        boolean onGround = sleeping || player.onGround();
         float   currentY = (float) player.getY();
 
         if (!onGround) {
@@ -102,7 +103,7 @@ public final class CameraShakeSystem {
 
         
         boolean isSwinging = player.swinging;
-        if (isSwinging && player.swingTime == 0) {
+        if (isSwinging && player.swingTime == 0 && !sleeping) {
             HIT.onHit();
         }
         wasSwinging = isSwinging;
@@ -142,14 +143,14 @@ public final class CameraShakeSystem {
             lastComputedOffset = CameraOffset.ZERO;
             return CameraOffset.ZERO;
         }
-        float blendTarget = (cfg.disableInCreativeFlight && state.isCreativeFlying) ? 0f : 1f;
-        if (creativeFadeBlend < blendTarget) {
-            creativeFadeBlend = Math.min(blendTarget, creativeFadeBlend + CREATIVE_FADE_SPEED * dt);
-        } else if (creativeFadeBlend > blendTarget) {
-            creativeFadeBlend = Math.max(blendTarget, creativeFadeBlend - CREATIVE_FADE_SPEED * dt);
+        float blendTarget = ((cfg.disableInCreativeFlight && state.isCreativeFlying) || state.isSleeping) ? 0f : 1f;
+        if (fadeBlend < blendTarget) {
+            fadeBlend = Math.min(blendTarget, fadeBlend + FADE_SPEED * dt);
+        } else if (fadeBlend > blendTarget) {
+            fadeBlend = Math.max(blendTarget, fadeBlend - FADE_SPEED * dt);
         }
 
-        if (creativeFadeBlend == 0f) {
+        if (fadeBlend == 0f) {
             lastComputedOffset = CameraOffset.ZERO;
             return CameraOffset.ZERO;
         }
@@ -169,12 +170,12 @@ public final class CameraShakeSystem {
         
         
         
-        if (creativeFadeBlend < 1f) {
-            s[0] *= creativeFadeBlend;
-            s[1] *= creativeFadeBlend;
-            s[2] *= creativeFadeBlend;
-            s[3] *= creativeFadeBlend;
-            s[4] *= creativeFadeBlend;
+        if (fadeBlend < 1f) {
+            s[0] *= fadeBlend;
+            s[1] *= fadeBlend;
+            s[2] *= fadeBlend;
+            s[3] *= fadeBlend;
+            s[4] *= fadeBlend;
         }
 
         CameraOffset sum = new CameraOffset(s[0], s[1], s[2], s[3], s[4]);
