@@ -147,6 +147,7 @@ jobs:
         continue-on-error: true
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          DISCORD_ROLE_ID: "1558846052889661540" # @updates
           CHANGELOG: ${{ steps.changelog.outputs.content }}
           VERSION: ${{ steps.release.outputs.version }}
         shell: bash
@@ -156,16 +157,19 @@ jobs:
             exit 0
           fi
           # Message content is capped at 2000 characters: cut at a line boundary.
-          # Blank lines are dropped (headings already carry their own spacing in Discord);
-          # empty allowed_mentions stops @everyone in the text from pinging.
+          # Blank lines are dropped (headings already carry their own spacing in Discord); the one
+          # before the role mention is added back. allowed_mentions lets only the updates role ping,
+          # so @everyone in the changelog text cannot.
           payload="$(python3 - <<'PY'
           import json, os
+          role = os.environ["DISCORD_ROLE_ID"]
           head = f"# Handycam {os.environ['VERSION']}\n"
+          tail = f"\n\n<@&{role}>"
           body = "\n".join(l.rstrip() for l in os.environ["CHANGELOG"].splitlines() if l.strip())
-          limit = 1990 - len(head)
+          limit = 1990 - len(head) - len(tail)
           if len(body) > limit:
               body = body[:limit].rsplit("\n", 1)[0] + "\n…"
-          print(json.dumps({"content": head + body, "allowed_mentions": {"parse": []}}))
+          print(json.dumps({"content": head + body + tail, "allowed_mentions": {"parse": [], "roles": [role]}}))
           PY
           )"
           curl -fsS -H 'Content-Type: application/json' -d "$payload" "$DISCORD_WEBHOOK_URL"
