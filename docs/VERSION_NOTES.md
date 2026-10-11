@@ -104,7 +104,9 @@ NeoForge metadata also pins Minecraft to `[1.21.1,1.21.2)` and Cloth Config to `
 | `Camera.setup()` | `(BlockGetter, Entity, boolean detached, boolean thirdPersonReverse, float partialTick)`; injected at `TAIL`. `detached` separates first-person; `thirdPersonReverse` separates back vs. front third-person |
 | `Camera` fields | `xRot`, `yRot` (degrees), `rotation` (`org.joml.Quaternionf`, mutate in place) via `@Accessor` |
 | `Camera.move()` | `move(float distanceOffset, float verticalOffset, float horizontalOffset)` via `@Invoker`; never write `Camera.position` directly |
-| `GameRenderer.getFov()` | `(Camera, float, boolean)`; return type `double` → `CallbackInfoReturnable<Double>`; inject at `RETURN`, cancellable |
+| `GameRenderer.getFov()` | `(Camera, float, boolean)`; return type `double` → `CallbackInfoReturnable<Double>`; injected at `HEAD` only. `enableVanillaFov = false` redirects `LivingEntity.isDeadOrDying()` and `Mth.lerp(DDD)D` (underwater) inside it; do not override its return value, that kills the spyglass and Zoomify (`@ModifyReturnValue` at `RETURN`) |
+| `AbstractClientPlayer.getFieldOfViewModifier()` | `()F`, injected at `RETURN`, cancellable; returns `0.1` for the first-person spyglass (`isScoping()`), otherwise the sprint/speed/bow/flying product |
+| `GameRenderer.getProjectionMatrix()` | `(double fov)` → `Matrix4f`; injected at `HEAD` to read the final world FOV (spyglass and zoom mods already applied), paired with a `getFov` `HEAD` hook that flags the `useFov == true` call |
 | `Gui.renderCrosshair()` | `(GuiGraphics, DeltaTracker)`; `GuiGraphics.pose()` is a `PoseStack` (`pushPose()` / `popPose()`, 3D `translate` / `scale`) |
 | Explosions | `ClientPacketListener.handleExplosion(ClientboundExplodePacket)`; coordinates via `getX()`, `getY()`, `getZ()` |
 | Lightning | `LightningBolt.tick`; shadowed private `life`; fire on client when `life == 2` |
