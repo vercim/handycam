@@ -1,4 +1,4 @@
-## [2.0.1-alpha] - 2026-10-11
+## [2.0.1-beta] - 2026-10-11
 
 ### Compatibility
 - Updated dependencies for Minecraft 1.21.1: Fabric Loader 0.19.5, Fabric API 0.116.17, Mod Menu 11.0.5, NeoForge 21.1.259. Fabric API and NeoForge minimum versions now match these.
