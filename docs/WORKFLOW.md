@@ -54,7 +54,7 @@ printf '1.21.1-fabric' > .sc_active_version   # or 1.21.1-neoforge
 
 Do not use `clean` routinely: it discards Gradle and Minecraft preparation work.
 
-Outputs: collected release JARs are in `build/libs/` (for example `handycam-2.0.0-alpha+1.21.1-fabric.jar`); per-target output is in `versions/<target>/build/libs/`.
+Outputs: collected release JARs are in `build/libs/` (for example `handycam-2.0.1-beta+1.21.1-fabric.jar`); per-target output is in `versions/<target>/build/libs/`.
 
 After changing `.sc_active_version`, re-sync Gradle (IDE reload or any `gradlew` call) so Stonecutter rewrites the loader-specific source blocks. Commit with `1.21.1-fabric` active (the configured `vcsVersion`).
 
