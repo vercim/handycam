@@ -130,7 +130,7 @@ The tag workflow (`.github/workflows/release.yml`):
 - builds every target with `clean build` and requires exactly one release JAR per target;
 - verifies the publishing variables and secrets exist, and refuses to overwrite an existing GitHub release;
 - publishes every target to Modrinth and CurseForge, then creates the GitHub release with the changelog section as notes;
-- posts the changelog to Discord through a webhook (best effort: skipped when `DISCORD_WEBHOOK_URL` is unset, and a failure does not fail the run).
+- posts the changelog to Discord through a webhook and pings the `@updates` role (role ID is set in the step's `env`; best effort: skipped when `DISCORD_WEBHOOK_URL` is unset, and a failure does not fail the run).
 
 It needs the repository variables `MODRINTH_PROJECT_ID` and `CURSEFORGE_PROJECT_ID`, and the secrets `MODRINTH_TOKEN` and `CURSEFORGE_TOKEN`; the optional secret `DISCORD_WEBHOOK_URL` enables the Discord post. Never put tokens or webhook URLs in repository files. A published version cannot be re-released: fix forward with a new version and tag.
 
