@@ -149,22 +149,23 @@ jobs:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           CHANGELOG: ${{ steps.changelog.outputs.content }}
           VERSION: ${{ steps.release.outputs.version }}
-          RELEASE_URL: ${{ github.server_url }}/${{ github.repository }}/releases/tag/${{ github.ref_name }}
         shell: bash
         run: |
           if [ -z "$DISCORD_WEBHOOK_URL" ]; then
             echo "DISCORD_WEBHOOK_URL is not set, skipping"
             exit 0
           fi
-          # Embed descriptions are capped at 4096 characters.
-          payload="$(jq -n \
-            --arg title "Handycam $VERSION" \
-            --arg url "$RELEASE_URL" \
-            --arg description "$CHANGELOG" \
-            '{embeds: [{
-              title: $title,
-              url: $url,
-              color: 5793266,
-              description: ($description | gsub("^\\s+|\\s+$"; "") | if length > 3900 then .[0:3900] + "…" else . end)
-            }]}')"
+          # Message content is capped at 2000 characters: cut at a line boundary.
+          # Blank lines are dropped (headings already carry their own spacing in Discord);
+          # empty allowed_mentions stops @everyone in the text from pinging.
+          payload="$(python3 - <<'PY'
+          import json, os
+          head = f"# Handycam {os.environ['VERSION']}\n"
+          body = "\n".join(l.rstrip() for l in os.environ["CHANGELOG"].splitlines() if l.strip())
+          limit = 1990 - len(head)
+          if len(body) > limit:
+              body = body[:limit].rsplit("\n", 1)[0] + "\n…"
+          print(json.dumps({"content": head + body, "allowed_mentions": {"parse": []}}))
+          PY
+          )"
           curl -fsS -H 'Content-Type: application/json' -d "$payload" "$DISCORD_WEBHOOK_URL"
