@@ -8,12 +8,10 @@ import dev.vercim.handycam.config.HandycamConfig;
 
 public class CameraSwayLayer implements ShakeLayer {
 
-    
     private final SpringSimulator rollSpring     = new SpringSimulator(120f, 22f);
-    
+
     private final SpringSimulator yawLagSpring   = new SpringSimulator(60f,  15f);
-    
-    
+
     private final SpringSimulator pitchLagSpring = new SpringSimulator(40f,  12f);
 
     @Override
@@ -28,8 +26,6 @@ public class CameraSwayLayer implements ShakeLayer {
 
         float sprintMult = state.isSprinting ? 1.5f : 1.0f;
 
-        
-        
         float targetRoll  = 0f;
         float targetYaw   = 0f;
         float targetPitch = 0f;

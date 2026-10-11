@@ -9,23 +9,18 @@ import dev.vercim.handycam.config.HandycamConfig;
 
 public class HitImpactLayer implements ShakeLayer {
 
-    
     private final SpringSimulator pitchSpring = new SpringSimulator(300f, 34f);
     private final SpringSimulator yawSpring   = new SpringSimulator(200f, 28f);
     private final SpringSimulator rollSpring  = new SpringSimulator(200f, 28f);
 
-    
-    
     private final FractalNoise noiseP = new FractalNoise(0xAABBCCDDL, 3, 25f, 0.6f);
     private final FractalNoise noiseY = new FractalNoise(0x11223344L, 3, 20f, 0.6f);
     private final FractalNoise noiseR = new FractalNoise(0x55667788L, 3, 18f, 0.5f);
 
-    
     private float pitchTarget = 0f;
     private float yawTarget   = 0f;
     private float rollTarget  = 0f;
 
-    
     private float trauma = 0f;
 
     private int side = 1;
@@ -40,7 +35,6 @@ public class HitImpactLayer implements ShakeLayer {
         yawTarget   =  side * 0.3f;
         rollTarget  =  side * 0.2f;
 
-        
         trauma = Math.min(trauma + 0.8f, 1.0f);
     }
 
@@ -49,7 +43,6 @@ public class HitImpactLayer implements ShakeLayer {
         HandycamConfig cfg = HandycamConfig.get();
         if (!cfg.hitEnabled) return CameraOffset.ZERO;
 
-        
         float pitch = pitchSpring.update(pitchTarget, dt);
         float yaw   = yawSpring  .update(yawTarget,   dt);
         float roll  = rollSpring .update(rollTarget,  dt);
@@ -59,7 +52,6 @@ public class HitImpactLayer implements ShakeLayer {
         yawTarget   *= (float) Math.exp(-dt * decay);
         rollTarget  *= (float) Math.exp(-dt * decay);
 
-        
         int oct = cfg.noiseOctaves;
         float shake = trauma * trauma;
         float np = noiseP.get(time,       oct) * shake * 0.4f;

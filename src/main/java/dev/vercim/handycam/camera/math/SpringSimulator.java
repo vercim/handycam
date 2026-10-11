@@ -7,9 +7,6 @@ public final class SpringSimulator {
     private float position;
     private float velocity;
 
-    
-    
-    
     private static final float SUB_STEP = 1f / 120f;
 
     public SpringSimulator(float stiffness, float damping) {
@@ -28,7 +25,6 @@ public final class SpringSimulator {
         return position;
     }
 
-    
     public float update(float target, float dt, float speedMult) {
         float sm = speedMult * speedMult;
         int steps = Math.max(1, (int) Math.ceil(dt / SUB_STEP));

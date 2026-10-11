@@ -8,7 +8,6 @@ import dev.vercim.handycam.config.HandycamConfig;
 
 public class JumpShakeLayer implements ShakeLayer {
 
-    
     private final SpringSimulator pitchSpring = new SpringSimulator(300f, 34f);
     private final SpringSimulator rollSpring  = new SpringSimulator(200f, 28f);
     private final SpringSimulator yawSpring   = new SpringSimulator(200f, 28f);
@@ -21,7 +20,7 @@ public class JumpShakeLayer implements ShakeLayer {
 
     @Override
     public void tick(PlayerState state) {
-        
+
         if (wasOnGround && !state.isOnGround && state.verticalVelocity > 0.1f) {
             onJump();
         }
@@ -32,7 +31,6 @@ public class JumpShakeLayer implements ShakeLayer {
         HandycamConfig cfg = HandycamConfig.get();
         if (!cfg.jumpEnabled) return;
 
-        
         pitchTarget = 1.0f;
         rollTarget  = 0.35f;
         yawTarget   = 0.25f;
@@ -47,13 +45,11 @@ public class JumpShakeLayer implements ShakeLayer {
         float roll  = rollSpring .update(rollTarget,  dt);
         float yaw   = yawSpring  .update(yawTarget,   dt);
 
-        
         float expDecay = (float) Math.exp(-dt * cfg.jumpDecay);
         pitchTarget *= expDecay;
         rollTarget  *= expDecay;
         yawTarget   *= expDecay;
 
-        
         float intensity = cfg.jumpIntensity * cfg.masterIntensity;
         return new CameraOffset(pitch * intensity, yaw * intensity, roll * intensity);
     }

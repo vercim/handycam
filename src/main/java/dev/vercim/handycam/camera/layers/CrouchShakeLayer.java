@@ -8,11 +8,9 @@ import dev.vercim.handycam.config.HandycamConfig;
 
 public class CrouchShakeLayer implements ShakeLayer {
 
-    
     private final SpringSimulator pitchSpring = new SpringSimulator(100f, 18f);
     private final SpringSimulator rollSpring  = new SpringSimulator(80f, 15f);
 
-    
     private float pitchTarget = 0f;
     private float rollTarget  = 0f;
 
@@ -20,12 +18,10 @@ public class CrouchShakeLayer implements ShakeLayer {
 
     @Override
     public void tick(PlayerState state) {
-        
+
         if (state.isCrouching && !wasCrouching) {
-            
             onCrouch();
         } else if (!state.isCrouching && wasCrouching) {
-            
             onStand();
         }
         wasCrouching = state.isCrouching;
@@ -35,7 +31,6 @@ public class CrouchShakeLayer implements ShakeLayer {
         HandycamConfig cfg = HandycamConfig.get();
         if (!cfg.crouchEnabled) return;
 
-        
         pitchTarget = -cfg.crouchIntensity * 0.7f;
         rollTarget  = cfg.crouchIntensity * 0.15f;
     }
@@ -44,7 +39,6 @@ public class CrouchShakeLayer implements ShakeLayer {
         HandycamConfig cfg = HandycamConfig.get();
         if (!cfg.crouchEnabled) return;
 
-        
         pitchTarget =  cfg.crouchIntensity * 0.5f;
         rollTarget  = -cfg.crouchIntensity * 0.15f;
     }
@@ -57,7 +51,6 @@ public class CrouchShakeLayer implements ShakeLayer {
         float pitch = pitchSpring.update(pitchTarget, dt);
         float roll  = rollSpring .update(rollTarget,  dt);
 
-        
         float expDecay = (float) Math.exp(-dt / 0.3f);
         pitchTarget *= expDecay;
         rollTarget  *= expDecay;

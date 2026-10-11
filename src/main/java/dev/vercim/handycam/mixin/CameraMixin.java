@@ -36,13 +36,6 @@ public abstract class CameraMixin {
 
         CameraOffset offset = CameraShakeSystem.computeFrame(player, partialTick);
 
-        
-        
-        
-        
-        
-        
-        
         CameraAccessor self = (CameraAccessor) (Object) this;
         Quaternionf rotation = self.getRotation();
         if (Math.abs(offset.pitch) > 1.0e-4f) rotation.rotateX( offset.pitch * Mth.DEG_TO_RAD);
@@ -50,7 +43,6 @@ public abstract class CameraMixin {
         if (Math.abs(offset.roll)  > 1.0e-4f) rotation.rotateZ( offset.roll  * Mth.DEG_TO_RAD);
         if (Math.abs(offset.y)     > 1.0e-5f) self.invokeMove(0f, offset.y, 0f);
 
-        
         if (isFirstPerson) {
             self.setXRot(self.getXRot() + offset.pitch);
             self.setYRot(self.getYRot() + offset.yaw);

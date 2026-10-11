@@ -10,7 +10,6 @@ import net.minecraft.client.Minecraft;
 
 public class EatSwayLayer implements ShakeLayer {
 
-
     private final FractalNoise noiseP = new FractalNoise(0xC1D2E3F4L, 2, 1.2f, 0.5f);
     private final FractalNoise noiseY = new FractalNoise(0xA5B6C7D8L, 2, 0.9f, 0.5f);
     private final FractalNoise noiseR = new FractalNoise(0xF0E1D2C3L, 2, 0.8f, 0.4f);
@@ -70,18 +69,14 @@ public class EatSwayLayer implements ShakeLayer {
         float i = cfg.eatIntensity * cfg.masterIntensity;
         float b = eatBlend;
 
-
         float basePitch = -0.8f * b * i;
         float baseRoll  =  1.5f * b * i * rollCurrent;
-
 
         float sway = b * cfg.eatSwayAmount;
         int   oct  = cfg.noiseOctaves;
         float np = noiseP.get(time,        oct) * sway * 0.55f * i;
         float ny = noiseY.get(time + 50f,  oct) * sway * 0.38f * i;
         float nr = noiseR.get(time + 100f, oct) * sway * 0.32f * i;
-
-
 
         Minecraft mc  = Minecraft.getInstance();
         int guiW      = mc.getWindow().getGuiScaledWidth();

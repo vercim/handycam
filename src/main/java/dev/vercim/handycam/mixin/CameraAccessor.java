@@ -20,11 +20,9 @@ public interface CameraAccessor {
     @Accessor("yRot")
     void setYRot(float yRot);
 
-    
     @Accessor("rotation")
     Quaternionf getRotation();
 
-    
     @Invoker("move")
     void invokeMove(float distanceOffset, float verticalOffset, float horizontalOffset);
 }
