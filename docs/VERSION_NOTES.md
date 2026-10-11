@@ -88,11 +88,11 @@ Targets: `1.21.1-fabric`, `1.21.1-neoforge` · first mod version: 2.0.0-alpha ·
 #### Dependencies
 ```properties
 java_version=21
-fabric_loader_version=0.16.4        # min 0.16.4
-fabric_api_version=0.116.6+1.21.1
+fabric_loader_version=0.19.5        # min 0.16.4
+fabric_api_version=0.116.17+1.21.1
 cloth_config_version=15.0.140
-modmenu_version=11.0.3              # Fabric only, optional
-neoforge_version=21.1.172
+modmenu_version=11.0.5              # Fabric only, optional
+neoforge_version=21.1.259
 neoforge_loader_version_range=[4,)
 ```
 NeoForge metadata also pins Minecraft to `[1.21.1,1.21.2)` and Cloth Config to `[15,)`. Mappings: official Mojang.

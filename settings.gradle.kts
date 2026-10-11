@@ -11,10 +11,10 @@ pluginManagement {
 
 plugins {
     id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
-    id("dev.kikugie.stonecutter") version "0.9.7"
-    id("dev.kikugie.loom-back-compat") version "0.4.1" apply false
-    id("net.neoforged.moddev") version "2.0.142" apply false
-    id("me.modmuss50.mod-publish-plugin") version "2.1.1" apply false
+    id("dev.kikugie.stonecutter") version "0.9.8"
+    id("dev.kikugie.loom-back-compat") version "0.4.3" apply false
+    id("net.neoforged.moddev") version "2.0.148" apply false
+    id("me.modmuss50.mod-publish-plugin") version "2.2.1" apply false
 }
 
 stonecutter {
