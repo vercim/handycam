@@ -13,8 +13,6 @@
     "LightningBoltMixin",
     "LocalPlayerMixin"
   ],
-  "mixins": [
-  ],
   "injectors": {
     "defaultRequire": 1
   }

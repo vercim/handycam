@@ -21,7 +21,6 @@ public class HandycamConfigScreen {
         HandycamConfig cfg = HandycamConfig.get();
         ConfigEntryBuilder e = builder.entryBuilder();
 
-
         ConfigCategory general = builder.getOrCreateCategory(Component.translatable("handycam.config.category.general"));
 
         general.addEntry(e.startBooleanToggle(Component.translatable("handycam.config.effects_enabled"), cfg.effectsEnabled)
@@ -63,7 +62,6 @@ public class HandycamConfigScreen {
             .setTooltip(Component.translatable("handycam.config.detail_layers.tooltip"))
             .setSaveConsumer(v -> cfg.noiseOctaves = v)
             .build());
-
 
         ConfigCategory tilt = builder.getOrCreateCategory(Component.translatable("handycam.config.category.directional_tilt"));
 
@@ -113,7 +111,6 @@ public class HandycamConfigScreen {
             .setSaveConsumer(v -> cfg.strafeTiltDecay = denorm(v, 1f))
             .build());
 
-
         ConfigCategory idle = builder.getOrCreateCategory(Component.translatable("handycam.config.category.breath_idle"));
 
         var breathToggle = e.startBooleanToggle(Component.translatable("handycam.config.breath_enabled"), cfg.breathEnabled)
@@ -162,7 +159,6 @@ public class HandycamConfigScreen {
             .setSaveConsumer(v -> cfg.idleTremorScale = denorm(v, 0.75f))
             .build());
 
-
         ConfigCategory movement = builder.getOrCreateCategory(Component.translatable("handycam.config.category.walk_sprint"));
 
         var walkBobToggle = e.startBooleanToggle(Component.translatable("handycam.config.walk_bob_enabled"), cfg.walkBobEnabled)
@@ -203,7 +199,6 @@ public class HandycamConfigScreen {
             .setRequirement(Requirement.isTrue(walkBobToggle::getValue))
             .setSaveConsumer(v -> cfg.sprintBobMult = denorm(v, 1.8f))
             .build());
-
 
         ConfigCategory jump = builder.getOrCreateCategory(Component.translatable("handycam.config.category.jump_crouch"));
 
@@ -259,7 +254,6 @@ public class HandycamConfigScreen {
             .setRequirement(Requirement.isTrue(crouchToggle::getValue))
             .setSaveConsumer(v -> cfg.crouchIntensity = denorm(v, 3.2f))
             .build());
-
 
         ConfigCategory mouse = builder.getOrCreateCategory(Component.translatable("handycam.config.category.mouse_cursor"));
 
@@ -343,7 +337,6 @@ public class HandycamConfigScreen {
             .setSaveConsumer(v -> cfg.mouseSwaySmoothing = denorm(v, 0.09f))
             .build());
 
-
         ConfigCategory eat = builder.getOrCreateCategory(Component.translatable("handycam.config.category.eating_drinking"));
 
         var eatToggle = e.startBooleanToggle(Component.translatable("handycam.config.eat_enabled"), cfg.eatEnabled)
@@ -381,7 +374,6 @@ public class HandycamConfigScreen {
             ))
             .setSaveConsumer(v -> cfg.eatSwayDirection = v)
             .build());
-
 
         ConfigCategory hit = builder.getOrCreateCategory(Component.translatable("handycam.config.category.swing_damage"));
 
@@ -430,7 +422,6 @@ public class HandycamConfigScreen {
             .setRequirement(Requirement.isTrue(damageToggle::getValue))
             .setSaveConsumer(v -> cfg.damageDecay = denorm(v, 1.2f))
             .build());
-
 
         ConfigCategory bow = builder.getOrCreateCategory(Component.translatable("handycam.config.category.bow_crossbow"));
 
