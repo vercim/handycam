@@ -13,7 +13,7 @@ public class HandycamConfig {
 
     
     
-    private static final int CURRENT_VERSION = 3;
+    private static final int CURRENT_VERSION = 4;
 
     private static final Gson GSON = new GsonBuilder()
             .setPrettyPrinting()
@@ -32,7 +32,7 @@ public class HandycamConfig {
     public boolean enableVanillaFov          = true;
 
     
-    public float masterIntensity = 2.0f;
+    public float masterIntensity = 1.6f;
     public int   noiseOctaves    = 4;    
 
     
@@ -164,6 +164,9 @@ public class HandycamConfig {
             if (sameValue(strafeTiltIntensity, 3.0f)) strafeTiltIntensity = 2.4f;
             if (sameValue(turnSway, 0.08f)) turnSway = 0.096f;
             if (sameValue(maxTurnRoll, 2.5f)) maxTurnRoll = 3.0f;
+        }
+        if (configVersion < 4) {
+            if (sameValue(masterIntensity, 2.0f)) masterIntensity = 1.6f;
         }
         configVersion = CURRENT_VERSION;
     }

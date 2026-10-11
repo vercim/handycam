@@ -130,15 +130,15 @@ Applying offsets: `rotateX(pitch)` → `rotateY(-yaw)` → `rotateZ(roll)` (yaw 
 
 ## Archived ports (pre-Stonecutter)
 
-These were built with Architectury in per-version branches (last Architectury release: `1.3.2`). The branches remain as read-only references: `archive/<version>` (and the matching old branch). They are not part of the Stonecutter matrix yet, so use them as a map when porting that version.
+These were built with Architectury in per-version branches (last Architectury release: `1.3.2`). The branches were deleted after the Stonecutter migration; their final commits are preserved as the git tags `archive/<version>` (pushed to `origin`). Treat them as read-only references: `git show archive/<version>:<path>` or `git checkout archive/<version>`. They are not part of the Stonecutter matrix yet, so use them as a map when porting that version.
 
 | MC | Loaders | Fabric loader | Fabric API | NeoForge / Forge | Cloth Config | Mod Menu | Java | Last mod version |
 |---|---|---|---|---|---|---|---|---|
 | 26.2 | Fabric, NeoForge | 0.19.3 | 0.152.1+26.2 | 26.2.0.7-beta | 26.2.155 | 20.0.0-alpha.1 | 25 | 1.3.1 |
 | 26.1 | Fabric, NeoForge | 0.19.3 | 0.145.1+26.1 | 26.1.0.19-beta | 26.1.154 | 18.0.0-alpha.8 | 25 | 1.3.1 |
 | 1.21.11 | Fabric, NeoForge | 0.19.3 | 0.141.4+1.21.11 | 21.11.42 | 21.11.153 | 17.0.0 | — | 1.3.0 |
-| 1.21.10 | Fabric, NeoForge | — | — | — | — | — | — | no notes recorded; see `archive/1.21.10` |
-| 1.21.4 | Fabric, NeoForge | 0.19.3 | 0.119.4+1.21.4 | 21.4.155 | 17.0.144 | 13.0.4 | — | 1.2.x (no archive branch; see tags `v1.2.*`) |
+| 1.21.10 | Fabric, NeoForge | — | — | — | — | — | — | no notes recorded; see tag `archive/1.21.10` |
+| 1.21.4 | Fabric, NeoForge | 0.19.3 | 0.119.4+1.21.4 | 21.4.155 | 17.0.144 | 13.0.4 | — | 1.2.x (no archive tag; see release tags `v1.2.*`) |
 | 1.20.1 | Fabric, Forge | 0.15.11 | 0.92.2+1.20.1 | Forge 1.20.1-47.2.0 | 11.1.136 | 7.2.2 | 17 | 1.3.1 |
 
 Full original notes (including build-plugin versions): `git show v2.0.0-alpha:docs/VERSION_NOTES.md`; migration rationale: `git show v2.0.0-alpha:docs/MIGRATION.md`.

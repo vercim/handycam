@@ -52,10 +52,10 @@ public class HandycamConfigScreen {
             .build());
 
         general.addEntry(e.startIntSlider(Component.translatable("handycam.config.global_intensity"),
-                norm(cfg.masterIntensity, 2f), 0, 200)
+                norm(cfg.masterIntensity, 1.6f), 0, 200)
             .setDefaultValue(100)
             .setTooltip(Component.translatable("handycam.config.global_intensity.tooltip"))
-            .setSaveConsumer(v -> cfg.masterIntensity = denorm(v, 2f))
+            .setSaveConsumer(v -> cfg.masterIntensity = denorm(v, 1.6f))
             .build());
         general.addEntry(e.startIntSlider(Component.translatable("handycam.config.detail_layers"),
                 cfg.noiseOctaves, 2, 5)
