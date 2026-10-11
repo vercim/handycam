@@ -5,9 +5,6 @@ Handycam adds subtle, physics-inspired camera movement that makes Minecraft feel
 Every effect has its own intensity slider and can be toggled off independently. Open settings through ModMenu (Fabric) or the in-game mod menu (NeoForge).
 
 ![Dependencies](https://cdn.modrinth.com/data/cached_images/78f018e94dabc1d8158865367fc8c3952ceb20a0_0.webp)
-
-Minecraft 1.21.1 · Fabric and NeoForge · Java 21
-
 - [Cloth Config](https://modrinth.com/mod/cloth-config)
 - [Fabric API](https://modrinth.com/mod/fabric-api) — Fabric only
 - [Mod Menu](https://modrinth.com/mod/modmenu) — recommended on Fabric
