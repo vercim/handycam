@@ -14,7 +14,7 @@ Handycam — client-side Minecraft mod, procedural handheld-camera effects. Fabr
 
 ## Current state
 
-- Version `2.0.0-alpha` (first Stonecutter release); last Architectury release is `1.3.2`.
+- Version `2.0.1-beta` (`2.0.0-alpha` was the first Stonecutter release); last Architectury release is `1.3.2`.
 - Targets: `1.21.1-fabric`, `1.21.1-neoforge`, declared once in `settings.gradle.kts`. Older versions (1.20.1, 1.21.10, 1.21.11, 26.1, 26.2) exist only as read-only references in the `archive/<version>` git tags (the old per-version branches were deleted) and are not in the matrix yet. Inspect one with `git checkout archive/<version>` or `git show archive/<version>:<path>`. Never add new long-lived version branches.
 - `vcsVersion = 1.21.1-fabric`: commit with `.sc_active_version` set to `1.21.1-fabric`.
 
@@ -32,7 +32,7 @@ src/main/java/dev/vercim/handycam/
   camera/
     CameraShakeSystem.java         — orchestrates all layers
     ShakeLayer.java                — layer interface
-    CameraOffset.java              — immutable offset (pitch, yaw, roll, x, y, z)
+    CameraOffset.java              — immutable offset (pitch, yaw, roll, y)
     PlayerState.java               — read-only player state snapshot per tick
     ZoomCompensation.java          — zoom ratio from the final world FOV; scales shake down while zoomed
     CrosshairSwaySystem.java       — crosshair compensation (draw-tilt, eat-tilt, mouse lead)
@@ -154,4 +154,3 @@ Build and run problems (wrong JDK, missing symbols in a generated target, wrong 
 
 - **GSON ignores field defaults** → GSON bypasses constructors; `HandycamConfig` registers an `InstanceCreator`, keep it.
 - **Camera position broken after writing `Camera.position`** → use `Camera.move()` via the `@Invoker` in `CameraAccessor`.
-- **Stray file** → `com/terraformersmc/modmenu/api/ModMenuApi.class` in the repo root is an accidental commit, not part of the build.
