@@ -15,10 +15,10 @@ The matrix is declared once in [`settings.gradle.kts`](../settings.gradle.kts). 
 
 ## Requirements
 
-- Any JDK 17+ to launch Gradle 9.4; the Java 21 toolchain is provisioned automatically.
+- JDK 25+ to launch Gradle (Fabric Loom 1.18 refuses to load on anything older); the Java 21 toolchain that compiles the mod is provisioned automatically. CI installs both JDKs.
 - Windows: PowerShell, use `.\gradlew.bat`.
 - macOS / Linux: use `./gradlew` (run `chmod +x gradlew` if it is not executable).
-- To force a specific launcher JDK: macOS `export JAVA_HOME=$(/usr/libexec/java_home -v 21)`, Windows `$env:JAVA_HOME = "C:\path\to\jdk-21"`.
+- To force a specific launcher JDK: macOS `export JAVA_HOME=$(/usr/libexec/java_home -v 25)`, Windows `$env:JAVA_HOME = "C:\path\to\jdk-25"`.
 
 ## Commands
 
@@ -135,6 +135,7 @@ It needs the repository variables `MODRINTH_PROJECT_ID` and `CURSEFORGE_PROJECT_
 
 ## Troubleshooting
 
+- **"Dependency requires at least JVM runtime version 25"** → Gradle was launched with an older JDK; launch it with JDK 25+ (`JAVA_HOME`, or `setup-java` in CI).
 - **Transparent world in dev** → Gradle is using the wrong JDK; use a Java 21 toolchain.
 - **"Cannot find symbol" in a generated target** → check the active Stonecutter target and its conditional blocks, then re-sync Gradle.
 - **Wrong client runs** → update `.sc_active_version` and use `runActiveClient`.
