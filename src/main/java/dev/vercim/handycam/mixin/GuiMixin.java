@@ -17,7 +17,7 @@ public abstract class GuiMixin {
 
     @Inject(method = "renderCrosshair", at = @At("HEAD"))
     private void handycam$crosshairPush(GuiGraphics graphics, DeltaTracker tracker, CallbackInfo ci) {
-        
+
         if (Minecraft.getInstance().options.getCameraType() != CameraType.FIRST_PERSON) return;
 
         HandycamConfig cfg = HandycamConfig.get();
@@ -40,7 +40,6 @@ public abstract class GuiMixin {
         graphics.pose().pushPose();
         if (hasTranslate) graphics.pose().translate(ox, oy, 0f);
         if (hasScale) {
-            
             graphics.pose().translate( cx, cy, 0f);
             graphics.pose().scale(scale, scale, 1f);
             graphics.pose().translate(-cx, -cy, 0f);

@@ -9,13 +9,10 @@ import dev.vercim.handycam.config.HandycamConfig;
 
 public class DamageShakeLayer implements ShakeLayer {
 
-    
-    
     private final SpringSimulator pitchSpring = new SpringSimulator(60f, 8f);
     private final SpringSimulator yawSpring   = new SpringSimulator(60f, 8f);
     private final SpringSimulator rollSpring  = new SpringSimulator(60f, 8f);
 
-    
     private final FractalNoise pitchA = new FractalNoise(0x11223344L, 4, 8f,  0.55f);
     private final FractalNoise pitchB = new FractalNoise(0xAABB1122L, 3, 22f, 0.5f);
     private final FractalNoise yawA   = new FractalNoise(0x55667788L, 4, 11f, 0.55f);
@@ -29,18 +26,15 @@ public class DamageShakeLayer implements ShakeLayer {
         HandycamConfig cfg = HandycamConfig.get();
         if (!cfg.damageEnabled) return;
 
-        
         float severity = (float) Math.sqrt(damageAmount / maxHealth);
         traumaAmount = Math.min(traumaAmount + severity, 1f);
 
-        
-        
         hitCounter++;
         int side = (hitCounter % 2 == 0) ? 1 : -1;
         float kick = severity * 40f;
-        pitchSpring.addVelocity(-kick);                    
-        yawSpring  .addVelocity( side * kick * 0.45f);    
-        rollSpring .addVelocity( side * kick * 0.35f);    
+        pitchSpring.addVelocity(-kick);
+        yawSpring  .addVelocity( side * kick * 0.45f);
+        rollSpring .addVelocity( side * kick * 0.35f);
     }
 
     @Override
@@ -49,12 +43,10 @@ public class DamageShakeLayer implements ShakeLayer {
         boolean springActive = Math.abs(pitchSpring.getPosition()) > 0.001f;
         if (!cfg.damageEnabled || (traumaAmount < 0.01f && !springActive)) return CameraOffset.ZERO;
 
-        
         float sp = pitchSpring.update(0f, dt);
         float sy = yawSpring  .update(0f, dt);
         float sr = rollSpring .update(0f, dt);
 
-        
         float shake = traumaAmount * traumaAmount;
         int oct = cfg.noiseOctaves;
         float p = (pitchA.get(time,       oct) * 0.6f + pitchB.get(time + 13f, oct) * 0.4f) * shake;

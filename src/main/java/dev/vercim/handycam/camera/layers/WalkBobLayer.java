@@ -10,7 +10,6 @@ public class WalkBobLayer implements ShakeLayer {
 
     private static final float TWO_PI = (float) (2.0 * Math.PI);
 
-    
     private final FractalNoise vertNoise  = new FractalNoise(0xDEADBEEFL, 3, 0.5f, 0.55f);
     private final FractalNoise latNoise   = new FractalNoise(0xCAFEBABEL, 3, 0.4f, 0.55f);
     private final FractalNoise yawNoise   = new FractalNoise(0xFEEDFACEL, 2, 0.35f, 0.55f);
@@ -22,7 +21,7 @@ public class WalkBobLayer implements ShakeLayer {
     private float airBlend       = 0f;
     private float smoothSpeed    = 0f;
     private float phaseSpeed     = 0f;
-    private float smoothSprint   = 1f;  
+    private float smoothSprint   = 1f;
     private boolean onGround     = true;
     private boolean wasAirborne  = false;
 
@@ -39,8 +38,6 @@ public class WalkBobLayer implements ShakeLayer {
         wasAirborne = !onGround;
 
         if (onGround) {
-            
-            
             if (justLanded) {
                 bobPhase = Math.round(bobPhase / PI) * PI;
             }
@@ -68,8 +65,6 @@ public class WalkBobLayer implements ShakeLayer {
         float sprintMult = smoothSprint;
         int oct = cfg.noiseOctaves;
 
-        
-        
         float sinP    = (float) Math.sin(bobPhase);
         float basePitch = sinP * sinP;
         float vn      = vertNoise.get(bobPhase * 0.4f, oct);

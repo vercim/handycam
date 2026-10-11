@@ -9,7 +9,6 @@ import java.util.List;
 
 public final class CameraShakeSystem {
 
-    
     private static final LandingImpactLayer  LANDING   = new LandingImpactLayer();
     private static final DamageShakeLayer    DAMAGE    = new DamageShakeLayer();
     private static final JumpShakeLayer      JUMP      = new JumpShakeLayer();
@@ -36,7 +35,6 @@ public final class CameraShakeSystem {
         new CameraSwayLayer()
     );
 
-    
     private static float  gameTime    = 0f;
     private static PlayerState lastState = null;
 
@@ -50,11 +48,10 @@ public final class CameraShakeSystem {
     private static boolean wasPaused = false;
     private static CameraOffset lastComputedOffset = CameraOffset.ZERO;
 
-    
-    private static final float[] scratch = new float[4]; 
+    private static final float[] scratch = new float[4];
 
-    private static float fadeBlend = 1f; 
-    private static final float FADE_SPEED = 3f; 
+    private static float fadeBlend = 1f;
+    private static final float FADE_SPEED = 3f;
 
     private CameraShakeSystem() {}
 
@@ -66,7 +63,6 @@ public final class CameraShakeSystem {
             return;
         }
         if (wasPaused) {
-            
             PlayerState.sync(player);
             lastFrameNano = -1L;
             wasPaused = false;
@@ -87,11 +83,9 @@ public final class CameraShakeSystem {
             if (fallDist > 0.15f) LANDING.onLand(fallDist);
         }
 
-        
         int   hurtTime = player.hurtTime;
         float health   = player.getHealth();
         if (hurtTime > prevHurtTime) {
-            
             float delta = (prevHealth > 0f) ? Math.max(prevHealth - health, 0f) : 1f;
             float maxHp = player.getMaxHealth();
             DAMAGE.onDamage(Math.max(delta, 1f), maxHp > 0f ? maxHp : 20f);
@@ -99,7 +93,6 @@ public final class CameraShakeSystem {
         prevHurtTime = hurtTime;
         prevHealth   = health;
 
-        
         if (player.swinging && player.swingTime == 0 && !sleeping) {
             HIT.onHit();
         }
@@ -133,7 +126,6 @@ public final class CameraShakeSystem {
 
         PlayerState state = (lastState != null) ? lastState : PlayerState.from(player);
 
-        
         HandycamConfig cfg = HandycamConfig.get();
         if (!cfg.effectsEnabled) {
             lastComputedOffset = CameraOffset.ZERO;
@@ -161,10 +153,6 @@ public final class CameraShakeSystem {
             s[3] += o.y;
         }
 
-        
-        
-        
-        
         // Zoom magnifies angular shake on screen; shrink it by the zoom ratio so it looks the same as unzoomed.
         float k = fadeBlend * ZoomCompensation.shakeScale();
         if (k < 1f) {
