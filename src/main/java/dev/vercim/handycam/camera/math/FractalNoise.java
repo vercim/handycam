@@ -5,8 +5,8 @@ public final class FractalNoise {
     private final PerlinNoise noise;
     private final int octaves;
     private final float frequency;
-    private final float gain;      
-    private final float lacunarity; 
+    private final float gain;
+    private final float lacunarity;
 
     public FractalNoise(long seed, int octaves, float frequency, float gain) {
         this.noise = new PerlinNoise(seed);
@@ -16,12 +16,10 @@ public final class FractalNoise {
         this.lacunarity = 2.0f;
     }
 
-    
     public float get(float t) {
         return get(t, octaves);
     }
 
-    
     public float get(float t, int maxOctaves) {
         int n = Math.max(1, Math.min(maxOctaves, octaves));
         float value = 0f;

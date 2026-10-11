@@ -9,19 +9,19 @@ import net.minecraft.world.item.UseAnim;
 
 public final class PlayerState {
 
-    public final float   horizontalSpeed;  
-    public final float   verticalVelocity; 
+    public final float   horizontalSpeed;
+    public final float   verticalVelocity;
     public final boolean isSprinting;
     public final boolean isOnGround;
     public final boolean isCrouching;
-    public final float   turnRate;         
-    public final float   pitchDelta;       
-    public final float   strafeSpeed;      
-    public final float   forwardSpeed;     
-    public final float   bowDrawProgress;      
-    public final boolean crossbowFired;       
-    public final float   crossbowDrawProgress; 
-    public final boolean isCreativeFlying;    
+    public final float   turnRate;
+    public final float   pitchDelta;
+    public final float   strafeSpeed;
+    public final float   forwardSpeed;
+    public final float   bowDrawProgress;
+    public final boolean crossbowFired;
+    public final float   crossbowDrawProgress;
+    public final boolean isCreativeFlying;
     public final boolean isEating;
     public final boolean isSleeping;
 
@@ -52,7 +52,6 @@ public final class PlayerState {
     private static float   prevXRot         = 0f;
     private static boolean prevCrossbowCharged = false;
 
-    
     public static void sync(LocalPlayer player) {
         prevYRot = player.getYRot();
         prevXRot = player.getXRot();
@@ -80,24 +79,17 @@ public final class PlayerState {
         if (pitchDelta < -20f) pitchDelta = -20f;
         prevXRot = currentXRot;
 
-        
         float yawRad   = (float) Math.toRadians(currentYRot);
         float sinYaw   = (float) Math.sin(yawRad);
         float cosYaw   = (float) Math.cos(yawRad);
-        
-        
-        
-        
-        
-        
+
         float forward = cosYaw * dz - sinYaw * dx;
         float strafe  =   cosYaw * dx + sinYaw * dz;
-        
+
         float norm    = 0.3f;
         forward = Math.max(-1f, Math.min(1f, forward / norm));
         strafe  = Math.max(-1f, Math.min(1f, strafe  / norm));
 
-        
         float bowDraw = 0f;
         if (player.isUsingItem()) {
             ItemStack use = player.getUseItem();
@@ -106,7 +98,6 @@ public final class PlayerState {
             }
         }
 
-        
         ItemStack main = player.getMainHandItem();
         ItemStack off  = player.getOffhandItem();
         boolean nowCharged = (main.getItem() instanceof CrossbowItem && CrossbowItem.isCharged(main))
@@ -114,7 +105,6 @@ public final class PlayerState {
         boolean crossbowFired = prevCrossbowCharged && !nowCharged;
         prevCrossbowCharged = nowCharged;
 
-        
         float crossbowDraw = 0f;
         if (player.isUsingItem()) {
             ItemStack use = player.getUseItem();

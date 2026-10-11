@@ -8,26 +8,21 @@ import dev.vercim.handycam.config.HandycamConfig;
 
 public class LandingImpactLayer implements ShakeLayer {
 
-    
     private final SpringSimulator pitchSpring = new SpringSimulator(200f, 28f);
-    
+
     private final SpringSimulator rollSpring  = new SpringSimulator(140f, 24f);
     private final SpringSimulator yawSpring   = new SpringSimulator(140f, 24f);
 
-    
     private float pitchTarget = 0f;
     private float rollTarget  = 0f;
     private float yawTarget   = 0f;
 
-    
     private int side = 1;
 
-    
     public void onLand(float fallDistance) {
         HandycamConfig cfg = HandycamConfig.get();
         if (!cfg.landingEnabled) return;
 
-        
         float strength = 1f - (float) Math.exp(-fallDistance / 7f);
         strength = Math.min(strength, 1f);
 
@@ -47,14 +42,12 @@ public class LandingImpactLayer implements ShakeLayer {
         float roll  = rollSpring .update(rollTarget,  dt);
         float yaw   = yawSpring  .update(yawTarget,   dt);
 
-        
         float expP  = (float) Math.exp(-dt / 0.12f);
         float expRY = (float) Math.exp(-dt / 0.18f);
         pitchTarget *= expP;
         rollTarget  *= expRY;
         yawTarget   *= expRY;
 
-        
         float i = cfg.landingIntensity * cfg.masterIntensity;
         return new CameraOffset(
             pitch * i * cfg.landingPitchMax,

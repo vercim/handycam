@@ -8,10 +8,9 @@ import dev.vercim.handycam.config.HandycamConfig;
 
 public class MouseLeadLayer implements ShakeLayer {
 
-    
     private float smoothYaw   = 0f;
     private float smoothPitch = 0f;
-    
+
     private float smoothVertical = 0f;
 
     @Override
@@ -27,31 +26,23 @@ public class MouseLeadLayer implements ShakeLayer {
             return CameraOffset.ZERO;
         }
 
-        
         float tauMouse = cfg.mouseSwaySmoothing;
         float aMouse   = 1f - (float) Math.exp(-dt / tauMouse);
         smoothYaw   += (state.turnRate   - smoothYaw)   * aMouse;
         smoothPitch += (state.pitchDelta - smoothPitch) * aMouse;
 
-        
-        
-        
         float tauVert = 0.12f;
         float aVert   = 1f - (float) Math.exp(-dt / tauVert);
-        
-        float vyDeg = state.verticalVelocity * 12f; 
+
+        float vyDeg = state.verticalVelocity * 12f;
         smoothVertical += (vyDeg - smoothVertical) * aVert;
 
-        
         float swayScale   = cfg.mouseSwayScale * cfg.masterIntensity;
         float driftScale  = cfg.verticalDriftIntensity * cfg.masterIntensity;
 
-        
-        
-        
         CrosshairSwaySystem.offsetX = smoothYaw   * swayScale;
         CrosshairSwaySystem.offsetY = smoothPitch * swayScale + smoothVertical * driftScale;
 
-        return CameraOffset.ZERO; 
+        return CameraOffset.ZERO;
     }
 }
