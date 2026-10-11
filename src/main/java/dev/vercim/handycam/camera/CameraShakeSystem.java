@@ -170,12 +170,14 @@ public final class CameraShakeSystem {
         
         
         
-        if (fadeBlend < 1f) {
-            s[0] *= fadeBlend;
-            s[1] *= fadeBlend;
-            s[2] *= fadeBlend;
-            s[3] *= fadeBlend;
-            s[4] *= fadeBlend;
+        // Zoom magnifies angular shake on screen; shrink it by the zoom ratio so it looks the same as unzoomed.
+        float k = fadeBlend * ZoomCompensation.shakeScale();
+        if (k < 1f) {
+            s[0] *= k;
+            s[1] *= k;
+            s[2] *= k;
+            s[3] *= k;
+            s[4] *= k;
         }
 
         CameraOffset sum = new CameraOffset(s[0], s[1], s[2], s[3], s[4]);

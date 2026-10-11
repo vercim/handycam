@@ -6,10 +6,14 @@
 ### Architecture
 - Updated build tooling: Gradle 9.8.1, Stonecutter 0.9.8, Loom Back Compat 0.4.3, Fabric Loom 1.18.4, NeoForge ModDevGradle 2.0.148, Mod Publish Plugin 2.2.1, and the GitHub Actions used by CI.
 
+### Effects
+- Camera shake now shrinks while zoomed in, so a spyglass or a zoom mod such as Zoomify no longer magnifies it. Works with any mod that changes the FOV.
+
 ### Config
 - Lowered the default Global Intensity by 20% (2.0 → 1.6; the slider still shows 100% as the default). Configs still on the old default are migrated automatically; custom values are kept.
 
 ### Fixes
+- Disabling Enable Vanilla FOV no longer blocks spyglass zoom or zoom mods such as Zoomify.
 - Fixed uncontrolled camera shaking while lying in a bed. Effects now fade out while sleeping and ignore mouse movement and bed bounce.
 
 ## [2.0.0-alpha] - 2026-07-28
