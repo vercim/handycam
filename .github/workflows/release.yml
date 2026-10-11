@@ -27,11 +27,15 @@ jobs:
       - name: Make Gradle wrapper executable
         run: chmod +x gradlew
 
-      - name: Set up JDK 21
+      # Gradle itself needs JDK 25 (Fabric Loom 1.18); the last version listed becomes JAVA_HOME.
+      # JDK 21 is the toolchain the mod compiles with.
+      - name: Set up JDK 21 and 25
         uses: actions/setup-java@v6
         with:
           distribution: temurin
-          java-version: "21"
+          java-version: |
+            21
+            25
           cache: gradle
 
       - name: Set up Gradle
