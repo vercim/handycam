@@ -34,6 +34,7 @@ src/main/java/dev/vercim/handycam/
     ShakeLayer.java                — layer interface
     CameraOffset.java              — immutable offset (pitch, yaw, roll, x, y, z)
     PlayerState.java               — read-only player state snapshot per tick
+    ZoomCompensation.java          — zoom ratio from the final world FOV; scales shake down while zoomed
     CrosshairSwaySystem.java       — crosshair compensation (draw-tilt, eat-tilt, mouse lead)
     layers/
       WalkBobLayer.java            — vertical and lateral bob on footsteps
@@ -62,7 +63,8 @@ src/main/java/dev/vercim/handycam/
   mixin/
     CameraMixin.java               — injects pitch/yaw/roll/y offset into the vanilla camera
     CameraAccessor.java            — @Accessor/@Invoker for Camera fields and move()
-    GameRendererMixin.java         — blocks dynamic FOV modifiers when enableVanillaFov=false
+    GameRendererMixin.java         — strips death/underwater FOV when enableVanillaFov=false; feeds ZoomCompensation
+    AbstractClientPlayerMixin.java — zeroes the sprint/speed/bow FOV modifier when enableVanillaFov=false (spyglass kept)
     GuiMixin.java                  — offsets/scales crosshair render per CrosshairSwaySystem
     ClientPacketListenerMixin.java — intercepts explosion packets → CameraShakeSystem.onExplosion()
     LightningBoltMixin.java        — intercepts lightning tick → CameraShakeSystem.onLightning()
@@ -96,7 +98,8 @@ Config is loaded on client start via `HandycamMod.initClient(configDir)`. The ef
 - Rotation order matters: `rotateX(pitch)` → `rotateY(-yaw)` → `rotateZ(roll)`. Yaw is negated because Minecraft's Y-axis convention is inverted relative to JOML. Mutate `Camera.rotation` (a `Quaternionf`) in place; never reassign the reference.
 - Update the `xRot`/`yRot` scalars in first-person only, so the crosshair stays in sync.
 - Never write `Camera.position` directly; use `invokeMove()` (`@Invoker` in `CameraAccessor`), otherwise vanilla camera logic such as clip-to-block breaks.
-- `GameRendererMixin` injects into `getFov` at `RETURN` (cancellable). With `enableVanillaFov = false` it returns the raw FOV option to strip dynamic modifiers.
+- With `enableVanillaFov = false`, vanilla FOV effects are removed at their source, never by overriding the `getFov` result, so the spyglass and zoom mods (Zoomify etc.) keep working: `AbstractClientPlayerMixin` returns `1` from `getFieldOfViewModifier` (sprint, speed, bow, flying) except for the first-person spyglass; `GameRendererMixin` redirects the death and underwater FOV steps inside `getFov`.
+- `GameRendererMixin` also reads the final world FOV in `getProjectionMatrix` (`HEAD`) for `ZoomCompensation`; do not read zoom from the `getFov` return, the value there depends on mixin order with Zoomify and similar mods.
 - `GuiMixin` wraps `renderCrosshair` (HEAD push / TAIL pop) and skips the offset outside first-person.
 
 Exact Minecraft signatures per version are in [docs/VERSION_NOTES.md](docs/VERSION_NOTES.md).
