@@ -1,9 +1,19 @@
-## [Unreleased]
+## [2.0.1-alpha] - 2026-10-11
+
+### Compatibility
+- Updated dependencies for Minecraft 1.21.1: Fabric Loader 0.19.5, Fabric API 0.116.17, Mod Menu 11.0.5, NeoForge 21.1.259. Fabric API and NeoForge minimum versions now match these.
+
+### Architecture
+- Updated build tooling: Gradle 9.8.1, Stonecutter 0.9.8, Loom Back Compat 0.4.3, Fabric Loom 1.18.4, NeoForge ModDevGradle 2.0.148, Mod Publish Plugin 2.2.1, and the GitHub Actions used by CI.
+
+### Effects
+- Camera shake now shrinks while zoomed in, so a spyglass or a zoom mod such as Zoomify no longer magnifies it.
 
 ### Config
-- Lowered the default Global Intensity by 20% (2.0 → 1.6; the slider still shows 100% as the default). Configs still on the old default are migrated automatically; custom values are kept.
+- Lowered the default Global Intensity by 20%. Configs still on the old default are migrated automatically.
 
 ### Fixes
+- Disabling Enable Vanilla FOV no longer blocks spyglass zoom or zoom mods such as Zoomify.
 - Fixed uncontrolled camera shaking while lying in a bed. Effects now fade out while sleeping and ignore mouse movement and bed bounce.
 
 ## [2.0.0-alpha] - 2026-07-28
