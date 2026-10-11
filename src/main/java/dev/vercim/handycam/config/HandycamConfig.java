@@ -50,7 +50,6 @@ public class HandycamConfig {
     public float   walkBobIntensity    = 2.5f;  
     public float   walkBobFrequency    = 0.90f; 
     public float   walkBobVerticalMult = 2.0f;  
-    public float   walkNoiseAmount     = 0.25f;
     public float   sprintBobMult       = 1.80f; 
 
     

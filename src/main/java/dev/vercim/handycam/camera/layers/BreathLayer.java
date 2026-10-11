@@ -32,6 +32,6 @@ public class BreathLayer implements ShakeLayer {
         float drift = phaseDrift.get(time, 1) * 0.35f;
         float y = (float) Math.sin(time * BREATH_HZ * TWO_PI + drift) * intensity * 0.015f;
 
-        return new CameraOffset(0f, 0f, 0f, 0f, y);
+        return new CameraOffset(0f, 0f, 0f, y);
     }
 }
