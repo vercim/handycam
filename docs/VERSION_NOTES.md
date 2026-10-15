@@ -81,6 +81,38 @@ Likely trouble spots, in order: `Camera`, `Gui`, `GameRenderer` mixins; then `Pl
 
 ## Target entries
 
+### MC 26.3 — Fabric / NeoForge
+
+Targets: `26.3-fabric`, `26.3-neoforge` · first mod version: 2.1.0 · date: 2026-10-15
+
+#### Dependencies
+```properties
+java_version=25
+fabric_loader_min_version=0.19.3
+fabric_api_version=0.163.0+26.3
+cloth_config_version=26.3.159
+modmenu_version=21.0.0              # Fabric only, optional
+neoforge_version=26.3.0.83
+neoforge_loader_version_range=[4,)
+neoforge_icon_file_key=iconFile
+neoforge_icon_blur_key=iconBlur
+```
+NeoForge metadata pins Minecraft to `[26.3,26.3.1)` and Cloth Config to `[26.3,)`.
+
+#### API differences (vs. 26.2)
+| Area | 26.2 | 26.3 | Where / condition |
+|---|---|---|---|
+| Swing state of `LivingEntity` | public fields `swinging`, `swingTime` (the hit shake fires when `swinging && swingTime == 0`) | private `SwingState` behind `isSwinging()`, `getSwingAnimation(float)` and `getCurrentSwing()`; the first tick of a swing is read as a rising edge of `isSwinging()` or a drop of `getSwingAnimation(1f)` (restart mid-animation) | `camera/CameraShakeSystem.java` (`swingStarted`), `//? if >=26.3` |
+
+Camera, FOV, crosshair (`Hud`), key mapping, and NeoForge entry points are unchanged from 26.2.
+
+#### Quirks
+- A world saved by 26.2 or older asks to be upgraded: generate the test world with a 26.3 server.
+- The new render backend logs `SurfaceException: Cannot acquire minimized window` while the game window is minimized; harmless.
+
+#### Verified
+- 2026-10-15, mod 2.1.0 (dev build): see the 1.21.4 entry for the checks run; Fabric ☑ NeoForge ☑. Left clicks sent to the game window triggered the new swing detection on both loaders. Packaged-JAR gameplay in a clean profile: ☐
+
 ### MC 26.2 — Fabric / NeoForge
 
 Targets: `26.2-fabric`, `26.2-neoforge` · first mod version: 2.1.0 · date: 2026-10-15

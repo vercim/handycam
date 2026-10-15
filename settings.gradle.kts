@@ -28,6 +28,7 @@ stonecutter {
             "26.1" to listOf("fabric", "neoforge"),
             "26.1.2" to listOf("fabric", "neoforge"),
             "26.2" to listOf("fabric", "neoforge"),
+            "26.3" to listOf("fabric", "neoforge"),
         )
         targets.forEach { (minecraft, loaders) ->
             loaders.forEach { loader -> version("$minecraft-$loader", minecraft).buildscript = "build.$loader.gradle.kts" }
