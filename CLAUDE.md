@@ -22,46 +22,54 @@ Handycam — client-side Minecraft mod, procedural handheld-camera effects. Fabr
 
 - IDE-only runs prove nothing about loader integration; validate the packaged JAR from `build/libs/` in a clean client profile (steps in [docs/WORKFLOW.md](docs/WORKFLOW.md)).
 - Both JARs must register `handycam.mixins.json`, and loader-specific classes must be absent from the other loader's JAR. A missing registration makes the mod load while every injection silently does nothing (this broke the first 1.3.2 build).
+- The camera rig is pinned by `RigEquivalenceTest` against `camera-golden.bin.gz`; a failure means the in-game camera changed. Update the fixture only for an intended behavior change, and say so in the commit.
 - Build commands differ per OS (`.\gradlew.bat` on Windows, `./gradlew` on macOS/Linux); take them from [docs/WORKFLOW.md](docs/WORKFLOW.md) rather than guessing.
 
 ## Structure
 
 ```
-src/main/java/dev/vercim/handycam/
-  HandycamMod.java                 — shared init (config dir + HandycamConfig.load)
-  camera/
-    CameraShakeSystem.java         — orchestrates all layers
-    ShakeLayer.java                — layer interface
-    CameraOffset.java              — immutable offset (pitch, yaw, roll, y)
-    PlayerState.java               — read-only player state snapshot per tick
-    ZoomCompensation.java          — zoom ratio from the final world FOV; scales shake down while zoomed
-    CrosshairSwaySystem.java       — crosshair compensation (draw-tilt, eat-tilt, mouse lead)
-    layers/
-      WalkBobLayer.java            — vertical and lateral bob on footsteps
-      CameraSwayLayer.java         — roll and drift while sprinting (fractal noise)
-      IdleShakeLayer.java          — subtle micro-motion while standing still
-      BreathLayer.java             — slow vertical sine-wave bob (~0.40 Hz breathing)
-      DamageShakeLayer.java        — spring-damped impulse on damage
-      HitImpactLayer.java          — multi-axis impact when hitting entities
-      LandingImpactLayer.java      — downward pitch on landing (scaled by fall distance)
-      JumpShakeLayer.java          — jump and landing event detection
-      StrafeTiltLayer.java         — roll when strafing left or right
-      ForwardTiltLayer.java        — subtle pitch forward while moving
-      MouseLeadLayer.java          — offset toward look direction
-      CrouchShakeLayer.java        — camera dip when crouching (pitch targets are signed: crouch dips
+src/main/java/dev/vercim/
+  ui/sim/                          — Minecraft-free primitives meant to move into a shared library: PerlinNoise,
+                                     FractalNoise, Spring1D, Spring3D, Easing, FixedStepRunner (JDK + JOML only)
+  handycam/
+    HandycamMod.java               — shared init (config dir + HandycamConfig.load)
+    rig/                           — camera physics core; no Minecraft, loader or game-side imports
+      CameraRig.java               — layer stack: tick() at 20 Hz, compute() per frame, onExplosion(), onItemEaten()
+      RigInput.java                — player state snapshot + tick events (landing, damage, hit)
+      RigOutput.java               — camera offset/rotation + crosshair displacement
+      RigParams.java               — read-only settings the rig reacts to (game: saved config; preview: pending values)
+      RigView.java                 — per-frame pixels-per-degree and zoom shake scale
+      RigSimulator.java            — fixed 1/120 s stepping + interpolation for hosts without a game loop (preview)
+      ShakeLayer.java, CameraOffset.java, CrosshairState.java
+      layers/
+        WalkBobLayer.java          — vertical and lateral bob on footsteps
+        CameraSwayLayer.java       — roll and drift while sprinting (fractal noise)
+        IdleShakeLayer.java        — subtle micro-motion while standing still
+        BreathLayer.java           — slow vertical sine-wave bob (~0.40 Hz breathing)
+        DamageShakeLayer.java      — spring-damped impulse on damage
+        HitImpactLayer.java        — multi-axis impact when hitting entities
+        LandingImpactLayer.java    — downward pitch on landing (scaled by fall distance)
+        JumpShakeLayer.java        — jump and landing event detection
+        StrafeTiltLayer.java       — roll when strafing left or right
+        ForwardTiltLayer.java      — subtle pitch forward while moving
+        MouseLeadLayer.java        — offset toward look direction
+        CrouchShakeLayer.java      — camera dip when crouching (pitch targets are signed: crouch dips
                                      down, standing lifts back; if it feels inverted, check onCrouch()/onStand())
-      EatSwayLayer.java            — tilt + noise sway while eating/drinking, crosshair compensation
-      BowShotLayer.java            — bow/crossbow recoil + draw-tilt with crosshair compensation
-      ExplosionShakeLayer.java     — spring-damped shake on nearby explosions and lightning
-    math/
-      PerlinNoise.java             — 2D Perlin noise primitive
-      FractalNoise.java            — multi-octave Perlin
-      SpringSimulator.java         — underdamped spring for impact effects
+        EatSwayLayer.java          — tilt + noise sway while eating/drinking, crosshair compensation
+        BowShotLayer.java          — bow/crossbow recoil + draw-tilt with crosshair compensation
+        ExplosionShakeLayer.java   — spring-damped shake on nearby explosions and lightning
+    camera/                        — game adapter around the rig
+      CameraShakeSystem.java       — detects landing/damage/hit, feeds the rig each tick, computes the frame offset
+      PlayerInputReader.java       — LocalPlayer → RigInput
+      PixelScale.java              — pixels per degree from GUI width and FOV
+      ZoomCompensation.java        — zoom ratio from the final world FOV; scales shake down while zoomed
+      CrosshairSwaySystem.java     — crosshair displacement the HUD mixin reads
   config/
-    HandycamConfig.java            — config load/save/migrate (config/handycam-config.json)
+    HandycamConfig.java            — config load/save/migrate (<config dir>/handycam.json)
+    HandycamRigParams.java         — RigParams backed by the saved config
     HandycamConfigScreen.java      — shared Cloth Config screen (both loaders)
   mixin/
-    CameraMixin.java               — injects pitch/yaw/roll/y offset into the vanilla camera
+    CameraMixin.java               — injects the rig's pitch/yaw/roll/y into the vanilla camera
     CameraAccessor.java            — @Accessor/@Invoker for Camera fields and move()
     GameRendererMixin.java         — strips death/underwater FOV when enableVanillaFov=false; feeds ZoomCompensation
     AbstractClientPlayerMixin.java — zeroes the sprint/speed/bow FOV modifier when enableVanillaFov=false (spyglass kept)
@@ -73,6 +81,8 @@ src/main/java/dev/vercim/handycam/
                                      HandycamConfigScreen (wrapper)
   neoforge/                        — HandycamNeoForge, HandycamNeoForgeClient (MOD-bus setup, F10 key),
                                      HandycamConfigScreenNeoForge (wrapper)
+src/test/java/                     — JUnit 5: ui.sim and rig unit tests, rig-vs-golden equivalence, package boundaries
+src/test/resources/                — camera-golden.bin.gz (output of the pre-rig layer stack)
 src/main/resources/
   assets/handycam/lang/            — en_us.json, ru_ru.json (keep in sync)
   fabric.mod.json, META-INF/neoforge.mods.toml, handycam.mixins.json, icon.png
@@ -86,7 +96,9 @@ Build scripts: `build.fabric.gradle.kts` (Loom via `loom-back-compat`, publishes
 
 ## Architecture
 
-`CameraShakeSystem` calls `compute()` on every layer each tick, sums the resulting `CameraOffset` values, and passes the combined offset to the mixin. Layers are independent and never interact.
+`CameraShakeSystem` (game adapter) feeds `CameraRig` a `RigInput` every 20 Hz tick (`tick()`) and asks it once per rendered frame for a `RigOutput` (`compute()`, real frame time as `dt`). The rig sums the `CameraOffset` of every layer and the mixin applies the result. Layers are independent and never interact. The game only passes a vertical offset; `RigOutput.x/z` stay 0.
+
+`rig/` and `ui/sim/` must stay free of Minecraft, loader and Blaze3d imports (`ui/` also of `dev.vercim.handycam`); `PackageBoundariesTest` enforces it. Layers read settings only through `RigParams`, never `HandycamConfig` directly, and write crosshair data into `CrosshairState`, not static fields.
 
 **Update visual state variables (phase, blend, decay) in `compute()` with `dt`, not in `tick()`.**
 
@@ -126,10 +138,10 @@ Key conventions: categories `handycam.config.category.<name>`, enum values `hand
 
 ## Adding a new layer
 
-1. Create a class in `camera/layers/` implementing `ShakeLayer`.
-2. Implement `compute(PlayerState, float time, float dt)` → `CameraOffset`.
-3. Add config fields to `HandycamConfig.java` if needed (consider migration).
-4. Register in `CameraShakeSystem.LAYERS` (order matters).
+1. Create a class in `rig/layers/` implementing `ShakeLayer`.
+2. Implement `compute(RigInput, RigParams, RigView, float time, float dt)` → `CameraOffset`.
+3. Add config fields to `HandycamConfig.java` if needed (consider migration), and the matching getters to `RigParams` and `HandycamRigParams` (field and method share a name; `HandycamRigParamsTest` checks the wiring).
+4. Register in the `CameraRig` layer list (order matters) and add a test.
 5. Add to the shared config screen with `.setTooltip()`.
 6. Add translation keys to both lang files.
 7. Add a `CHANGELOG.md` entry under `Effects`.

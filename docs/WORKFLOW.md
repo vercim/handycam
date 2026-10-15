@@ -50,6 +50,7 @@ printf '1.21.1-fabric' > .sc_active_version   # or 1.21.1-neoforge
 | `buildActive` | Builds the active target |
 | `buildAndCollect` | Builds every target and collects release JARs in `build/libs/` |
 | `:<target>:build` | Builds one target explicitly (useful when investigating loader integration) |
+| `:<target>:test` | Runs the JUnit tests of one target (`build` runs them too) |
 | `clean buildAndCollect` | Fresh full build; use for release verification only |
 
 Do not use `clean` routinely: it discards Gradle and Minecraft preparation work.
@@ -72,6 +73,18 @@ fabricOnlyCall();
 
 Keep conditions as narrow as practical. If a whole entry point is loader-specific, keep its `package` declaration outside the conditional block so the inactive target generates a valid, otherwise empty source file. Minecraft-version differences are expressed the same way, next to the affected code (see [VERSION_NOTES.md](VERSION_NOTES.md)).
 
+## Tests
+
+JUnit 5 tests live in `src/test` and run on every target. They need no game: the camera rig and `ui/sim` are plain Java.
+
+- `RigEquivalenceTest` replays a scripted session through `CameraRig` and compares it with `src/test/resources/dev/vercim/handycam/rig/camera-golden.bin.gz`, recorded from the layer stack before it was moved into `rig/` (tolerance 1e-6; the output was bit-identical when the rig was introduced).
+- `PackageBoundariesTest` scans `src/main/java` to keep `ui/sim` and `rig` free of Minecraft and loader imports.
+- On NeoForge, ModDevGradle keeps JOML and Gson off the test classpath, so `build.neoforge.gradle.kts` adds them as `testImplementation`.
+
+```powershell
+.\gradlew.bat :1.21.1-fabric:test :1.21.1-neoforge:test
+```
+
 ## CI
 
 The build workflow (`.github/workflows/build.yml`) runs on pushes to `main` and pull requests only when build-relevant files change:
@@ -87,6 +100,7 @@ A change is ready to merge when:
 - every target compiles and produces its release JAR;
 - each JAR contains and registers `handycam.mixins.json`;
 - loader-specific classes do not leak into the other loader's JAR;
+- all tests pass on every target;
 - camera and config behavior stay compatible with the previous release.
 
 ## Packaged-JAR validation

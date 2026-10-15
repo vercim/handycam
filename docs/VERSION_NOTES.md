@@ -125,6 +125,7 @@ Applying offsets: `rotateX(pitch)` → `rotateY(-yaw)` → `rotateZ(roll)` (yaw 
 
 #### Quirks
 - 2.0.0-alpha first packaged build registered the Mixin config correctly for both loaders (the `1.3.2` fix); keep verifying it on every release.
+- NeoForge (ModDevGradle) test classpath lacks JOML and Gson although the main classpath has them; `build.neoforge.gradle.kts` declares both for tests. Fabric needs nothing extra.
 
 #### Verified
 - CI builds both targets on every build-relevant push (green as of 2026-09-25).

@@ -87,3 +87,8 @@ Besides the camera offset the layers produce crosshair offsets (`MouseLeadLayer`
 - Loom and ModDevGradle test classpaths for classes that import Minecraft (D5).
 - GL state leakage when rendering into a `TextureTarget` from a screen (viewport, depth, blend, shader color); the backend must save and restore it.
 - Without Mod Menu, a Fabric player has no way to open the screen (existing behavior, not changed by this work).
+
+## Stage 1 notes
+
+- `RigInput` carries the tick-detected events (landing fall distance, damage, hit). Explosion and item-eaten events arrive between ticks and act at once, so they are direct calls on `CameraRig` (`onExplosion`, `onItemEaten`) instead of `RigInput` fields; delaying them to the next tick would change the game.
+- The golden fixture was recorded at commit `7ff43cf`; the rig reproduces it bit for bit on the recording machine. A known quirk is preserved: the HUD crosshair keeps its last offset while the effects toggle is off, because the layers do not run then.
