@@ -2,11 +2,11 @@ package dev.vercim.handycam.camera.layers;
 
 import dev.vercim.handycam.camera.CameraOffset;
 import dev.vercim.handycam.camera.CrosshairSwaySystem;
+import dev.vercim.handycam.camera.PixelScale;
 import dev.vercim.handycam.camera.PlayerState;
 import dev.vercim.handycam.camera.ShakeLayer;
 import dev.vercim.handycam.camera.math.FractalNoise;
 import dev.vercim.handycam.config.HandycamConfig;
-import net.minecraft.client.Minecraft;
 
 public class EatSwayLayer implements ShakeLayer {
 
@@ -18,10 +18,6 @@ public class EatSwayLayer implements ShakeLayer {
     private float rollTarget  = 0f;
     private float rollCurrent = 0f;
     private volatile boolean pendingRoll = true;
-
-    private float cachedPixPerDeg = 0f;
-    private int   cachedFov       = -1;
-    private int   cachedGuiW      = -1;
 
     public void onItemEaten() {
         pendingRoll = true;
@@ -78,18 +74,10 @@ public class EatSwayLayer implements ShakeLayer {
         float ny = noiseY.get(time + 50f,  oct) * sway * 0.38f * i;
         float nr = noiseR.get(time + 100f, oct) * sway * 0.32f * i;
 
-        Minecraft mc  = Minecraft.getInstance();
-        int guiW      = mc.getWindow().getGuiScaledWidth();
-        int fovDeg    = mc.options.fov().get();
-        if (fovDeg != cachedFov || guiW != cachedGuiW) {
-            cachedPixPerDeg = (float) ((guiW / 2.0) / Math.tan(Math.toRadians(fovDeg / 2.0))
-                                       * Math.toRadians(1.0));
-            cachedFov  = fovDeg;
-            cachedGuiW = guiW;
-        }
+        float pixPerDeg = PixelScale.get();
 
         CrosshairSwaySystem.eatCompX = 0f;
-        CrosshairSwaySystem.eatCompY = basePitch * cachedPixPerDeg * 0.65f;
+        CrosshairSwaySystem.eatCompY = basePitch * pixPerDeg * 0.65f;
 
         return new CameraOffset(basePitch + np, ny, baseRoll + nr);
     }

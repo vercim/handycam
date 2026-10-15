@@ -2,12 +2,12 @@ package dev.vercim.handycam.camera.layers;
 
 import dev.vercim.handycam.camera.CameraOffset;
 import dev.vercim.handycam.camera.CrosshairSwaySystem;
+import dev.vercim.handycam.camera.PixelScale;
 import dev.vercim.handycam.camera.PlayerState;
 import dev.vercim.handycam.camera.ShakeLayer;
 import dev.vercim.handycam.camera.math.FractalNoise;
 import dev.vercim.handycam.camera.math.SpringSimulator;
 import dev.vercim.handycam.config.HandycamConfig;
-import net.minecraft.client.Minecraft;
 
 public class BowShotLayer implements ShakeLayer {
 
@@ -28,10 +28,6 @@ public class BowShotLayer implements ShakeLayer {
 
     private float prevDraw = 0f;
     private int   side     = 1;
-
-    private float cachedPixPerDeg = 0f;
-    private int   cachedFov   = -1;
-    private int   cachedGuiW  = -1;
 
     @Override
     public void tick(PlayerState state) {
@@ -94,16 +90,7 @@ public class BowShotLayer implements ShakeLayer {
         float yawDraw   = bowYawDraw      .update(bowProgress       * 1.5f,  dt);
         float pitchDraw = crossbowPitchDraw.update(xbowProgress * (-1.2f), dt);
 
-        Minecraft mc    = Minecraft.getInstance();
-        int guiW        = mc.getWindow().getGuiScaledWidth();
-        int fovDeg      = mc.options.fov().get();
-        if (fovDeg != cachedFov || guiW != cachedGuiW) {
-            cachedPixPerDeg = (float) ((guiW / 2.0) / Math.tan(Math.toRadians(fovDeg / 2.0))
-                                       * Math.toRadians(1.0));
-            cachedFov  = fovDeg;
-            cachedGuiW = guiW;
-        }
-        float pixPerDeg = cachedPixPerDeg;
+        float pixPerDeg = PixelScale.get();
 
         CrosshairSwaySystem.drawCompX = -yawDraw   * drawScale * pixPerDeg * 0.65f;
         CrosshairSwaySystem.drawCompY = -pitchDraw * drawScale * pixPerDeg * 0.65f;
