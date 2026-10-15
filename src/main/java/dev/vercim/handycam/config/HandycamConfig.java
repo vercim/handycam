@@ -1,24 +1,26 @@
 package dev.vercim.handycam.config;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import dev.vercim.ui.config.ConfigModel;
 
 import java.io.IOException;
-import java.io.Reader;
-import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.util.Map;
 
 public class HandycamConfig {
 
     private static final int CURRENT_VERSION = 4;
 
-    private static final Gson GSON = new GsonBuilder()
-            .setPrettyPrinting()
-            .registerTypeAdapter(HandycamConfig.class,
-                    (com.google.gson.InstanceCreator<HandycamConfig>) t -> new HandycamConfig())
-            .create();
+    public static final String FILE_NAME = "handycam.json";
+    private static final String VERSION_KEY = "configVersion";
+
     private static HandycamConfig instance;
+
+    /** Keys of the file that this version does not know, written back unchanged on save. */
+    private static JsonObject unknownKeys = new JsonObject();
 
     public int configVersion = 0;
 
@@ -115,23 +117,52 @@ public class HandycamConfig {
         return instance;
     }
 
+    /**
+     * Reads {@code handycam.json} into a fresh config (fields keep their defaults for missing or unusable keys),
+     * migrates it and writes it back. An unreadable file is kept as {@code handycam.json.bak}.
+     */
     public static void load(Path configDir) {
-        Path file = configDir.resolve("handycam.json");
-        if (Files.exists(file)) {
-            try (Reader r = Files.newBufferedReader(file)) {
-                instance = GSON.fromJson(r, HandycamConfig.class);
-            } catch (IOException e) {
-                instance = new HandycamConfig();
-            }
-        } else {
-            instance = new HandycamConfig();
+        Path file = configDir.resolve(FILE_NAME);
+        HandycamConfig loaded = new HandycamConfig();
+        ConfigModel model = HandycamOptions.create(loaded);
+        try {
+            model.load(file);
+        } catch (IOException e) {
+            keepBackup(file);
+            loaded = new HandycamConfig();
+            model = HandycamOptions.create(loaded);
         }
-        if (instance == null) instance = new HandycamConfig();
+
+        loaded.configVersion = readVersion(model.extras().get(VERSION_KEY));
+        unknownKeys = new JsonObject();
+        for (Map.Entry<String, JsonElement> entry : model.extras().entrySet()) {
+            if (!entry.getKey().equals(VERSION_KEY)) unknownKeys.add(entry.getKey(), entry.getValue());
+        }
+
+        instance = loaded;
         instance.migrate();
         save(configDir);
     }
 
-    private void migrate() {
+    private static int readVersion(JsonElement element) {
+        try {
+            return element != null && element.isJsonPrimitive() ? element.getAsInt() : 0;
+        } catch (NumberFormatException e) {
+            return 0;
+        }
+    }
+
+    private static void keepBackup(Path file) {
+        try {
+            if (Files.exists(file)) {
+                Files.copy(file, file.resolveSibling(file.getFileName() + ".bak"), StandardCopyOption.REPLACE_EXISTING);
+            }
+        } catch (IOException ignored) {
+            // Nothing more can be done for a file we cannot even copy.
+        }
+    }
+
+    void migrate() {
         if (configVersion < 1) {
             strafeTiltIntensity  = 2.4f;
             forwardTiltIntensity = 2.4f;
@@ -157,13 +188,16 @@ public class HandycamConfig {
     }
 
     public static void save(Path configDir) {
-        Path file = configDir.resolve("handycam.json");
+        HandycamConfig config = get();
+        ConfigModel model = HandycamOptions.create(config);
+        model.extras().addProperty(VERSION_KEY, config.configVersion);
+        for (Map.Entry<String, JsonElement> entry : unknownKeys.entrySet()) {
+            model.extras().add(entry.getKey(), entry.getValue());
+        }
         try {
-            Files.createDirectories(configDir);
-            try (Writer w = Files.newBufferedWriter(file)) {
-                GSON.toJson(get(), w);
-            }
+            model.save(configDir.resolve(FILE_NAME));
         } catch (IOException e) {
+            // As before, a config that cannot be written is not worth failing the game over.
         }
     }
 }
