@@ -1,11 +1,12 @@
-package dev.vercim.handycam.camera.layers;
+package dev.vercim.handycam.rig.layers;
 
-import dev.vercim.handycam.camera.CameraOffset;
-import dev.vercim.handycam.camera.PlayerState;
-import dev.vercim.handycam.camera.ShakeLayer;
+import dev.vercim.handycam.rig.CameraOffset;
+import dev.vercim.handycam.rig.RigInput;
+import dev.vercim.handycam.rig.RigParams;
+import dev.vercim.handycam.rig.RigView;
+import dev.vercim.handycam.rig.ShakeLayer;
 import dev.vercim.ui.sim.FractalNoise;
 import dev.vercim.ui.sim.Spring1D;
-import dev.vercim.handycam.config.HandycamConfig;
 
 public class ForwardTiltLayer implements ShakeLayer {
 
@@ -19,36 +20,35 @@ public class ForwardTiltLayer implements ShakeLayer {
     private final FractalNoise rollNoise  = new FractalNoise(0x6F5E4D3CL, 3, 0.28f, 0.5f);
 
     @Override
-    public CameraOffset compute(PlayerState state, float time, float dt) {
-        HandycamConfig cfg = HandycamConfig.get();
-        if (!cfg.forwardTiltEnabled) {
+    public CameraOffset compute(RigInput state, RigParams params, RigView view, float time, float dt) {
+        if (!params.forwardTiltEnabled()) {
             pitchSpring.reset();
             rollSpring.reset();
             smoothForward = 0f;
             return CameraOffset.ZERO;
         }
 
-        float tau = 0.05f / Math.max(cfg.forwardTiltDecay, 0.1f);
-        smoothForward += (state.forwardSpeed - smoothForward) * (1f - (float) Math.exp(-dt / tau));
+        float tau = 0.05f / Math.max(params.forwardTiltDecay(), 0.1f);
+        smoothForward += (state.forwardSpeed() - smoothForward) * (1f - (float) Math.exp(-dt / tau));
 
-        float sprintMult = state.isSprinting ? 1.3f : 1.0f;
+        float sprintMult = state.sprinting() ? 1.3f : 1.0f;
 
-        float i = cfg.forwardTiltIntensity * sprintMult * 0.6f;
+        float i = params.forwardTiltIntensity() * sprintMult * 0.6f;
 
         float targetPitch = -smoothForward * i;
 
         float targetRoll  =  smoothForward * i * 0.3f;
 
-        float speed = cfg.forwardTiltDecay;
+        float speed = params.forwardTiltDecay();
         float pitch = pitchSpring.update(targetPitch, dt, speed);
         float roll  = rollSpring .update(targetRoll,  dt, speed);
 
-        int oct = cfg.noiseOctaves;
+        int oct = params.noiseOctaves();
         float nAbs = Math.abs(smoothForward);
         float nPitch = pitchNoise.get(time,       oct) * nAbs * i * 0.12f;
         float nRoll  = rollNoise .get(time + 77f, oct) * nAbs * i * 0.08f;
 
-        float m = cfg.masterIntensity;
+        float m = params.masterIntensity();
         return new CameraOffset((pitch + nPitch) * m, 0f, (roll + nRoll) * m);
     }
 }

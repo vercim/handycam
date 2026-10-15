@@ -52,6 +52,9 @@ repositories {
 dependencies {
     implementation("me.shedaniel.cloth:cloth-config-neoforge:${project.property("cloth_config_version")}")
 
+    // Minecraft ships JOML and Gson, but ModDevGradle keeps them off the test classpath.
+    testImplementation("org.joml:joml:1.10.8")
+    testImplementation("com.google.code.gson:gson:2.10.1")
     testImplementation(platform("org.junit:junit-bom:5.11.4"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
@@ -61,7 +64,6 @@ tasks.test {
     useJUnitPlatform()
     // Tests read the shared source tree (package-boundary checks) and fixtures from it.
     systemProperty("handycam.rootDir", rootProject.projectDir.absolutePath)
-    System.getProperty("handycam.captureGolden")?.let { systemProperty("handycam.captureGolden", it) }
 }
 
 tasks.processResources {

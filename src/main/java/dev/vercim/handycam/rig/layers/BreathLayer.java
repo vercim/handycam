@@ -1,10 +1,11 @@
-package dev.vercim.handycam.camera.layers;
+package dev.vercim.handycam.rig.layers;
 
-import dev.vercim.handycam.camera.CameraOffset;
-import dev.vercim.handycam.camera.PlayerState;
-import dev.vercim.handycam.camera.ShakeLayer;
+import dev.vercim.handycam.rig.CameraOffset;
+import dev.vercim.handycam.rig.RigInput;
+import dev.vercim.handycam.rig.RigParams;
+import dev.vercim.handycam.rig.RigView;
+import dev.vercim.handycam.rig.ShakeLayer;
 import dev.vercim.ui.sim.FractalNoise;
-import dev.vercim.handycam.config.HandycamConfig;
 
 public class BreathLayer implements ShakeLayer {
 
@@ -15,14 +16,13 @@ public class BreathLayer implements ShakeLayer {
     private final FractalNoise phaseDrift = new FractalNoise(0xF001F002L, 1, 0.09f, 0.5f);
 
     @Override
-    public CameraOffset compute(PlayerState state, float time, float dt) {
-        HandycamConfig cfg = HandycamConfig.get();
-        if (!cfg.breathEnabled) return CameraOffset.ZERO;
+    public CameraOffset compute(RigInput state, RigParams params, RigView view, float time, float dt) {
+        if (!params.breathEnabled()) return CameraOffset.ZERO;
 
-        float concentration = 1f - state.bowDrawProgress * cfg.bowConcentration;
+        float concentration = 1f - state.bowDrawProgress() * params.bowConcentration();
         if (concentration < 0f) concentration = 0f;
 
-        float intensity = cfg.breathIntensity * cfg.masterIntensity * concentration;
+        float intensity = params.breathIntensity() * params.masterIntensity() * concentration;
         if (intensity < 1e-4f) return CameraOffset.ZERO;
 
         float drift = phaseDrift.get(time, 1) * 0.35f;

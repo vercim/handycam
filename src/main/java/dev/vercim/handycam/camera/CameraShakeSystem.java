@@ -1,42 +1,28 @@
 package dev.vercim.handycam.camera;
 
-import dev.vercim.handycam.camera.layers.*;
 import dev.vercim.handycam.config.HandycamConfig;
+import dev.vercim.handycam.config.HandycamRigParams;
+import dev.vercim.handycam.rig.CameraRig;
+import dev.vercim.handycam.rig.RigInput;
+import dev.vercim.handycam.rig.RigOutput;
+import dev.vercim.handycam.rig.RigParams;
+import dev.vercim.handycam.rig.RigView;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 
-import java.util.List;
+import java.util.Random;
 
+/**
+ * Connects the camera rig to the running game: detects landing, damage and hits, reads the player each tick, and
+ * computes the frame offset with the real frame time. The physics itself lives in {@link CameraRig}.
+ */
 public final class CameraShakeSystem {
 
-    private static final LandingImpactLayer  LANDING   = new LandingImpactLayer();
-    private static final DamageShakeLayer    DAMAGE    = new DamageShakeLayer();
-    private static final JumpShakeLayer      JUMP      = new JumpShakeLayer();
-    private static final HitImpactLayer      HIT       = new HitImpactLayer();
-    private static final BowShotLayer        BOW       = new BowShotLayer();
-    private static final ExplosionShakeLayer EXPLOSION = new ExplosionShakeLayer();
-    private static final EatSwayLayer        EAT       = new EatSwayLayer();
+    private static final CameraRig   RIG    = new CameraRig(new Random());
+    private static final RigParams   PARAMS = HandycamRigParams.INSTANCE;
 
-    private static final List<ShakeLayer> LAYERS = List.of(
-        new BreathLayer(),
-        new IdleShakeLayer(),
-        new WalkBobLayer(),
-        new StrafeTiltLayer(),
-        new ForwardTiltLayer(),
-        new CrouchShakeLayer(),
-        new MouseLeadLayer(),
-        EAT,
-        JUMP,
-        LANDING,
-        DAMAGE,
-        HIT,
-        BOW,
-        EXPLOSION,
-        new CameraSwayLayer()
-    );
-
-    private static float  gameTime    = 0f;
-    private static PlayerState lastState = null;
+    private static float    gameTime  = 0f;
+    private static RigInput lastState = null;
 
     private static long   lastFrameNano = -1L;
 
@@ -46,12 +32,7 @@ public final class CameraShakeSystem {
     private static float   prevHealth   = -1f;
 
     private static boolean wasPaused = false;
-    private static CameraOffset lastComputedOffset = CameraOffset.ZERO;
-
-    private static final float[] scratch = new float[4];
-
-    private static float fadeBlend = 1f;
-    private static final float FADE_SPEED = 3f;
+    private static RigOutput lastComputed = RigOutput.ZERO;
 
     private CameraShakeSystem() {}
 
@@ -63,7 +44,7 @@ public final class CameraShakeSystem {
             return;
         }
         if (wasPaused) {
-            PlayerState.sync(player);
+            PlayerInputReader.sync(player);
             lastFrameNano = -1L;
             wasPaused = false;
         }
@@ -72,6 +53,7 @@ public final class CameraShakeSystem {
         boolean onGround = sleeping || player.onGround();
         float   currentY = (float) player.getY();
 
+        float landingFall = 0f;
         if (!onGround) {
             if (wasOnGround) {
                 peakY = currentY;
@@ -80,35 +62,36 @@ public final class CameraShakeSystem {
             }
         } else if (!wasOnGround) {
             float fallDist = peakY - currentY;
-            if (fallDist > 0.15f) LANDING.onLand(fallDist);
+            if (fallDist > 0.15f) landingFall = fallDist;
         }
 
         int   hurtTime = player.hurtTime;
         float health   = player.getHealth();
+        float damageAmount = 0f;
+        float damageMaxHealth = 0f;
         if (hurtTime > prevHurtTime) {
             float delta = (prevHealth > 0f) ? Math.max(prevHealth - health, 0f) : 1f;
             float maxHp = player.getMaxHealth();
-            DAMAGE.onDamage(Math.max(delta, 1f), maxHp > 0f ? maxHp : 20f);
+            damageAmount    = Math.max(delta, 1f);
+            damageMaxHealth = maxHp > 0f ? maxHp : 20f;
         }
         prevHurtTime = hurtTime;
         prevHealth   = health;
 
-        if (player.swinging && player.swingTime == 0 && !sleeping) {
-            HIT.onHit();
-        }
+        boolean hit = player.swinging && player.swingTime == 0 && !sleeping;
 
         wasOnGround = onGround;
         gameTime   += 1f / 20f;
 
-        lastState = PlayerState.from(player);
-        for (ShakeLayer layer : LAYERS) layer.tick(lastState);
+        lastState = PlayerInputReader.read(player).withEvents(landingFall, damageAmount, damageMaxHealth, hit);
+        RIG.tick(lastState, PARAMS);
     }
 
-    public static CameraOffset computeFrame(LocalPlayer player, float partialTick) {
+    public static RigOutput computeFrame(LocalPlayer player, float partialTick) {
         Minecraft mc2 = Minecraft.getInstance();
         if (mc2.isPaused() || !mc2.isWindowActive()) {
             lastFrameNano = -1L;
-            return lastComputedOffset;
+            return lastComputed;
         }
 
         long now = System.nanoTime();
@@ -124,47 +107,12 @@ public final class CameraShakeSystem {
 
         float time = gameTime + partialTick * (1f / 20f);
 
-        PlayerState state = (lastState != null) ? lastState : PlayerState.from(player);
+        RigInput state = (lastState != null) ? lastState : PlayerInputReader.read(player);
+        RigView view = new RigView(PixelScale.get(), ZoomCompensation.shakeScale());
 
-        HandycamConfig cfg = HandycamConfig.get();
-        if (!cfg.effectsEnabled) {
-            lastComputedOffset = CameraOffset.ZERO;
-            return CameraOffset.ZERO;
-        }
-        float blendTarget = ((cfg.disableInCreativeFlight && state.isCreativeFlying) || state.isSleeping) ? 0f : 1f;
-        if (fadeBlend < blendTarget) {
-            fadeBlend = Math.min(blendTarget, fadeBlend + FADE_SPEED * dt);
-        } else if (fadeBlend > blendTarget) {
-            fadeBlend = Math.max(blendTarget, fadeBlend - FADE_SPEED * dt);
-        }
-
-        if (fadeBlend == 0f) {
-            lastComputedOffset = CameraOffset.ZERO;
-            return CameraOffset.ZERO;
-        }
-
-        float[] s = scratch;
-        s[0] = 0f; s[1] = 0f; s[2] = 0f; s[3] = 0f;
-        for (ShakeLayer layer : LAYERS) {
-            CameraOffset o = layer.compute(state, time, dt);
-            s[0] += o.pitch;
-            s[1] += o.yaw;
-            s[2] += o.roll;
-            s[3] += o.y;
-        }
-
-        // Zoom magnifies angular shake on screen; shrink it by the zoom ratio so it looks the same as unzoomed.
-        float k = fadeBlend * ZoomCompensation.shakeScale();
-        if (k < 1f) {
-            s[0] *= k;
-            s[1] *= k;
-            s[2] *= k;
-            s[3] *= k;
-        }
-
-        CameraOffset sum = new CameraOffset(s[0], s[1], s[2], s[3]);
-        lastComputedOffset = sum;
-        return sum;
+        lastComputed = RIG.compute(state, PARAMS, view, time, dt);
+        CrosshairSwaySystem.apply(lastComputed.crosshair());
+        return lastComputed;
     }
 
     public static void onExplosion(double ex, double ey, double ez) {
@@ -174,7 +122,7 @@ public final class CameraShakeSystem {
     }
 
     public static void onItemEaten() {
-        EAT.onItemEaten();
+        RIG.onItemEaten();
     }
 
     public static void onLightning(double ex, double ey, double ez) {
@@ -197,7 +145,7 @@ public final class CameraShakeSystem {
 
         float t = 1f - dist / maxDist;
         float severity = t * t * t * severityMult;
-        EXPLOSION.onExplosion(severity);
+        RIG.onExplosion(severity);
     }
 
 }

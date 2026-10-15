@@ -1,11 +1,12 @@
-package dev.vercim.handycam.camera.layers;
+package dev.vercim.handycam.rig.layers;
 
-import dev.vercim.handycam.camera.CameraOffset;
-import dev.vercim.handycam.camera.PlayerState;
-import dev.vercim.handycam.camera.ShakeLayer;
+import dev.vercim.handycam.rig.CameraOffset;
+import dev.vercim.handycam.rig.RigInput;
+import dev.vercim.handycam.rig.RigParams;
+import dev.vercim.handycam.rig.RigView;
+import dev.vercim.handycam.rig.ShakeLayer;
 import dev.vercim.ui.sim.FractalNoise;
 import dev.vercim.ui.sim.Spring1D;
-import dev.vercim.handycam.config.HandycamConfig;
 
 import java.util.Random;
 
@@ -24,19 +25,22 @@ public class IdleShakeLayer implements ShakeLayer {
     private float tremorRollTarget  = 0f;
 
     private float tremorTimer = 4f;
-    private final Random rng  = new Random();
+    private final Random rng;
+
+    public IdleShakeLayer(Random rng) {
+        this.rng = rng;
+    }
 
     @Override
-    public CameraOffset compute(PlayerState state, float time, float dt) {
-        HandycamConfig cfg = HandycamConfig.get();
-        if (!cfg.idleEnabled) return CameraOffset.ZERO;
+    public CameraOffset compute(RigInput state, RigParams params, RigView view, float time, float dt) {
+        if (!params.idleEnabled()) return CameraOffset.ZERO;
 
-        float concentration = 1f - state.bowDrawProgress * cfg.bowConcentration;
+        float concentration = 1f - state.bowDrawProgress() * params.bowConcentration();
         if (concentration < 0f) concentration = 0f;
 
-        float intensity = cfg.idleIntensity * cfg.masterIntensity * concentration;
-        float t = time * cfg.idleFrequency;
-        int oct = cfg.noiseOctaves;
+        float intensity = params.idleIntensity() * params.masterIntensity() * concentration;
+        float t = time * params.idleFrequency();
+        int oct = params.noiseOctaves();
 
         float breathP = noisePitch.get(t,        oct) * intensity;
         float breathY = noiseYaw  .get(t + 100f, oct) * intensity;
@@ -44,7 +48,7 @@ public class IdleShakeLayer implements ShakeLayer {
 
         tremorTimer -= dt;
         if (tremorTimer <= 0f) {
-            float mag = intensity * (cfg.idleTremorScale * (0.6f + rng.nextFloat() * 0.4f));
+            float mag = intensity * (params.idleTremorScale() * (0.6f + rng.nextFloat() * 0.4f));
             tremorPitchTarget = (rng.nextFloat() * 2f - 1f) * mag;
             tremorYawTarget   = (rng.nextFloat() * 2f - 1f) * mag * 0.8f;
             tremorRollTarget  = (rng.nextFloat() * 2f - 1f) * mag * 0.5f;

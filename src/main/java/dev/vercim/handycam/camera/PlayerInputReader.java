@@ -1,5 +1,6 @@
 package dev.vercim.handycam.camera;
 
+import dev.vercim.handycam.rig.RigInput;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.entity.player.Abilities;
 import net.minecraft.world.item.BowItem;
@@ -7,57 +8,22 @@ import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.UseAnim;
 
-public final class PlayerState {
-
-    public final float   horizontalSpeed;
-    public final float   verticalVelocity;
-    public final boolean isSprinting;
-    public final boolean isOnGround;
-    public final boolean isCrouching;
-    public final float   turnRate;
-    public final float   pitchDelta;
-    public final float   strafeSpeed;
-    public final float   forwardSpeed;
-    public final float   bowDrawProgress;
-    public final boolean crossbowFired;
-    public final float   crossbowDrawProgress;
-    public final boolean isCreativeFlying;
-    public final boolean isEating;
-    public final boolean isSleeping;
-
-    private PlayerState(float horizontalSpeed, float verticalVelocity,
-                        boolean isSprinting, boolean isOnGround, boolean isCrouching,
-                        float turnRate, float pitchDelta,
-                        float strafeSpeed, float forwardSpeed,
-                        float bowDrawProgress, boolean crossbowFired, float crossbowDrawProgress,
-                        boolean isCreativeFlying, boolean isEating, boolean isSleeping) {
-        this.horizontalSpeed  = horizontalSpeed;
-        this.verticalVelocity = verticalVelocity;
-        this.isSprinting      = isSprinting;
-        this.isOnGround       = isOnGround;
-        this.isCrouching      = isCrouching;
-        this.turnRate         = turnRate;
-        this.pitchDelta       = pitchDelta;
-        this.strafeSpeed      = strafeSpeed;
-        this.forwardSpeed     = forwardSpeed;
-        this.bowDrawProgress      = bowDrawProgress;
-        this.crossbowFired        = crossbowFired;
-        this.crossbowDrawProgress = crossbowDrawProgress;
-        this.isCreativeFlying     = isCreativeFlying;
-        this.isEating             = isEating;
-        this.isSleeping           = isSleeping;
-    }
+/** Reads the local player into the rig's input snapshot. Keeps the previous look direction between ticks. */
+public final class PlayerInputReader {
 
     private static float   prevYRot         = 0f;
     private static float   prevXRot         = 0f;
     private static boolean prevCrossbowCharged = false;
+
+    private PlayerInputReader() {}
 
     public static void sync(LocalPlayer player) {
         prevYRot = player.getYRot();
         prevXRot = player.getXRot();
     }
 
-    public static PlayerState from(LocalPlayer player) {
+    /** The player's state without events; the caller adds landing, damage and hit detection. */
+    public static RigInput read(LocalPlayer player) {
         if (player.isSleeping()) return sleeping(player);
 
         float dx = (float) player.getDeltaMovement().x;
@@ -123,17 +89,19 @@ public final class PlayerState {
             isEating = (anim == UseAnim.EAT || anim == UseAnim.DRINK);
         }
 
-        return new PlayerState(hSpeed, dy, player.isSprinting(), player.onGround(),
-                               player.isCrouching(), turnRate, pitchDelta, strafe, forward,
-                               bowDraw, crossbowFired, crossbowDraw, creativeFlying, isEating, false);
+        return new RigInput(hSpeed, dy, player.isSprinting(), player.onGround(),
+                            player.isCrouching(), turnRate, pitchDelta, strafe, forward,
+                            bowDraw, crossbowFired, crossbowDraw, creativeFlying, isEating, false,
+                            0f, 0f, 0f, false);
     }
 
     // Vanilla locks the camera to the bed, yet the player's yaw still follows the mouse and the bed
     // bounces the player; report a neutral state so no layer reacts to either.
-    private static PlayerState sleeping(LocalPlayer player) {
+    private static RigInput sleeping(LocalPlayer player) {
         sync(player);
         prevCrossbowCharged = false;
-        return new PlayerState(0f, 0f, false, true, false, 0f, 0f, 0f, 0f,
-                               0f, false, 0f, false, false, true);
+        return new RigInput(0f, 0f, false, true, false, 0f, 0f, 0f, 0f,
+                            0f, false, 0f, false, false, true,
+                            0f, 0f, 0f, false);
     }
 }

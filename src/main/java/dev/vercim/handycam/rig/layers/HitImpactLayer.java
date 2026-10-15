@@ -1,11 +1,12 @@
-package dev.vercim.handycam.camera.layers;
+package dev.vercim.handycam.rig.layers;
 
-import dev.vercim.handycam.camera.CameraOffset;
-import dev.vercim.handycam.camera.PlayerState;
-import dev.vercim.handycam.camera.ShakeLayer;
+import dev.vercim.handycam.rig.CameraOffset;
+import dev.vercim.handycam.rig.RigInput;
+import dev.vercim.handycam.rig.RigParams;
+import dev.vercim.handycam.rig.RigView;
+import dev.vercim.handycam.rig.ShakeLayer;
 import dev.vercim.ui.sim.FractalNoise;
 import dev.vercim.ui.sim.Spring1D;
-import dev.vercim.handycam.config.HandycamConfig;
 
 public class HitImpactLayer implements ShakeLayer {
 
@@ -25,9 +26,8 @@ public class HitImpactLayer implements ShakeLayer {
 
     private int side = 1;
 
-    public void onHit() {
-        HandycamConfig cfg = HandycamConfig.get();
-        if (!cfg.hitEnabled) return;
+    public void onHit(RigParams params) {
+        if (!params.hitEnabled()) return;
 
         side = -side;
 
@@ -39,29 +39,28 @@ public class HitImpactLayer implements ShakeLayer {
     }
 
     @Override
-    public CameraOffset compute(PlayerState state, float time, float dt) {
-        HandycamConfig cfg = HandycamConfig.get();
-        if (!cfg.hitEnabled) return CameraOffset.ZERO;
+    public CameraOffset compute(RigInput state, RigParams params, RigView view, float time, float dt) {
+        if (!params.hitEnabled()) return CameraOffset.ZERO;
 
         float pitch = pitchSpring.update(pitchTarget, dt);
         float yaw   = yawSpring  .update(yawTarget,   dt);
         float roll  = rollSpring .update(rollTarget,  dt);
 
-        float decay = cfg.hitDecay;
+        float decay = params.hitDecay();
         pitchTarget *= (float) Math.exp(-dt * decay);
         yawTarget   *= (float) Math.exp(-dt * decay);
         rollTarget  *= (float) Math.exp(-dt * decay);
 
-        int oct = cfg.noiseOctaves;
+        int oct = params.noiseOctaves();
         float shake = trauma * trauma;
         float np = noiseP.get(time,       oct) * shake * 0.4f;
         float ny = noiseY.get(time + 33f, oct) * shake * 0.4f;
         float nr = noiseR.get(time + 66f, oct) * shake * 0.25f;
 
-        trauma -= cfg.hitDecay * 0.5f * dt;
+        trauma -= params.hitDecay() * 0.5f * dt;
         if (trauma < 0f) trauma = 0f;
 
-        float i = cfg.hitIntensity * cfg.masterIntensity;
+        float i = params.hitIntensity() * params.masterIntensity();
         return new CameraOffset((pitch + np) * i, (yaw + ny) * i, (roll + nr) * i);
     }
 }

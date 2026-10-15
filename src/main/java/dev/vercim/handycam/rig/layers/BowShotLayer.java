@@ -1,15 +1,17 @@
-package dev.vercim.handycam.camera.layers;
+package dev.vercim.handycam.rig.layers;
 
-import dev.vercim.handycam.camera.CameraOffset;
-import dev.vercim.handycam.camera.CrosshairSwaySystem;
-import dev.vercim.handycam.camera.PixelScale;
-import dev.vercim.handycam.camera.PlayerState;
-import dev.vercim.handycam.camera.ShakeLayer;
+import dev.vercim.handycam.rig.CameraOffset;
+import dev.vercim.handycam.rig.CrosshairState;
+import dev.vercim.handycam.rig.RigInput;
+import dev.vercim.handycam.rig.RigParams;
+import dev.vercim.handycam.rig.RigView;
+import dev.vercim.handycam.rig.ShakeLayer;
 import dev.vercim.ui.sim.FractalNoise;
 import dev.vercim.ui.sim.Spring1D;
-import dev.vercim.handycam.config.HandycamConfig;
 
 public class BowShotLayer implements ShakeLayer {
+
+    private final CrosshairState crosshair;
 
     private final Spring1D pitchSpring = new Spring1D(80f, 14f);
     private final Spring1D yawSpring   = new Spring1D(60f, 12f);
@@ -29,23 +31,26 @@ public class BowShotLayer implements ShakeLayer {
     private float prevDraw = 0f;
     private int   side     = 1;
 
-    @Override
-    public void tick(PlayerState state) {
+    public BowShotLayer(CrosshairState crosshair) {
+        this.crosshair = crosshair;
+    }
 
-        float draw = state.bowDrawProgress;
+    @Override
+    public void tick(RigInput state, RigParams params) {
+
+        float draw = state.bowDrawProgress();
         if (prevDraw >= 0.1f && draw == 0f) {
-            onShot(prevDraw);
+            onShot(prevDraw, params);
         }
         prevDraw = draw;
 
-        if (state.crossbowFired) {
-            onShot(1.0f);
+        if (state.crossbowFired()) {
+            onShot(1.0f, params);
         }
     }
 
-    private void onShot(float power) {
-        HandycamConfig cfg = HandycamConfig.get();
-        if (!cfg.bowEnabled) return;
+    private void onShot(float power, RigParams params) {
+        if (!params.bowEnabled()) return;
 
         side = -side;
 
@@ -56,21 +61,20 @@ public class BowShotLayer implements ShakeLayer {
     }
 
     @Override
-    public CameraOffset compute(PlayerState state, float time, float dt) {
-        HandycamConfig cfg = HandycamConfig.get();
-        if (!cfg.bowEnabled) {
-            CrosshairSwaySystem.drawCompX    = 0f;
-            CrosshairSwaySystem.drawCompY    = 0f;
-            CrosshairSwaySystem.bowDrawProgress = 0f;
+    public CameraOffset compute(RigInput state, RigParams params, RigView view, float time, float dt) {
+        if (!params.bowEnabled()) {
+            crosshair.drawCompX    = 0f;
+            crosshair.drawCompY    = 0f;
+            crosshair.bowDrawProgress = 0f;
             return CameraOffset.ZERO;
         }
 
-        CrosshairSwaySystem.bowDrawProgress = state.bowDrawProgress;
+        crosshair.bowDrawProgress = state.bowDrawProgress();
 
         float pitch = pitchSpring.update(pitchTarget, dt);
         float yaw   = yawSpring  .update(yawTarget,   dt);
 
-        float expDecay = (float) Math.exp(-dt * cfg.bowRecoilDecay);
+        float expDecay = (float) Math.exp(-dt * params.bowRecoilDecay());
         pitchTarget *= expDecay;
         yawTarget   *= expDecay;
 
@@ -79,21 +83,21 @@ public class BowShotLayer implements ShakeLayer {
         float ny = noiseY.get(time + 33f, 2) * shake * 0.25f;
         float nr = noiseR.get(time + 66f, 2) * shake * 0.18f;
 
-        trauma -= cfg.bowRecoilDecay * 0.35f * dt;
+        trauma -= params.bowRecoilDecay() * 0.35f * dt;
         if (trauma < 0f) trauma = 0f;
 
-        float i = cfg.bowRecoilIntensity * cfg.masterIntensity;
+        float i = params.bowRecoilIntensity() * params.masterIntensity();
 
-        float drawScale = cfg.masterIntensity;
-        float bowProgress = cfg.bowDrawTiltEnabled ? state.bowDrawProgress : 0f;
-        float xbowProgress = cfg.bowDrawTiltEnabled ? state.crossbowDrawProgress : 0f;
+        float drawScale = params.masterIntensity();
+        float bowProgress = params.bowDrawTiltEnabled() ? state.bowDrawProgress() : 0f;
+        float xbowProgress = params.bowDrawTiltEnabled() ? state.crossbowDrawProgress() : 0f;
         float yawDraw   = bowYawDraw      .update(bowProgress       * 1.5f,  dt);
         float pitchDraw = crossbowPitchDraw.update(xbowProgress * (-1.2f), dt);
 
-        float pixPerDeg = PixelScale.get();
+        float pixPerDeg = view.pixelsPerDegree();
 
-        CrosshairSwaySystem.drawCompX = -yawDraw   * drawScale * pixPerDeg * 0.65f;
-        CrosshairSwaySystem.drawCompY = -pitchDraw * drawScale * pixPerDeg * 0.65f;
+        crosshair.drawCompX = -yawDraw   * drawScale * pixPerDeg * 0.65f;
+        crosshair.drawCompY = -pitchDraw * drawScale * pixPerDeg * 0.65f;
 
         return new CameraOffset((pitch + np) * i + pitchDraw * drawScale,
                                 (yaw   + ny) * i + yawDraw   * drawScale,

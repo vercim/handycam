@@ -1,18 +1,17 @@
 package dev.vercim.handycam.rig;
 
 import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
 
-/** Reads and writes the recorded camera output: per variant, per frame, {@link #FIELDS} floats. */
+/**
+ * Reads the recorded camera output: per config variant, per frame, {@link #FIELDS} floats. The fixture was captured
+ * from the layer stack as it was before the rig refactor (commit 7ff43cf, test {@code GoldenCaptureTest}) and is
+ * the contract the refactored rig has to keep.
+ */
 final class Golden {
 
     static final String RESOURCE = "/dev/vercim/handycam/rig/camera-golden.bin.gz";
@@ -20,20 +19,6 @@ final class Golden {
         "pitch", "yaw", "roll", "y",
         "crosshairOffsetX", "crosshairOffsetY", "drawCompX", "drawCompY", "eatCompX", "eatCompY", "bowDrawProgress"
     };
-
-    static void write(Path file, List<float[][]> variants) throws IOException {
-        Files.createDirectories(file.getParent());
-        try (OutputStream os = Files.newOutputStream(file);
-             DataOutputStream out = new DataOutputStream(new GZIPOutputStream(os))) {
-            out.writeInt(variants.size());
-            for (float[][] frames : variants) {
-                out.writeInt(frames.length);
-                for (float[] frame : frames) {
-                    for (float v : frame) out.writeFloat(v);
-                }
-            }
-        }
-    }
 
     static List<float[][]> read() throws IOException {
         try (InputStream is = Golden.class.getResourceAsStream(RESOURCE)) {

@@ -59,7 +59,6 @@ tasks.test {
     useJUnitPlatform()
     // Tests read the shared source tree (package-boundary checks) and fixtures from it.
     systemProperty("handycam.rootDir", rootProject.projectDir.absolutePath)
-    System.getProperty("handycam.captureGolden")?.let { systemProperty("handycam.captureGolden", it) }
 }
 
 tasks.processResources {

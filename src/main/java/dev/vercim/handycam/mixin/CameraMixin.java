@@ -1,8 +1,8 @@
 package dev.vercim.handycam.mixin;
 
-import dev.vercim.handycam.camera.CameraOffset;
 import dev.vercim.handycam.camera.CameraShakeSystem;
 import dev.vercim.handycam.config.HandycamConfig;
+import dev.vercim.handycam.rig.RigOutput;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
@@ -34,18 +34,18 @@ public abstract class CameraMixin {
                 || (isThirdPerson  && cfg.enableEffectsThirdPerson);
         if (!applyEffects) return;
 
-        CameraOffset offset = CameraShakeSystem.computeFrame(player, partialTick);
+        RigOutput offset = CameraShakeSystem.computeFrame(player, partialTick);
 
         CameraAccessor self = (CameraAccessor) (Object) this;
         Quaternionf rotation = self.getRotation();
-        if (Math.abs(offset.pitch) > 1.0e-4f) rotation.rotateX( offset.pitch * Mth.DEG_TO_RAD);
-        if (Math.abs(offset.yaw)   > 1.0e-4f) rotation.rotateY(-offset.yaw   * Mth.DEG_TO_RAD);
-        if (Math.abs(offset.roll)  > 1.0e-4f) rotation.rotateZ( offset.roll  * Mth.DEG_TO_RAD);
-        if (Math.abs(offset.y)     > 1.0e-5f) self.invokeMove(0f, offset.y, 0f);
+        if (Math.abs(offset.pitch()) > 1.0e-4f) rotation.rotateX( offset.pitch() * Mth.DEG_TO_RAD);
+        if (Math.abs(offset.yaw())   > 1.0e-4f) rotation.rotateY(-offset.yaw()   * Mth.DEG_TO_RAD);
+        if (Math.abs(offset.roll())  > 1.0e-4f) rotation.rotateZ( offset.roll()  * Mth.DEG_TO_RAD);
+        if (Math.abs(offset.y())     > 1.0e-5f) self.invokeMove(0f, offset.y(), 0f);
 
         if (isFirstPerson) {
-            self.setXRot(self.getXRot() + offset.pitch);
-            self.setYRot(self.getYRot() + offset.yaw);
+            self.setXRot(self.getXRot() + offset.pitch());
+            self.setYRot(self.getYRot() + offset.yaw());
         }
     }
 }

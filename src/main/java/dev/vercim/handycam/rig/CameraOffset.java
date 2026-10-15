@@ -1,4 +1,4 @@
-package dev.vercim.handycam.camera;
+package dev.vercim.handycam.rig;
 
 public final class CameraOffset {
 

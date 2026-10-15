@@ -1,11 +1,12 @@
-package dev.vercim.handycam.camera.layers;
+package dev.vercim.handycam.rig.layers;
 
-import dev.vercim.handycam.camera.CameraOffset;
-import dev.vercim.handycam.camera.PlayerState;
-import dev.vercim.handycam.camera.ShakeLayer;
+import dev.vercim.handycam.rig.CameraOffset;
+import dev.vercim.handycam.rig.RigInput;
+import dev.vercim.handycam.rig.RigParams;
+import dev.vercim.handycam.rig.RigView;
+import dev.vercim.handycam.rig.ShakeLayer;
 import dev.vercim.ui.sim.FractalNoise;
 import dev.vercim.ui.sim.Spring1D;
-import dev.vercim.handycam.config.HandycamConfig;
 
 public class DamageShakeLayer implements ShakeLayer {
 
@@ -22,9 +23,8 @@ public class DamageShakeLayer implements ShakeLayer {
     private float traumaAmount = 0f;
     private int   hitCounter   = 0;
 
-    public void onDamage(float damageAmount, float maxHealth) {
-        HandycamConfig cfg = HandycamConfig.get();
-        if (!cfg.damageEnabled) return;
+    public void onDamage(float damageAmount, float maxHealth, RigParams params) {
+        if (!params.damageEnabled()) return;
 
         float severity = (float) Math.sqrt(damageAmount / maxHealth);
         traumaAmount = Math.min(traumaAmount + severity, 1f);
@@ -38,25 +38,24 @@ public class DamageShakeLayer implements ShakeLayer {
     }
 
     @Override
-    public CameraOffset compute(PlayerState state, float time, float dt) {
-        HandycamConfig cfg = HandycamConfig.get();
+    public CameraOffset compute(RigInput state, RigParams params, RigView view, float time, float dt) {
         boolean springActive = Math.abs(pitchSpring.position()) > 0.001f;
-        if (!cfg.damageEnabled || (traumaAmount < 0.01f && !springActive)) return CameraOffset.ZERO;
+        if (!params.damageEnabled() || (traumaAmount < 0.01f && !springActive)) return CameraOffset.ZERO;
 
         float sp = pitchSpring.update(0f, dt);
         float sy = yawSpring  .update(0f, dt);
         float sr = rollSpring .update(0f, dt);
 
         float shake = traumaAmount * traumaAmount;
-        int oct = cfg.noiseOctaves;
+        int oct = params.noiseOctaves();
         float p = (pitchA.get(time,       oct) * 0.6f + pitchB.get(time + 13f, oct) * 0.4f) * shake;
         float y = (yawA  .get(time + 7f,  oct) * 0.6f + yawB  .get(time + 41f, oct) * 0.4f) * shake * 0.7f;
         float r =  rollA .get(time + 19f, oct) * shake * 0.45f;
 
-        traumaAmount -= cfg.damageDecay * dt;
+        traumaAmount -= params.damageDecay() * dt;
         if (traumaAmount < 0f) traumaAmount = 0f;
 
-        float i = cfg.damageIntensity * cfg.masterIntensity;
+        float i = params.damageIntensity() * params.masterIntensity();
         return new CameraOffset((sp + p) * i, (sy + y) * i, (sr + r) * i);
     }
 }

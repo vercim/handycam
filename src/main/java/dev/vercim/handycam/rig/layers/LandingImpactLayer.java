@@ -1,10 +1,11 @@
-package dev.vercim.handycam.camera.layers;
+package dev.vercim.handycam.rig.layers;
 
-import dev.vercim.handycam.camera.CameraOffset;
-import dev.vercim.handycam.camera.PlayerState;
-import dev.vercim.handycam.camera.ShakeLayer;
+import dev.vercim.handycam.rig.CameraOffset;
+import dev.vercim.handycam.rig.RigInput;
+import dev.vercim.handycam.rig.RigParams;
+import dev.vercim.handycam.rig.RigView;
+import dev.vercim.handycam.rig.ShakeLayer;
 import dev.vercim.ui.sim.Spring1D;
-import dev.vercim.handycam.config.HandycamConfig;
 
 public class LandingImpactLayer implements ShakeLayer {
 
@@ -19,9 +20,8 @@ public class LandingImpactLayer implements ShakeLayer {
 
     private int side = 1;
 
-    public void onLand(float fallDistance) {
-        HandycamConfig cfg = HandycamConfig.get();
-        if (!cfg.landingEnabled) return;
+    public void onLand(float fallDistance, RigParams params) {
+        if (!params.landingEnabled()) return;
 
         float strength = 1f - (float) Math.exp(-fallDistance / 7f);
         strength = Math.min(strength, 1f);
@@ -34,9 +34,8 @@ public class LandingImpactLayer implements ShakeLayer {
     }
 
     @Override
-    public CameraOffset compute(PlayerState state, float time, float dt) {
-        HandycamConfig cfg = HandycamConfig.get();
-        if (!cfg.landingEnabled) return CameraOffset.ZERO;
+    public CameraOffset compute(RigInput state, RigParams params, RigView view, float time, float dt) {
+        if (!params.landingEnabled()) return CameraOffset.ZERO;
 
         float pitch = pitchSpring.update(pitchTarget, dt);
         float roll  = rollSpring .update(rollTarget,  dt);
@@ -48,11 +47,11 @@ public class LandingImpactLayer implements ShakeLayer {
         rollTarget  *= expRY;
         yawTarget   *= expRY;
 
-        float i = cfg.landingIntensity * cfg.masterIntensity;
+        float i = params.landingIntensity() * params.masterIntensity();
         return new CameraOffset(
-            pitch * i * cfg.landingPitchMax,
-            yaw   * i * cfg.landingYawMax,
-            roll  * i * cfg.landingRollMax
+            pitch * i * params.landingPitchMax(),
+            yaw   * i * params.landingYawMax(),
+            roll  * i * params.landingRollMax()
         );
     }
 }

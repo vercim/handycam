@@ -1,11 +1,12 @@
-package dev.vercim.handycam.camera.layers;
+package dev.vercim.handycam.rig.layers;
 
-import dev.vercim.handycam.camera.CameraOffset;
-import dev.vercim.handycam.camera.PlayerState;
-import dev.vercim.handycam.camera.ShakeLayer;
+import dev.vercim.handycam.rig.CameraOffset;
+import dev.vercim.handycam.rig.RigInput;
+import dev.vercim.handycam.rig.RigParams;
+import dev.vercim.handycam.rig.RigView;
+import dev.vercim.handycam.rig.ShakeLayer;
 import dev.vercim.ui.sim.FractalNoise;
 import dev.vercim.ui.sim.Spring1D;
-import dev.vercim.handycam.config.HandycamConfig;
 
 public class StrafeTiltLayer implements ShakeLayer {
 
@@ -19,34 +20,33 @@ public class StrafeTiltLayer implements ShakeLayer {
     private final FractalNoise yawNoise  = new FractalNoise(0xD4C3B2A1L, 3, 0.3f, 0.5f);
 
     @Override
-    public CameraOffset compute(PlayerState state, float time, float dt) {
-        HandycamConfig cfg = HandycamConfig.get();
-        if (!cfg.strafeTiltEnabled) {
+    public CameraOffset compute(RigInput state, RigParams params, RigView view, float time, float dt) {
+        if (!params.strafeTiltEnabled()) {
             rollSpring.reset();
             yawSpring.reset();
             smoothStrafe = 0f;
             return CameraOffset.ZERO;
         }
 
-        float tau = 0.04f / Math.max(cfg.strafeTiltDecay, 0.1f);
-        smoothStrafe += (state.strafeSpeed - smoothStrafe) * (1f - (float) Math.exp(-dt / tau));
+        float tau = 0.04f / Math.max(params.strafeTiltDecay(), 0.1f);
+        smoothStrafe += (state.strafeSpeed() - smoothStrafe) * (1f - (float) Math.exp(-dt / tau));
 
-        float sprintMult = state.isSprinting ? 1.4f : 1.0f;
-        float i = cfg.strafeTiltIntensity * sprintMult;
+        float sprintMult = state.sprinting() ? 1.4f : 1.0f;
+        float i = params.strafeTiltIntensity() * sprintMult;
 
         float targetRoll =  smoothStrafe * i;
         float targetYaw  = -smoothStrafe * i * 0.25f;
 
-        float speed = cfg.strafeTiltDecay;
+        float speed = params.strafeTiltDecay();
         float roll = rollSpring.update(targetRoll, dt, speed);
         float yaw  = yawSpring .update(targetYaw,  dt, speed);
 
-        int oct = cfg.noiseOctaves;
+        int oct = params.noiseOctaves();
         float nAbs = Math.abs(smoothStrafe);
         float nRoll = rollNoise.get(time,       oct) * nAbs * i * 0.15f;
         float nYaw  = yawNoise .get(time + 50f, oct) * nAbs * i * 0.10f;
 
-        float m = cfg.masterIntensity;
+        float m = params.masterIntensity();
         return new CameraOffset(0f, (yaw + nYaw) * m, (roll + nRoll) * m);
     }
 }

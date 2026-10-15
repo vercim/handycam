@@ -1,10 +1,11 @@
-package dev.vercim.handycam.camera.layers;
+package dev.vercim.handycam.rig.layers;
 
-import dev.vercim.handycam.camera.CameraOffset;
-import dev.vercim.handycam.camera.PlayerState;
-import dev.vercim.handycam.camera.ShakeLayer;
+import dev.vercim.handycam.rig.CameraOffset;
+import dev.vercim.handycam.rig.RigInput;
+import dev.vercim.handycam.rig.RigParams;
+import dev.vercim.handycam.rig.RigView;
+import dev.vercim.handycam.rig.ShakeLayer;
 import dev.vercim.ui.sim.Spring1D;
-import dev.vercim.handycam.config.HandycamConfig;
 
 public class JumpShakeLayer implements ShakeLayer {
 
@@ -19,17 +20,16 @@ public class JumpShakeLayer implements ShakeLayer {
     private boolean wasOnGround = true;
 
     @Override
-    public void tick(PlayerState state) {
+    public void tick(RigInput state, RigParams params) {
 
-        if (wasOnGround && !state.isOnGround && state.verticalVelocity > 0.1f) {
-            onJump();
+        if (wasOnGround && !state.onGround() && state.verticalVelocity() > 0.1f) {
+            onJump(params);
         }
-        wasOnGround = state.isOnGround;
+        wasOnGround = state.onGround();
     }
 
-    private void onJump() {
-        HandycamConfig cfg = HandycamConfig.get();
-        if (!cfg.jumpEnabled) return;
+    private void onJump(RigParams params) {
+        if (!params.jumpEnabled()) return;
 
         pitchTarget = 1.0f;
         rollTarget  = 0.35f;
@@ -37,20 +37,19 @@ public class JumpShakeLayer implements ShakeLayer {
     }
 
     @Override
-    public CameraOffset compute(PlayerState state, float time, float dt) {
-        HandycamConfig cfg = HandycamConfig.get();
-        if (!cfg.jumpEnabled) return CameraOffset.ZERO;
+    public CameraOffset compute(RigInput state, RigParams params, RigView view, float time, float dt) {
+        if (!params.jumpEnabled()) return CameraOffset.ZERO;
 
         float pitch = pitchSpring.update(pitchTarget, dt);
         float roll  = rollSpring .update(rollTarget,  dt);
         float yaw   = yawSpring  .update(yawTarget,   dt);
 
-        float expDecay = (float) Math.exp(-dt * cfg.jumpDecay);
+        float expDecay = (float) Math.exp(-dt * params.jumpDecay());
         pitchTarget *= expDecay;
         rollTarget  *= expDecay;
         yawTarget   *= expDecay;
 
-        float intensity = cfg.jumpIntensity * cfg.masterIntensity;
+        float intensity = params.jumpIntensity() * params.masterIntensity();
         return new CameraOffset(pitch * intensity, yaw * intensity, roll * intensity);
     }
 }
