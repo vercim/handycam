@@ -2,6 +2,9 @@ package dev.vercim.handycam.mixin;
 
 import net.minecraft.client.Camera;
 import org.joml.Quaternionf;
+//? if >=26.1 {
+/*import org.joml.Vector3f;
+*///?}
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
@@ -23,6 +26,26 @@ public interface CameraAccessor {
     @Accessor("rotation")
     Quaternionf getRotation();
 
+    //? if >=26.1 {
+    /*@Accessor("forwards")
+    Vector3f getForwards();
+
+    @Accessor("up")
+    Vector3f getUp();
+
+    @Accessor("left")
+    Vector3f getLeft();
+
+    @Accessor("matrixPropertiesDirty")
+    int getMatrixPropertiesDirty();
+
+    @Accessor("matrixPropertiesDirty")
+    void setMatrixPropertiesDirty(int matrixPropertiesDirty);
+
+    @Invoker("setRotation")
+    void invokeSetRotation(float yRot, float xRot);
+
+    *///?}
     @Invoker("move")
     void invokeMove(float distanceOffset, float verticalOffset, float horizontalOffset);
 }

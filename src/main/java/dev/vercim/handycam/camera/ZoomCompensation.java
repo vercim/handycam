@@ -22,7 +22,11 @@ public final class ZoomCompensation {
     public static void onProjectionFov(double fovDeg) {
         if (!worldFovPending) return;
         worldFovPending = false;
+        onWorldFov(fovDeg);
+    }
 
+    // From 26.1 only the world projection goes through Camera.setupPerspective, so no flag is needed.
+    public static void onWorldFov(double fovDeg) {
         double base = Minecraft.getInstance().options.fov().get();
         if (!(fovDeg > 0.0 && fovDeg < 180.0) || !(base > 0.0 && base < 180.0)) {
             zoomRatio = 1f;

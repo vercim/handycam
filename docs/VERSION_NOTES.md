@@ -81,6 +81,33 @@ Likely trouble spots, in order: `Camera`, `Gui`, `GameRenderer` mixins; then `Pl
 
 ## Target entries
 
+### MC 1.21.11 — Fabric / NeoForge
+
+Targets: `1.21.11-fabric`, `1.21.11-neoforge` · first mod version: 2.1.0 · date: 2026-10-15
+
+#### Dependencies
+```properties
+java_version=21
+fabric_loader_min_version=0.17.3
+fabric_api_version=0.141.6+1.21.11
+cloth_config_version=21.11.153
+modmenu_version=17.0.1              # Fabric only, optional
+neoforge_version=21.11.48
+neoforge_loader_version_range=[4,)
+```
+NeoForge metadata pins Minecraft to `[1.21.11,1.21.12)` and Cloth Config to `[21,)`.
+
+#### API differences (vs. 1.21.10)
+| Area | 1.21.10 | 1.21.11 | Where / condition |
+|---|---|---|---|
+| `Camera.setup()` first parameter | `BlockGetter` | `Level` | `mixin/CameraMixin.java`, `//? if >=1.21.11` |
+| Resource identifier class | `ResourceLocation` | `Identifier` | `HandycamKeys.java`, `//? if >=1.21.11` |
+
+Everything else used by the mod (FOV hooks, crosshair, explosion packet, NeoForge entry points, `KeyBindingHelper`) is unchanged from 1.21.10.
+
+#### Verified
+- 2026-10-15, mod 2.1.0 (dev build): see the 1.21.4 entry for the checks run; Fabric ☑ NeoForge ☑. Packaged-JAR gameplay in a clean profile: ☐
+
 ### MC 1.21.10 — Fabric / NeoForge
 
 Targets: `1.21.10-fabric`, `1.21.10-neoforge` · first mod version: 2.1.0 · date: 2026-10-15
