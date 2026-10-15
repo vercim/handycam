@@ -81,6 +81,36 @@ Likely trouble spots, in order: `Camera`, `Gui`, `GameRenderer` mixins; then `Pl
 
 ## Target entries
 
+### MC 26.2 — Fabric / NeoForge
+
+Targets: `26.2-fabric`, `26.2-neoforge` · first mod version: 2.1.0 · date: 2026-10-15
+
+#### Dependencies
+```properties
+java_version=25
+fabric_loader_min_version=0.18.4
+fabric_api_version=0.161.0+26.2
+cloth_config_version=26.2.155
+modmenu_version=20.0.3              # Fabric only, optional
+neoforge_version=26.2.0.93
+neoforge_loader_version_range=[4,)
+neoforge_icon_file_key=iconFile
+neoforge_icon_blur_key=iconBlur
+```
+NeoForge metadata pins Minecraft to `[26.2,26.2.1)` and Cloth Config to `[26.2,)`.
+
+#### API differences (vs. 26.1.2)
+| Area | 26.1.2 | 26.2 | Where / condition |
+|---|---|---|---|
+| Crosshair owner | `Gui.extractCrosshair(GuiGraphicsExtractor, DeltaTracker)` | the same method on `Hud` (`net.minecraft.client.gui.Hud`) | `mixin/GuiMixin.java`, `//? if >=26.2` |
+| `neoforge.mods.toml` icon | `logoFile` / `logoBlur` | `iconFile` / `iconBlur`; `logoFile` logs a deprecation warning | `neoforge_icon_*_key` in `gradle.properties` (default) and `versions/26.2-neoforge/gradle.properties` |
+
+#### Quirks
+- A world saved by an older 26.x asks "Create a backup before upgrading this world?" and blocks `--quickPlaySingleplayer`: generate the test world with a 26.2 server.
+
+#### Verified
+- 2026-10-15, mod 2.1.0 (dev build): see the 1.21.4 entry for the checks run; Fabric ☑ NeoForge ☑. Packaged-JAR gameplay in a clean profile: ☐
+
 ### MC 26.1.2 — Fabric / NeoForge
 
 Targets: `26.1.2-fabric`, `26.1.2-neoforge` · first mod version: 2.1.0 · date: 2026-10-15

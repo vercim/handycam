@@ -61,6 +61,8 @@ tasks.processResources {
         "neoforge_loader_version_range" to project.property("neoforge_loader_version_range"),
         "minecraft_version_range" to project.property("minecraft_version_range"),
         "cloth_config_version_range" to project.property("cloth_config_version_range"),
+        "neoforge_icon_file_key" to project.property("neoforge_icon_file_key"),
+        "neoforge_icon_blur_key" to project.property("neoforge_icon_blur_key"),
         "mixin_compatibility_level" to project.property("mixin_compatibility_level")
     )
     inputs.properties(metadata)
