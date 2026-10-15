@@ -59,10 +59,11 @@ tasks.processResources {
         "fabric_api_version" to project.property("fabric_api_version"),
         "cloth_config_version" to project.property("cloth_config_version"),
         "modmenu_version" to project.property("modmenu_version"),
-        "java_version" to javaVersion
+        "java_version" to javaVersion,
+        "mixin_compatibility_level" to project.property("mixin_compatibility_level")
     )
     inputs.properties(metadata)
-    filesMatching("fabric.mod.json") { expand(metadata) }
+    filesMatching(listOf("fabric.mod.json", "handycam.mixins.json")) { expand(metadata) }
     exclude("META-INF/neoforge.mods.toml")
 }
 

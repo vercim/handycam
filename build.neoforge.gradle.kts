@@ -59,10 +59,12 @@ tasks.processResources {
         "minecraft_version" to minecraftVersion,
         "neoforge_version" to project.property("neoforge_version"),
         "neoforge_loader_version_range" to project.property("neoforge_loader_version_range"),
-        "cloth_config_version" to project.property("cloth_config_version")
+        "minecraft_version_range" to project.property("minecraft_version_range"),
+        "cloth_config_version_range" to project.property("cloth_config_version_range"),
+        "mixin_compatibility_level" to project.property("mixin_compatibility_level")
     )
     inputs.properties(metadata)
-    filesMatching("META-INF/neoforge.mods.toml") { expand(metadata) }
+    filesMatching(listOf("META-INF/neoforge.mods.toml", "handycam.mixins.json")) { expand(metadata) }
     exclude("fabric.mod.json")
 }
 
