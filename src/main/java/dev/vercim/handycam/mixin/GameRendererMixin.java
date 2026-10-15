@@ -21,17 +21,24 @@ public abstract class GameRendererMixin {
 
     @Inject(method = "getFov", at = @At("HEAD"))
     private void handycam$markWorldFov(Camera camera, float partialTick, boolean useFov,
-                                       CallbackInfoReturnable<Double> cir) {
+                                       CallbackInfoReturnable<?> cir) {
         handycam$worldFov = useFov;
         ZoomCompensation.onGetFov(useFov);
     }
 
     // Zoom is read where the FOV is consumed, not where getFov returns: that is the value after the vanilla
     // spyglass modifier and Zoomify's ModifyReturnValue, independent of mixin order.
+    //? if >=1.21.4 {
+    /*@Inject(method = "getProjectionMatrix", at = @At("HEAD"))
+    private void handycam$readFinalFov(float fov, CallbackInfoReturnable<Matrix4f> cir) {
+        ZoomCompensation.onProjectionFov(fov);
+    }
+    *///?} else {
     @Inject(method = "getProjectionMatrix", at = @At("HEAD"))
     private void handycam$readFinalFov(double fov, CallbackInfoReturnable<Matrix4f> cir) {
         ZoomCompensation.onProjectionFov(fov);
     }
+    //?}
 
     // enableVanillaFov = false drops the vanilla FOV effects one by one instead of overriding the result, so
     // the spyglass and zoom mods (which change the result) keep working. Sprint/speed/bow is cut in
@@ -42,11 +49,19 @@ public abstract class GameRendererMixin {
         return !handycam$stripVanillaFov() && entity.isDeadOrDying();
     }
 
+    //? if >=1.21.4 {
+    /*@Redirect(method = "getFov",
+              at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;lerp(FFF)F", ordinal = 1))
+    private float handycam$skipFluidFov(float delta, float start, float end) {
+        return handycam$stripVanillaFov() ? 1.0f : Mth.lerp(delta, start, end);
+    }
+    *///?} else {
     @Redirect(method = "getFov",
               at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;lerp(DDD)D"))
     private double handycam$skipFluidFov(double delta, double start, double end) {
         return handycam$stripVanillaFov() ? 1.0 : Mth.lerp(delta, start, end);
     }
+    //?}
 
     @Unique
     private boolean handycam$stripVanillaFov() {

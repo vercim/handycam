@@ -22,6 +22,7 @@ stonecutter {
         // One node per Minecraft version and loader. Per-target settings live in versions/<node>/gradle.properties.
         val targets = linkedMapOf(
             "1.21.1" to listOf("fabric", "neoforge"),
+            "1.21.4" to listOf("fabric", "neoforge"),
         )
         targets.forEach { (minecraft, loaders) ->
             loaders.forEach { loader -> version("$minecraft-$loader", minecraft).buildscript = "build.$loader.gradle.kts" }

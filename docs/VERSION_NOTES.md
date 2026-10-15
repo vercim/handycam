@@ -81,6 +81,40 @@ Likely trouble spots, in order: `Camera`, `Gui`, `GameRenderer` mixins; then `Pl
 
 ## Target entries
 
+### MC 1.21.4 — Fabric / NeoForge
+
+Targets: `1.21.4-fabric`, `1.21.4-neoforge` · first mod version: 2.1.0 · date: 2026-10-15
+
+#### Dependencies
+```properties
+java_version=21
+fabric_loader_min_version=0.16.9
+fabric_api_version=0.119.4+1.21.4
+cloth_config_version=17.0.144
+modmenu_version=13.0.4              # Fabric only, optional
+neoforge_version=21.4.161
+neoforge_loader_version_range=[4,)
+```
+NeoForge metadata pins Minecraft to `[1.21.4,1.21.5)` and Cloth Config to `[17,)`. Values live in `versions/<target>/gradle.properties`.
+
+#### API differences (vs. baseline)
+| Area | Baseline (1.21.1) | 1.21.4 | Where / condition |
+|---|---|---|---|
+| Use animation | `UseAnim` | `ItemUseAnimation` | `camera/PlayerState.java`, `//? if >=1.21.4` |
+| Explosion packet | `getX()`, `getY()`, `getZ()` | `center()` (`Vec3`) | `mixin/ClientPacketListenerMixin.java`, `//? if >=1.21.4` |
+| `AbstractClientPlayer.getFieldOfViewModifier()` | `()F` | `(boolean firstPerson, float effectScale)F` | `mixin/AbstractClientPlayerMixin.java`, `//? if >=1.21.4` |
+| `GameRenderer.getFov()` | returns `double`; fluid squeeze is `Mth.lerp(DDD)D` | returns `float`; fluid squeeze is the second `Mth.lerp(FFF)F` call (`ordinal = 1`) | `mixin/GameRendererMixin.java`, `//? if >=1.21.4` |
+| `GameRenderer.getProjectionMatrix()` | `(double)` | `(float)` | `mixin/GameRendererMixin.java`, `//? if >=1.21.4` |
+
+`Camera.setup()` (`BlockGetter`), `Gui.renderCrosshair(GuiGraphics, DeltaTracker)`, `PoseStack` crosshair transforms, key mappings and NeoForge entry points are unchanged.
+
+#### Quirks
+- The `getFov` hook that only records the world-FOV flag takes `CallbackInfoReturnable<?>`, so it needs no per-version return type.
+- NeoForge dev runs log two `Assets URL ... uses unexpected schema` warnings from `VanillaPackResourcesBuilder`; they are unrelated to Handycam.
+
+#### Verified
+- 2026-10-15, mod 2.1.0 (dev build): dev client of both targets joined a flat singleplayer world with no mixin errors and every Handycam handler present in the exported target classes (`-Dmixin.debug.export=true`); both JARs register `handycam.mixins.json` and contain no other-loader classes. Packaged-JAR gameplay in a clean profile: ☐
+
 ### MC 1.21.1 — Fabric / NeoForge
 
 Targets: `1.21.1-fabric`, `1.21.1-neoforge` · first mod version: 2.0.0-alpha · date: 2026-07-28 · **baseline for all diffs**
@@ -132,7 +166,7 @@ Applying offsets: `rotateX(pitch)` → `rotateY(-yaw)` → `rotateZ(roll)` (yaw 
 
 ## Archived ports (pre-Stonecutter)
 
-These were built with Architectury in per-version branches (last Architectury release: `1.3.2`). The branches were deleted after the Stonecutter migration; their final commits are preserved as the git tags `archive/<version>` (pushed to `origin`). Treat them as read-only references: `git show archive/<version>:<path>` or `git checkout archive/<version>`. They are not part of the Stonecutter matrix yet, so use them as a map when porting that version.
+These were built with Architectury in per-version branches (last Architectury release: `1.3.2`). The branches were deleted after the Stonecutter migration; their final commits are preserved as the git tags `archive/<version>` (pushed to `origin`). Treat them as read-only references: `git show archive/<version>:<path>` or `git checkout archive/<version>`. Versions that have since joined the Stonecutter matrix have their own entry above; for the rest, use them as a map when porting.
 
 | MC | Loaders | Fabric loader | Fabric API | NeoForge / Forge | Cloth Config | Mod Menu | Java | Last mod version |
 |---|---|---|---|---|---|---|---|---|
