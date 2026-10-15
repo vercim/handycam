@@ -18,6 +18,8 @@ Handycam uses one [Stonecutter](https://stonecutter.kikugie.dev/) repository: a 
 | `1.21.11-neoforge` | NeoForge | 21 |
 | `26.1-fabric` | Fabric | 25 |
 | `26.1-neoforge` | NeoForge | 25 |
+| `26.1.2-fabric` | Fabric | 25 |
+| `26.1.2-neoforge` | NeoForge | 25 |
 
 The matrix is declared once in [`settings.gradle.kts`](../settings.gradle.kts); per-target Java, Minecraft range, loader and library versions live in `versions/<target>/gradle.properties`. The active target for the convenience tasks is stored in `.sc_active_version`.
 

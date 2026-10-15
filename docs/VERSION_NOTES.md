@@ -81,6 +81,28 @@ Likely trouble spots, in order: `Camera`, `Gui`, `GameRenderer` mixins; then `Pl
 
 ## Target entries
 
+### MC 26.1.2 — Fabric / NeoForge
+
+Targets: `26.1.2-fabric`, `26.1.2-neoforge` · first mod version: 2.1.0 · date: 2026-10-15
+
+#### Dependencies
+```properties
+java_version=25
+fabric_loader_min_version=0.18.4
+fabric_api_version=0.155.3+26.1.2
+cloth_config_version=26.1.154
+modmenu_version=18.0.2              # Fabric only, optional
+neoforge_version=26.1.2.122
+neoforge_loader_version_range=[4,)
+```
+NeoForge metadata pins Minecraft to `[26.1.2,26.1.3)` and Cloth Config to `[26.1,)`.
+
+#### API differences
+None from 26.1: every hook and signature the mod uses is identical, so the target only adds dependency versions. It stays a separate target because the packaged JARs pin the exact Minecraft version.
+
+#### Verified
+- 2026-10-15, mod 2.1.0 (dev build): see the 1.21.4 entry for the checks run; Fabric ☑ NeoForge ☑. Packaged-JAR gameplay in a clean profile: ☐
+
 ### MC 26.1 — Fabric / NeoForge
 
 Targets: `26.1-fabric`, `26.1-neoforge` · first mod version: 2.1.0 · date: 2026-10-15
