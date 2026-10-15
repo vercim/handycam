@@ -21,12 +21,14 @@ import java.util.Random;
  */
 public final class HandycamPreviewScene implements Scene {
 
-    private static final float EYE_HEIGHT = PreviewWorld.EYE_HEIGHT;
     private static final float LINE = 0.02f;
 
     private static final int CONE = 0xFFFFD35A;
     private static final int AXIS = 0xFFFF6A5A;
     private static final int LEVEL = 0x60FFFFFF;
+    private static final int HITBOX = 0x90FFFFFF;
+    private static final int EYE_LINE = 0xFFFF2020;
+    private static final float HITBOX_LINE = 0.012f;
     private static final int SHADOW = 0x55000000;
     private static final float SHADOW_HALF = 0.4f;
 
@@ -35,7 +37,7 @@ public final class HandycamPreviewScene implements Scene {
     private static final float VIEW_PITCH = 20f;
     /** A narrow field of view for the camera we look through: little perspective distortion, a long distance. */
     private static final float VIEW_FOV = 30f;
-    private static final float VIEW_DISTANCE = 8.5f;
+    private static final float VIEW_DISTANCE = 9.2f;
 
     private final PreviewSimulation simulation;
 
@@ -50,7 +52,7 @@ public final class HandycamPreviewScene implements Scene {
 
     @Override
     public void init(SceneContext context) {
-        context.camera().target(0f, 0.95f, 0f).fov(VIEW_FOV).distance(VIEW_DISTANCE, 4f, 30f).angles(VIEW_YAW, VIEW_PITCH);
+        context.camera().target(0f, 0.8f, 0f).fov(VIEW_FOV).distance(VIEW_DISTANCE, 4f, 30f).angles(VIEW_YAW, VIEW_PITCH);
     }
 
     @Override
@@ -66,23 +68,37 @@ public final class HandycamPreviewScene implements Scene {
         context.drawBox(new Vector3f(-SHADOW_HALF, 0.004f, -SHADOW_HALF), new Vector3f(SHADOW_HALF, 0.01f, SHADOW_HALF), SHADOW);
 
         RigOutput rig = simulation.output(alpha);
-        float standingHeight = EYE_HEIGHT + simulation.height(alpha);
+        float feet = simulation.height(alpha);
+        float eyeLevel = feet + simulation.eyeHeight(alpha);   // the camera before the rig moves it
 
         context.push();
-        context.translate(0f, standingHeight, 0f);
+        context.translate(0f, eyeLevel, 0f);
         drawCone(context, LEVEL, 0.01f);
         context.pop();
 
         // What the rig reports, as it reports it: the same order the game applies it to the camera (pitch, then yaw
         // negated, then roll) and the same degrees and blocks.
         context.push();
-        context.translate(0f, standingHeight + rig.y(), 0f);
+        context.translate(0f, eyeLevel + rig.y(), 0f);
         context.rotateX(rig.pitch());
         context.rotateY(-rig.yaw());
         context.rotateZ(rig.roll());
         drawHead(context);
         drawCone(context, CONE, LINE);
         context.pop();
+
+        drawHitbox(context, feet);
+    }
+
+    /** The player's box with its eye line, like the game's hitbox display: a yardstick next to the blocks. */
+    private void drawHitbox(SceneRenderContext context, float feet) {
+        boolean crouching = simulation.crouching();
+        for (PlayerHitbox.Edge e : PlayerHitbox.edges(feet, crouching)) {
+            context.drawLine(e.from(), e.to(), HITBOX, HITBOX_LINE);
+        }
+        for (PlayerHitbox.Edge e : PlayerHitbox.eyeLine(feet, crouching)) {
+            context.drawLine(e.from(), e.to(), EYE_LINE, HITBOX_LINE);
+        }
     }
 
     /** The player head item: the head of the skin and, around it, the hat layer. */

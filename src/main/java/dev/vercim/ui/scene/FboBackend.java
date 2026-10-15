@@ -21,13 +21,13 @@ import org.lwjgl.opengl.GL14;
 /**
  * Draws the scene into an offscreen framebuffer with its own depth buffer, using the scene camera's projection and
  * view, then draws that texture into the GUI rectangle. The framebuffer is cleared to the widget's background color
- * and is twice the size of the rectangle and
+ * and is three times the size of the rectangle and
  * filtered down, which smooths the edges. Everything the scene pass changes (target, projection, model-view, depth,
  * blend, cull, scissor, shader color) is put back before the texture is drawn.
  */
 final class FboBackend implements PreviewBackend {
 
-    private static final int SUPERSAMPLE = 2;
+    private static final int SUPERSAMPLE = 3;
     private static final int MAX_TEXTURE_SIDE = 8192;
 
     private final Minecraft minecraft = Minecraft.getInstance();

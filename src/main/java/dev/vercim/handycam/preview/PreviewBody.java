@@ -29,6 +29,18 @@ public final class PreviewBody {
     private static final float SPEED_SCALE = 0.3f;
     private static final float MIN_FALL = 0.15f;
 
+    /** Movement input is scaled by this while crouching (the game's 0.3 with no sneaking-speed enchantment). */
+    private static final float SNEAK_INPUT = 0.3f;
+
+    /** Eye height standing and crouching, and how fast the camera follows a change: half the way each tick. */
+    public static final float STANDING_EYE = 1.62f;
+    public static final float CROUCHING_EYE = 1.27f;
+    private static final float EYE_FOLLOW = 0.5f;
+
+    /** Height of the player's box standing and crouching. */
+    public static final float STANDING_HEIGHT = 1.8f;
+    public static final float CROUCHING_HEIGHT = 1.5f;
+
     /** Blocks per tick along the facing direction and to the left, after friction. */
     private float forward;
     private float left;
@@ -38,6 +50,10 @@ public final class PreviewBody {
     private boolean onGround = true;
     private float peakY;
 
+    private boolean crouching;
+    private float eyeHeight = STANDING_EYE;
+    private float previousEyeHeight = STANDING_EYE;
+
     private InputState input = InputState.NONE;
     private float pendingDamage;
     private boolean pendingHit;
@@ -45,6 +61,21 @@ public final class PreviewBody {
     /** Height above the ground at the last tick, in blocks: 0 while standing, about 1.25 at the top of a jump. */
     public float y() {
         return y;
+    }
+
+    /** Whether the player was crouching at the last tick. */
+    public boolean crouching() {
+        return crouching;
+    }
+
+    /** Where the camera is above the player's feet at the last tick: it eases toward 1.62 standing, 1.27 crouching. */
+    public float eyeHeight() {
+        return eyeHeight;
+    }
+
+    /** What {@link #eyeHeight()} was at the tick before. */
+    public float previousEyeHeight() {
+        return previousEyeHeight;
     }
 
     /** The keys held right now; read at the next tick. */
@@ -65,10 +96,13 @@ public final class PreviewBody {
     /** Advances one 20 Hz tick and returns what the rig should see. */
     public RigInput tick() {
         boolean groundedAtStart = onGround;
-        boolean sprinting = input.forward() && !input.back() && input.sprint();
+        crouching = input.crouch();
+        // The player cannot sprint while crouching.
+        boolean sprinting = input.forward() && !input.back() && input.sprint() && !crouching;
 
-        float strafeInput = ((input.left() ? 1f : 0f) - (input.right() ? 1f : 0f)) * INPUT_SCALE;
-        float forwardInput = ((input.forward() ? 1f : 0f) - (input.back() ? 1f : 0f)) * INPUT_SCALE;
+        float inputScale = INPUT_SCALE * (crouching ? SNEAK_INPUT : 1f);
+        float strafeInput = ((input.left() ? 1f : 0f) - (input.right() ? 1f : 0f)) * inputScale;
+        float forwardInput = ((input.forward() ? 1f : 0f) - (input.back() ? 1f : 0f)) * inputScale;
 
         if (groundedAtStart && input.jump()) {
             velocityY = JUMP_VELOCITY;
@@ -110,6 +144,9 @@ public final class PreviewBody {
         left *= friction;
         velocityY = (velocityY - GRAVITY) * VERTICAL_DRAG;
 
+        previousEyeHeight = eyeHeight;
+        eyeHeight += ((crouching ? CROUCHING_EYE : STANDING_EYE) - eyeHeight) * EYE_FOLLOW;
+
         float damage = pendingDamage;
         boolean hit = pendingHit;
         pendingDamage = 0f;
@@ -118,7 +155,7 @@ public final class PreviewBody {
         float speed = (float) Math.sqrt(forward * forward + left * left);
         return new RigInput(
                 Math.min(speed / SPEED_SCALE, 1f), velocityY,
-                sprinting, onGround, false,
+                sprinting, onGround, crouching,
                 0f, 0f,
                 clamp(left / SPEED_SCALE), clamp(forward / SPEED_SCALE),
                 0f, false, 0f,

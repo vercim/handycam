@@ -2,24 +2,25 @@
 package dev.vercim.ui.widget;
 
 /**
- * Where the parts of the settings screen go. Wide windows get three columns: the option list on the left, in the
- * middle the first-person view above the 3D view (with the buttons for the events below them) and the panel for the
- * selected option on the right. Narrow windows put the two views side by side across the top and the list and the
- * panel side by side underneath. A title sits above and the footer buttons below in both. Plain geometry, in GUI
- * pixels, so it can be checked without the game.
+ * Where the parts of the settings screen go. Wide windows get three columns. The option list is on the left with
+ * Save and Cancel under it, the panel for the selected option is on the right with Reset All under it, and the two
+ * views, the first-person view above the 3D view, take the whole height of the screen between them. The buttons are
+ * never wider than the column they belong to. Narrow windows put the two views side by side across the top and the
+ * list and the panel, with their buttons, underneath. The title is above the list and a status text above the panel
+ * (across the top row in narrow windows). Plain geometry, in GUI pixels, so it can be checked without the game.
  */
-public record SettingsLayout(boolean narrow, Rect title, Rect list, Rect pov, Rect view3d, Rect previewButtons,
-                             Rect panel, Rect footer) {
+public record SettingsLayout(boolean narrow, Rect title, Rect status, Rect list, Rect pov, Rect view3d, Rect panel,
+                             Rect save, Rect cancel, Rect resetAll) {
 
     public static final int MARGIN = 8;
     public static final int GAP = 6;
-    public static final int TITLE_TOP = 6;
     public static final int TITLE_HEIGHT = 12;
     public static final int BUTTON_HEIGHT = 20;
 
-    /** Below this GUI width the preview moves to the top. */
+    /** Below this GUI width the views move to the top. */
     public static final int NARROW_BELOW = 380;
 
+    private static final int HEADER_GAP = 2;
     private static final int LIST_MIN = 100;
     private static final int LIST_MAX = 210;
     private static final int PANEL_MIN = 96;
@@ -44,49 +45,65 @@ public record SettingsLayout(boolean narrow, Rect title, Rect list, Rect pov, Re
 
     public static SettingsLayout compute(int width, int height) {
         int inner = Math.max(0, width - 2 * MARGIN);
-        int top = TITLE_TOP + TITLE_HEIGHT + 4;
-        int footerY = Math.max(top, height - MARGIN - BUTTON_HEIGHT);
-        int bottom = Math.max(top, footerY - GAP);
-        int contentHeight = bottom - top;
-
-        Rect title = new Rect(MARGIN, TITLE_TOP, inner, TITLE_HEIGHT);
-        Rect footer = new Rect(MARGIN, footerY, inner, BUTTON_HEIGHT);
+        int top = MARGIN;
+        int bottom = Math.max(top, height - MARGIN);
+        int headerHeight = TITLE_HEIGHT + HEADER_GAP;
+        int buttonsY = Math.max(top, bottom - BUTTON_HEIGHT);
 
         if (width >= NARROW_BELOW) {
             int listWidth = clamp(inner * 34 / 100, LIST_MIN, LIST_MAX);
             int panelWidth = clamp(inner * 26 / 100, PANEL_MIN, PANEL_MAX);
             int viewWidth = Math.max(0, inner - listWidth - panelWidth - 2 * GAP);
             int viewX = MARGIN + listWidth + GAP;
-            int viewsHeight = Math.max(0, contentHeight - BUTTON_HEIGHT - GAP);
+            int panelX = viewX + viewWidth + GAP;
+            int columnTop = Math.min(bottom, top + headerHeight);
+            int columnHeight = Math.max(0, buttonsY - GAP - columnTop);
+
+            int viewsHeight = bottom - top;
             int povHeight = Math.max(0, (viewsHeight - VIEW_GAP) * 45 / 100);
             int view3dHeight = Math.max(0, viewsHeight - VIEW_GAP - povHeight);
 
-            return new SettingsLayout(false, title,
-                    new Rect(MARGIN, top, listWidth, contentHeight),
+            return new SettingsLayout(false,
+                    new Rect(MARGIN, top, listWidth, TITLE_HEIGHT),
+                    new Rect(panelX, top, panelWidth, TITLE_HEIGHT),
+                    new Rect(MARGIN, columnTop, listWidth, columnHeight),
                     new Rect(viewX, top, viewWidth, povHeight),
                     new Rect(viewX, top + povHeight + VIEW_GAP, viewWidth, view3dHeight),
-                    new Rect(viewX, top + viewsHeight + GAP, viewWidth, Math.min(BUTTON_HEIGHT, contentHeight)),
-                    new Rect(viewX + viewWidth + GAP, top, panelWidth, contentHeight),
-                    footer);
+                    new Rect(panelX, columnTop, panelWidth, columnHeight),
+                    saveButton(MARGIN, buttonsY, listWidth), cancelButton(MARGIN, buttonsY, listWidth),
+                    new Rect(panelX, buttonsY, panelWidth, BUTTON_HEIGHT));
         }
 
-        int viewsHeight = Math.min(Math.max(0, contentHeight - BUTTON_HEIGHT - GAP),
-                Math.max(PREVIEW_MIN_HEIGHT, contentHeight * 34 / 100));
-        int povWidth = Math.max(0, (inner - VIEW_GAP) / 2);
-        int view3dWidth = Math.max(0, inner - VIEW_GAP - povWidth);
-        int buttonsY = top + viewsHeight + GAP;
-        int lowerTop = buttonsY + BUTTON_HEIGHT + GAP;
-        int lowerHeight = Math.max(0, bottom - lowerTop);
         int listWidth = Math.max(0, (inner - GAP) * 55 / 100);
         int panelWidth = Math.max(0, inner - GAP - listWidth);
+        int panelX = MARGIN + listWidth + GAP;
+        int viewsTop = Math.min(bottom, top + headerHeight);
+        int available = Math.max(0, buttonsY - GAP - viewsTop);
+        int viewsHeight = Math.min(available, Math.max(PREVIEW_MIN_HEIGHT, available * 40 / 100));
+        int povWidth = Math.max(0, (inner - VIEW_GAP) / 2);
+        int view3dWidth = Math.max(0, inner - VIEW_GAP - povWidth);
+        int lowerTop = viewsTop + viewsHeight + GAP;
+        int lowerHeight = Math.max(0, buttonsY - GAP - lowerTop);
 
-        return new SettingsLayout(true, title,
+        return new SettingsLayout(true,
+                new Rect(MARGIN, top, listWidth, TITLE_HEIGHT),
+                new Rect(panelX, top, panelWidth, TITLE_HEIGHT),
                 new Rect(MARGIN, lowerTop, listWidth, lowerHeight),
-                new Rect(MARGIN, top, povWidth, viewsHeight),
-                new Rect(MARGIN + povWidth + VIEW_GAP, top, view3dWidth, viewsHeight),
-                new Rect(MARGIN, buttonsY, inner, BUTTON_HEIGHT),
-                new Rect(MARGIN + listWidth + GAP, lowerTop, panelWidth, lowerHeight),
-                footer);
+                new Rect(MARGIN, viewsTop, povWidth, viewsHeight),
+                new Rect(MARGIN + povWidth + VIEW_GAP, viewsTop, view3dWidth, viewsHeight),
+                new Rect(panelX, lowerTop, panelWidth, lowerHeight),
+                saveButton(MARGIN, buttonsY, listWidth), cancelButton(MARGIN, buttonsY, listWidth),
+                new Rect(panelX, buttonsY, panelWidth, BUTTON_HEIGHT));
+    }
+
+    /** Save and Cancel share the width of the list between them. */
+    private static Rect saveButton(int x, int y, int columnWidth) {
+        return new Rect(x, y, Math.max(0, (columnWidth - GAP) / 2), BUTTON_HEIGHT);
+    }
+
+    private static Rect cancelButton(int x, int y, int columnWidth) {
+        int saveWidth = Math.max(0, (columnWidth - GAP) / 2);
+        return new Rect(x + saveWidth + GAP, y, Math.max(0, columnWidth - saveWidth - GAP), BUTTON_HEIGHT);
     }
 
     private static int clamp(int v, int lo, int hi) {

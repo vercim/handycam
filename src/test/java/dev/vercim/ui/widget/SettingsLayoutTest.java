@@ -15,8 +15,8 @@ class SettingsLayoutTest {
     };
 
     private static List<Rect> parts(SettingsLayout layout) {
-        return List.of(layout.title(), layout.list(), layout.pov(), layout.view3d(), layout.previewButtons(),
-                layout.panel(), layout.footer());
+        return List.of(layout.title(), layout.status(), layout.list(), layout.pov(), layout.view3d(), layout.panel(),
+                layout.save(), layout.cancel(), layout.resetAll());
     }
 
     @Test
@@ -46,6 +46,23 @@ class SettingsLayoutTest {
     }
 
     @Test
+    void theButtonsNeverGoBeyondTheColumnTheyBelongTo() {
+        for (int[] size : SIZES) {
+            SettingsLayout layout = SettingsLayout.compute(size[0], size[1]);
+            String where = size[0] + "x" + size[1];
+
+            assertTrue(layout.save().x() >= layout.list().x(), where);
+            assertTrue(layout.cancel().right() <= layout.list().right(), where);
+            assertTrue(layout.save().right() <= layout.cancel().x(), where);
+            assertTrue(layout.resetAll().x() >= layout.panel().x(), where);
+            assertTrue(layout.resetAll().right() <= layout.panel().right(), where);
+            // and they sit under the column, not beside it
+            assertTrue(layout.save().y() >= layout.list().bottom(), where);
+            assertTrue(layout.resetAll().y() >= layout.panel().bottom(), where);
+        }
+    }
+
+    @Test
     void wideWindowsPutTheListLeftThePanelRightAndTheTwoViewsStackedBetween() {
         SettingsLayout layout = SettingsLayout.compute(854, 480);
 
@@ -55,12 +72,18 @@ class SettingsLayoutTest {
         assertEquals(layout.pov().x(), layout.view3d().x());
         assertEquals(layout.pov().width(), layout.view3d().width());
         assertTrue(layout.pov().bottom() <= layout.view3d().y(), "the first-person view is above the 3D view");
-        assertEquals(layout.view3d().x(), layout.previewButtons().x());
-        assertEquals(layout.view3d().width(), layout.previewButtons().width());
-        assertTrue(layout.previewButtons().y() >= layout.view3d().bottom());
-        assertEquals(layout.list().y(), layout.panel().y());
-        assertEquals(layout.list().y(), layout.pov().y());
         assertTrue(layout.pov().width() > layout.list().width(), "the views are the big part");
+    }
+
+    @Test
+    void theViewsTakeTheWholeHeightOfTheScreenBetweenTheMargins() {
+        for (int[] size : new int[][] {{427, 240}, {480, 270}, {854, 480}, {1920, 1080}}) {
+            SettingsLayout layout = SettingsLayout.compute(size[0], size[1]);
+            String where = size[0] + "x" + size[1];
+
+            assertEquals(SettingsLayout.MARGIN, layout.pov().y(), where);
+            assertEquals(size[1] - SettingsLayout.MARGIN, layout.view3d().bottom(), where);
+        }
     }
 
     @Test
@@ -82,13 +105,12 @@ class SettingsLayoutTest {
         assertTrue(layout.pov().right() <= layout.view3d().x());
         assertEquals(layout.pov().y(), layout.view3d().y());
         assertEquals(layout.pov().height(), layout.view3d().height());
-        assertTrue(layout.pov().bottom() <= layout.previewButtons().y());
-        assertTrue(layout.previewButtons().bottom() <= layout.list().y());
-        assertTrue(layout.previewButtons().bottom() <= layout.panel().y());
+        assertTrue(layout.pov().bottom() <= layout.list().y());
+        assertTrue(layout.view3d().bottom() <= layout.panel().y());
         assertTrue(layout.list().right() <= layout.panel().x());
         assertEquals(layout.list().y(), layout.panel().y());
         assertTrue(layout.pov().height() >= 48);
-        assertTrue(layout.list().height() >= 80, "the lower half stays usable: " + layout.list());
+        assertTrue(layout.list().height() >= 60, "the lower half stays usable: " + layout.list());
     }
 
     @Test
@@ -105,17 +127,24 @@ class SettingsLayoutTest {
         assertTrue(layout.list().width() >= 100);
         assertTrue(layout.panel().width() >= 96);
         assertTrue(layout.pov().width() >= 120);
-        assertTrue(layout.pov().height() >= 60);
-        assertTrue(layout.view3d().height() >= 60);
-        assertEquals(20, layout.footer().height());
+        assertTrue(layout.pov().height() >= 80);
+        assertTrue(layout.view3d().height() >= 80);
+        assertTrue(layout.list().height() >= 150);
+        assertTrue(layout.panel().height() >= 150);
+        assertEquals(20, layout.save().height());
+        assertTrue(layout.save().width() >= 60, "room for a label: " + layout.save());
+        assertTrue(layout.resetAll().width() >= 90, "room for a label: " + layout.resetAll());
     }
 
     @Test
-    void theFooterIsAtTheBottomAndTheTitleAtTheTop() {
+    void theButtonsAreAtTheBottomAndTheTitleAtTheTop() {
         for (int[] size : SIZES) {
             SettingsLayout layout = SettingsLayout.compute(size[0], size[1]);
-            assertEquals(size[1] - SettingsLayout.MARGIN, layout.footer().bottom());
-            assertEquals(SettingsLayout.TITLE_TOP, layout.title().y());
+            assertEquals(size[1] - SettingsLayout.MARGIN, layout.save().bottom());
+            assertEquals(size[1] - SettingsLayout.MARGIN, layout.cancel().bottom());
+            assertEquals(size[1] - SettingsLayout.MARGIN, layout.resetAll().bottom());
+            assertEquals(SettingsLayout.MARGIN, layout.title().y());
+            assertEquals(SettingsLayout.MARGIN, layout.status().y());
         }
     }
 

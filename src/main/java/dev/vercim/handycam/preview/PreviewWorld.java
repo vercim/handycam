@@ -5,11 +5,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
-/** What the two views share: the platform the player stands on, the player's eye height and the skin. */
+/** What the two views share: the platform the player stands on and the skin. */
 final class PreviewWorld {
-
-    /** Height of the camera above the platform while the player stands: the eye height of the player, 1.62 blocks. */
-    static final float EYE_HEIGHT = 1.62f;
 
     static final ResourceLocation SKIN = ResourceLocation.withDefaultNamespace(PlayerHead.SKIN_TEXTURE);
 

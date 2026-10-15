@@ -266,4 +266,46 @@ class PreviewSimulationTest {
 
         assertEquals(0f, sim.output(1f).y(), 1e-6f);
     }
+
+    private static final InputState CROUCH = new InputState(false, false, false, false, false, false, true);
+
+    @Test
+    void crouchingLowersTheCameraSmoothlyAndStandingRaisesItAgain() {
+        Settings s = new Settings().quiet();
+        PreviewSimulation sim = new PreviewSimulation(s.params, new Random(1));
+
+        assertEquals(1.62f, sim.eyeHeight(0f), 1e-6f);
+        assertFalse(sim.crouching());
+
+        float previous = sim.eyeHeight(0f);
+        float largestStep = 0f;
+        for (int i = 0; i < 90; i++) {
+            sim.step(CROUCH);
+            float eye = sim.eyeHeight(0.5f);
+            largestStep = Math.max(largestStep, Math.abs(eye - previous));
+            assertTrue(eye <= previous + 1e-6f, "only goes down: " + eye + " after " + previous);
+            previous = eye;
+        }
+        assertTrue(sim.crouching());
+        assertEquals(1.27f, sim.eyeHeight(1f), 1e-3f);
+        assertTrue(largestStep < 0.35f / 6f * 1.3f, "no 20 Hz jumps: " + largestStep);
+
+        for (int i = 0; i < 90; i++) sim.step(InputState.NONE);
+        assertFalse(sim.crouching());
+        assertEquals(1.62f, sim.eyeHeight(1f), 1e-3f);
+    }
+
+    @Test
+    void theRigReactsToACrouchWithItsOwnDip() {
+        Settings s = new Settings().quiet();
+        PreviewSimulation sim = new PreviewSimulation(s.params, new Random(1));
+
+        float strongest = 0f;
+        for (int i = 0; i < 60; i++) {
+            sim.step(CROUCH);
+            strongest = Math.max(strongest, Math.abs(sim.output(1f).pitch()));
+        }
+
+        assertTrue(strongest > 0.05f, "pitch dip " + strongest);
+    }
 }

@@ -8,8 +8,8 @@ public final class Theme {
 
     // surfaces: a dark blue screen, panels a shade lighter, the 3D view drawn straight onto the screen color
     public static final int BACKGROUND = 0xFF0A1428;
-    /** The first-person view's sky: a lighter blue, so it reads as what the player sees and not as the screen. */
-    public static final int POV_BACKGROUND = 0xFF15305C;
+    /** The first-person view's sky: the game's own sky blue, so it reads as what the player sees and not as the screen. */
+    public static final int POV_BACKGROUND = 0xFF78A7FF;
     public static final int PANEL = 0xFF101C36;
     public static final int PANEL_BORDER = 0xFF2B4170;
     public static final int TRACK = 0xFF070E1E;

@@ -41,12 +41,12 @@ src/main/java/dev/vercim/
                                      with a game texture laid out by BoxUv, lines), PreviewWidget (fixed 1/120 s steps,
                                      orbit camera, keyboard capture; embedded() = no frame, keys always on, Esc left to
                                      the screen; interactive(false) = fixed camera, no clicks; overlay), OrbitCamera,
-                                     InputCapture; FboBackend + GlSceneRenderer are the only GL code (1.21.1: offscreen
+                                     InputCapture (Control/InputState: movement, jump, sprint, crouch); FboBackend + GlSceneRenderer are the only GL code (1.21.1: offscreen
                                      framebuffer, cleared to the widget's background color)
   ui/widget/                       — the settings screen's widgets on vanilla AbstractWidget: OptionListWidget
                                      (categories + options), DescriptionPanel (selected option's text), VerticalSliderWidget
                                      (numbers), ChoiceListWidget (toggles and enums), ThemedButton; Theme (all colors and spacing, dark blue),
-                                     SettingsLayout (wide: list | first-person view over 3D view | panel; narrow: the two views side by side on top) and TextWrap
+                                     SettingsLayout (wide: list with Save/Cancel | first-person view over 3D view, full height | panel with Reset All; narrow: the two views side by side on top) and TextWrap
                                      are Minecraft-free and unit-tested; OptionText is the only place option texts are built
   handycam/
     HandycamMod.java               — shared init (config dir + HandycamConfig.load)
@@ -105,13 +105,16 @@ src/main/java/dev/vercim/
                                      HandycamConfigScreenNeoForge (wrapper)
   handycam/preview/                — what the config screen's views show: PreviewBody (a player walking and jumping in
                                      place with vanilla's arithmetic) + PreviewSimulation (body feeding CameraRig; smooth
-                                     jump height) are Minecraft-free, so are PlayerHead (the player head item: 0.5-block
-                                     cube + hat layer, UVs of the default skin) and PovCamera (the first-person camera, placed
-                                     like the head). HandycamPreviewScene (3D view) draws the 3x3 platform and the head,
-                                     textured with the real skin, at eye height 1.62, moved exactly as the rig reports it,
-                                     not amplified: pitch/yaw/roll, the jump's real height, the rig's vertical offset.
-                                     HandycamPovScene (first-person view, reads the same simulation) draws the world from the
-                                     eyes in the player's FOV with a floor, columns and a hand; PreviewWorld is what both share
+                                     jump height, eye height, crouching: slower, no sprint, eyes 1.62 -> 1.27) are
+                                     Minecraft-free, so are PlayerHead (the player head item: 0.5-block cube + hat layer,
+                                     UVs of the default skin), PlayerHitbox (the F3+B box and eye line), PovCamera (the
+                                     first-person camera, placed like the head) and PovHudLayout (the game's HUD coordinates).
+                                     HandycamPreviewScene (3D view) draws the 3x3 platform, the head (real skin) and the
+                                     hitbox, at the camera's eye height, moved exactly as the rig reports it, not amplified:
+                                     pitch/yaw/roll, the jump's real height, the rig's vertical offset. HandycamPovScene
+                                     (first-person view, reads the same simulation) draws PovWorld (grass, path, flowers,
+                                     trees, sun, clouds) from the eyes in the player's FOV with a hand, and PovHud draws the
+                                     game's HUD sprites over it; PreviewWorld is what both views share
   handycam/dev/                    — PreviewDebugScreen, PreviewSmokeTest: development aid for the preview
                                      (see docs/WORKFLOW.md), never shown to players
 src/test/java/                     — JUnit 5: ui.sim, ui.config, ui.widget (layout, text wrap) and rig unit tests,

@@ -101,6 +101,6 @@ public final class InputCapture {
         if (!captured) return InputState.NONE;
         return new InputState(held.contains(Control.FORWARD), held.contains(Control.BACK),
                 held.contains(Control.LEFT), held.contains(Control.RIGHT),
-                held.contains(Control.JUMP), held.contains(Control.SPRINT));
+                held.contains(Control.JUMP), held.contains(Control.SPRINT), held.contains(Control.CROUCH));
     }
 }

@@ -14,7 +14,6 @@ import dev.vercim.ui.widget.SettingsLayout.Rect;
 import dev.vercim.ui.widget.Theme;
 import dev.vercim.ui.widget.ThemedButton;
 import dev.vercim.ui.widget.VerticalSliderWidget;
-import net.minecraft.client.Options;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.screens.Screen;
@@ -36,10 +35,6 @@ import java.util.List;
 public final class HandycamConfigScreen extends Screen {
 
     private static final int SLIDER_MIN_HEIGHT = 56;
-    private static final int BUTTON_GAP = 4;
-    private static final int FOOTER_BUTTON_MAX_WIDTH = 120;
-    private static final int CROSSHAIR = 0xFFFFFFFF;
-    private static final int CROSSHAIR_EDGE = 0x80000000;
 
     private final Screen parent;
     private final Runnable saveCallback;
@@ -83,8 +78,6 @@ public final class HandycamConfigScreen extends Screen {
         layout = SettingsLayout.compute(width, height);
         if (view3d == null) createWidgets();
 
-        Component hint = hint();
-        pov.hints(hint, hint);   // over the sky of the first-person view, which is empty; the 3D view needs its top for a jump
         place(list, layout.list());
         place(view3d, layout.view3d());
         place(pov, layout.pov());
@@ -97,9 +90,8 @@ public final class HandycamConfigScreen extends Screen {
         addRenderableWidget(slider);
         addRenderableWidget(choices);
 
-        addPreviewButtons();
         addResetButton();
-        addFooterButtons();
+        addButtons();
         layoutPanel();
     }
 
@@ -115,7 +107,7 @@ public final class HandycamConfigScreen extends Screen {
                 .embedded()
                 .interactive(false)
                 .background(Theme.POV_BACKGROUND)
-                .overlay(HandycamConfigScreen::drawCrosshair)
+                .overlay(HandycamPovScene.hud())
                 .unavailableMessage(unavailable);
         list = new OptionListWidget(rows, this::select);
         panel = new DescriptionPanel();
@@ -129,40 +121,9 @@ public final class HandycamConfigScreen extends Screen {
         }
     }
 
-    /** The game's crosshair: a plus in the middle of the view, with a dark edge so it shows on any background. */
-    private static void drawCrosshair(GuiGraphics graphics, int x, int y, int width, int height) {
-        int cx = x + width / 2;
-        int cy = y + height / 2;
-        graphics.fill(cx - 5, cy - 1, cx + 6, cy + 2, CROSSHAIR_EDGE);
-        graphics.fill(cx - 1, cy - 5, cx + 2, cy + 6, CROSSHAIR_EDGE);
-        graphics.fill(cx - 4, cy, cx + 5, cy + 1, CROSSHAIR);
-        graphics.fill(cx, cy - 4, cx + 1, cy + 5, CROSSHAIR);
-    }
-
     private static void place(AbstractWidget widget, Rect rect) {
         widget.setPosition(rect.x(), rect.y());
         widget.setSize(rect.width(), rect.height());
-    }
-
-    /** Which keys move the player, as the player has bound them. */
-    private Component hint() {
-        Options o = minecraft.options;
-        return Component.translatable("handycam.config.preview.hint",
-                o.keyUp.getTranslatedKeyMessage(), o.keyLeft.getTranslatedKeyMessage(),
-                o.keyDown.getTranslatedKeyMessage(), o.keyRight.getTranslatedKeyMessage(),
-                o.keyJump.getTranslatedKeyMessage(), o.keySprint.getTranslatedKeyMessage());
-    }
-
-    /** Damage and explosion: events the player cannot trigger by walking. (A hit is a click on an empty spot.) */
-    private void addPreviewButtons() {
-        Rect r = layout.previewButtons();
-        int width = Math.max(0, (r.width() - BUTTON_GAP) / 2);
-        int x2 = r.x() + width + BUTTON_GAP;
-
-        addRenderableWidget(new ThemedButton(Component.translatable("handycam.config.preview.damage"),
-                () -> scene.simulation().damage()).bounds(r.x(), r.y(), width, r.height()));
-        addRenderableWidget(new ThemedButton(Component.translatable("handycam.config.preview.explosion"),
-                () -> scene.simulation().explosion(1f)).bounds(x2, r.y(), Math.max(0, r.right() - x2), r.height()));
     }
 
     private void addResetButton() {
@@ -171,17 +132,14 @@ public final class HandycamConfigScreen extends Screen {
         }).bounds(0, 0, 10, DescriptionPanel.RESET_HEIGHT));
     }
 
-    private void addFooterButtons() {
-        Rect f = layout.footer();
-        int width = Math.max(0, Math.min(FOOTER_BUTTON_MAX_WIDTH, (f.width() - 2 * BUTTON_GAP) / 3));
-        int x = f.x() + (f.width() - (3 * width + 2 * BUTTON_GAP)) / 2;
-
+    /** Save and Cancel under the list, Reset All under the panel: each as wide as the column it sits under. */
+    private void addButtons() {
         addRenderableWidget(new ThemedButton(Component.translatable("handycam.config.save"), this::save)
-                .primary().bounds(x, f.y(), width, f.height()));
+                .primary().bounds(layout.save().x(), layout.save().y(), layout.save().width(), layout.save().height()));
         addRenderableWidget(new ThemedButton(Component.translatable("handycam.config.cancel"), this::onClose)
-                .bounds(x + width + BUTTON_GAP, f.y(), width, f.height()));
+                .bounds(layout.cancel().x(), layout.cancel().y(), layout.cancel().width(), layout.cancel().height()));
         addRenderableWidget(new ThemedButton(Component.translatable("handycam.config.reset_all"), model::resetVisibleToDefault)
-                .bounds(x + 2 * (width + BUTTON_GAP), f.y(), width, f.height()));
+                .bounds(layout.resetAll().x(), layout.resetAll().y(), layout.resetAll().width(), layout.resetAll().height()));
     }
 
     // ---- the selected option
@@ -259,8 +217,9 @@ public final class HandycamConfigScreen extends Screen {
         Rect t = layout.title();
         graphics.drawString(font, title, t.x(), t.y() + 2, Theme.TEXT, true);
         if (model.hasPending()) {
+            Rect st = layout.status();
             Component unsaved = Component.translatable("handycam.config.unsaved");
-            graphics.drawString(font, unsaved, t.right() - font.width(unsaved), t.y() + 2, Theme.EDITED, true);
+            graphics.drawString(font, unsaved, st.right() - font.width(unsaved), st.y() + 2, Theme.EDITED, true);
         }
     }
 

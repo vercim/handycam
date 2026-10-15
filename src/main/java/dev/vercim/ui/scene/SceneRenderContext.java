@@ -38,6 +38,9 @@ public interface SceneRenderContext {
     /** A solid box between two corners. */
     void drawBox(Vector3fc min, Vector3fc max, int argb);
 
+    /** A flat quad of one color, not shaded by direction: for things that give light themselves, like a sun. */
+    void drawQuad(Vector3fc a, Vector3fc b, Vector3fc c, Vector3fc d, int argb);
+
     /**
      * A box whose faces show parts of a texture (a game texture, by its location), laid out as {@code uv} says. The
      * texture is multiplied by {@code argb}, so white leaves it as it is; its transparent pixels are not drawn. The

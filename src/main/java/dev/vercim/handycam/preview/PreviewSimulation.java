@@ -27,6 +27,8 @@ public final class PreviewSimulation {
     // The body moves once per 20 Hz tick; its height is interpolated between the last two ticks so a jump is smooth.
     private float previousHeight;
     private float currentHeight;
+    private float previousEye = PreviewBody.STANDING_EYE;
+    private float currentEye = PreviewBody.STANDING_EYE;
     private int stepsIntoTick = RigSimulator.STEPS_PER_TICK;
 
     public PreviewSimulation(RigParams params, Random rng) {
@@ -43,8 +45,10 @@ public final class PreviewSimulation {
 
     private RigInput tickBody() {
         previousHeight = currentHeight;
+        previousEye = currentEye;
         RigInput input = body.tick();
         currentHeight = body.y();
+        currentEye = body.eyeHeight();
         return input;
     }
 
@@ -55,8 +59,24 @@ public final class PreviewSimulation {
      * step already elapsed), a little behind the body but without 20 Hz jumps.
      */
     public float height(float alpha) {
-        float phase = (stepsIntoTick - 1 + alpha) / RigSimulator.STEPS_PER_TICK;
-        return previousHeight + (currentHeight - previousHeight) * phase;
+        return previousHeight + (currentHeight - previousHeight) * phase(alpha);
+    }
+
+    /**
+     * Where the camera is above the player's feet: 1.62 standing, 1.27 crouching, following a change the way the
+     * game's camera does, smoothed between ticks like {@link #height}.
+     */
+    public float eyeHeight(float alpha) {
+        return previousEye + (currentEye - previousEye) * phase(alpha);
+    }
+
+    /** Whether the player is crouching, as of the last tick. */
+    public boolean crouching() {
+        return body.crouching();
+    }
+
+    private float phase(float alpha) {
+        return (stepsIntoTick - 1 + alpha) / RigSimulator.STEPS_PER_TICK;
     }
 
     /** The camera's current tilt, interpolated by the fraction of the next step already elapsed. */

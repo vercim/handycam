@@ -12,10 +12,7 @@
   "handycam.config.unsaved": "Не сохранено",
   "handycam.config.panel.default": "По умолчанию: %s",
   "handycam.config.panel.requires": "Нужно включить: %s",
-  "handycam.config.preview.damage": "Урон",
-  "handycam.config.preview.explosion": "Взрыв",
   "handycam.config.preview.unavailable": "3D-превью недоступно",
-  "handycam.config.preview.hint": "%s %s %s %s — ходьба, %s — прыжок, %s — бег. Клик — удар.",
 
   "handycam.config.category.general": "Основные",
   "handycam.config.category.directional_tilt": "Наклон",

@@ -12,10 +12,7 @@
   "handycam.config.unsaved": "Unsaved",
   "handycam.config.panel.default": "Default: %s",
   "handycam.config.panel.requires": "Requires: %s",
-  "handycam.config.preview.damage": "Damage",
-  "handycam.config.preview.explosion": "Explosion",
   "handycam.config.preview.unavailable": "3D preview unavailable",
-  "handycam.config.preview.hint": "%s %s %s %s walk, %s jumps, %s sprints. Click to hit.",
 
   "handycam.config.category.general": "General",
   "handycam.config.category.directional_tilt": "Directional",

@@ -24,6 +24,7 @@ final class MinecraftBindings implements InputCapture.Bindings {
             case RIGHT -> o.keyRight;
             case JUMP -> o.keyJump;
             case SPRINT -> o.keySprint;
+            case CROUCH -> o.keyShift;
         };
     }
 

@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class InputCaptureTest {
 
-    private static final int W = 87, A = 65, S = 83, D = 68, SPACE = 32, LEFT_CLICK_KEY = 1000;
+    private static final int W = 87, A = 65, S = 83, D = 68, SPACE = 32, LEFT_CLICK_KEY = 1000, SHIFT = 340;
 
     /** Keys the user bound: WASD, Space for jump; sprint on a mouse button. */
     private static final class FakeBindings implements InputCapture.Bindings {
@@ -24,6 +24,7 @@ class InputCaptureTest {
                 case D -> Control.RIGHT;
                 case SPACE -> Control.JUMP;
                 case LEFT_CLICK_KEY -> Control.SPRINT;
+                case SHIFT -> Control.CROUCH;
                 default -> null;
             };
         }
@@ -42,6 +43,7 @@ class InputCaptureTest {
                 case RIGHT -> physicallyDown.contains(D);
                 case JUMP -> physicallyDown.contains(SPACE);
                 case SPRINT -> false;
+                case CROUCH -> physicallyDown.contains(SHIFT);
             };
         }
     }
@@ -155,7 +157,7 @@ class InputCaptureTest {
     @Test
     void allControlsAreReportedInTheState() {
         capture.capture();
-        for (int key : new int[] {W, S, A, D, SPACE, LEFT_CLICK_KEY}) press(key);
+        for (int key : new int[] {W, S, A, D, SPACE, LEFT_CLICK_KEY, SHIFT}) press(key);
 
         InputState state = capture.state();
         Set<Control> held = EnumSet.noneOf(Control.class);
@@ -225,5 +227,30 @@ class InputCaptureTest {
         assertTrue(capture.keyPressed(InputCapture.KEY_ESCAPE, 0));
         assertFalse(capture.isCaptured());
         assertFalse(capture.isAlwaysCaptured());
+    }
+
+    @Test
+    void theCrouchControlIsTrackedLikeAnyOther() {
+        assertFalse(capture.state().crouch());
+
+        capture.capture();
+        press(SHIFT);
+        assertTrue(capture.state().crouch());
+        assertTrue(capture.state().isHeld(Control.CROUCH));
+
+        release(SHIFT);
+        assertFalse(capture.state().crouch());
+        assertFalse(InputState.NONE.crouch());
+    }
+
+    @Test
+    void aLostCrouchReleaseIsFoundByThePoll() {
+        capture.capture();
+        press(SHIFT);
+        bindings.physicallyDown.remove(SHIFT);   // let go over another window
+
+        capture.poll();
+
+        assertFalse(capture.state().crouch());
     }
 }

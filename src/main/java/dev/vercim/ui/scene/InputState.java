@@ -2,9 +2,15 @@
 package dev.vercim.ui.scene;
 
 /** Which controls are held right now. All false while the preview is not capturing the keyboard. */
-public record InputState(boolean forward, boolean back, boolean left, boolean right, boolean jump, boolean sprint) {
+public record InputState(boolean forward, boolean back, boolean left, boolean right, boolean jump, boolean sprint,
+                         boolean crouch) {
 
-    public static final InputState NONE = new InputState(false, false, false, false, false, false);
+    public static final InputState NONE = new InputState(false, false, false, false, false, false, false);
+
+    /** Without the crouch control: for scenes that do not use it. */
+    public InputState(boolean forward, boolean back, boolean left, boolean right, boolean jump, boolean sprint) {
+        this(forward, back, left, right, jump, sprint, false);
+    }
 
     /** -1, 0 or 1: forward minus back. */
     public int moveForward() {
@@ -24,6 +30,7 @@ public record InputState(boolean forward, boolean back, boolean left, boolean ri
             case RIGHT -> right;
             case JUMP -> jump;
             case SPRINT -> sprint;
+            case CROUCH -> crouch;
         };
     }
 }
