@@ -173,4 +173,97 @@ class PreviewSimulationTest {
 
         assertEquals((before.pitch() + after.pitch()) / 2f, middle.pitch(), 1e-5f);
     }
+
+    @Test
+    void standingKeepsTheHeightAtZero() {
+        Settings s = new Settings().quiet();
+        PreviewSimulation sim = new PreviewSimulation(s.params, new Random(1));
+
+        for (int i = 0; i < 240; i++) {
+            sim.step(InputState.NONE);
+            assertEquals(0f, sim.height(0.5f), 1e-6f);
+        }
+    }
+
+    @Test
+    void aJumpRisesAboutOneAndAQuarterBlocksAndComesBackDown() {
+        Settings s = new Settings().quiet();
+        PreviewSimulation sim = new PreviewSimulation(s.params, new Random(1));
+
+        float peak = 0f;
+        sim.step(JUMP);
+        for (int i = 0; i < 200; i++) {
+            sim.step(InputState.NONE);
+            peak = Math.max(peak, sim.height(1f));
+        }
+
+        assertTrue(peak > 1.1f && peak < 1.4f, "peak " + peak);
+        assertEquals(0f, sim.height(1f), 1e-6f, "back on the ground");
+    }
+
+    @Test
+    void theHeightChangesSmoothlyBetweenTicksNotInTwentyHertzJumps() {
+        Settings s = new Settings().quiet();
+        PreviewSimulation sim = new PreviewSimulation(s.params, new Random(1));
+
+        float previous = sim.height(0f);
+        float largestJump = 0f;
+        int movingSteps = 0;
+        sim.step(JUMP);
+        for (int i = 0; i < 120; i++) {
+            for (float alpha : new float[] {0f, 0.5f}) {
+                float h = sim.height(alpha);
+                largestJump = Math.max(largestJump, Math.abs(h - previous));
+                if (Math.abs(h - previous) > 1e-5f) movingSteps++;
+                previous = h;
+            }
+            sim.step(InputState.NONE);
+        }
+
+        // a tick moves at most 0.42 blocks; spread over 6 steps and 2 samples each, a sample moves a fraction of that
+        assertTrue(largestJump < 0.42f / 6f * 1.2f, "largest jump " + largestJump);
+        assertTrue(movingSteps > 60, "moving samples " + movingSteps);
+    }
+
+    @Test
+    void theHeightAtTheEndOfAStepIsContinuousWithTheNextStep() {
+        Settings s = new Settings().quiet();
+        PreviewSimulation sim = new PreviewSimulation(s.params, new Random(1));
+        sim.step(JUMP);
+        for (int i = 0; i < 30; i++) {
+            float endOfStep = sim.height(1f);
+            sim.step(InputState.NONE);
+            float startOfNext = sim.height(0f);
+            assertEquals(endOfStep, startOfNext, 1e-4f, "step " + i);
+        }
+    }
+
+    @Test
+    void breathingMovesTheCameraUpAndDown() {
+        Settings s = new Settings().quiet();
+        s.cfg.breathEnabled = true;
+        PreviewSimulation sim = new PreviewSimulation(s.params, new Random(1));
+
+        float low = Float.MAX_VALUE;
+        float high = -Float.MAX_VALUE;
+        for (int i = 0; i < 120 * 6; i++) {   // more than two breaths at 0.4 Hz
+            sim.step(InputState.NONE);
+            float y = sim.output(1f).y();
+            low = Math.min(low, y);
+            high = Math.max(high, y);
+        }
+
+        assertTrue(high - low > 0.02f, "range " + (high - low));
+        assertTrue(high > 0f && low < 0f, "it goes both ways");
+    }
+
+    @Test
+    void withBreathingOffTheCameraStaysLevelWhileStanding() {
+        Settings s = new Settings().quiet();
+        PreviewSimulation sim = new PreviewSimulation(s.params, new Random(1));
+
+        for (int i = 0; i < 240; i++) sim.step(InputState.NONE);
+
+        assertEquals(0f, sim.output(1f).y(), 1e-6f);
+    }
 }

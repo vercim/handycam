@@ -1,6 +1,7 @@
 package dev.vercim.handycam.preview;
 
 import dev.vercim.handycam.rig.CameraRig;
+import dev.vercim.handycam.rig.RigInput;
 import dev.vercim.handycam.rig.RigOutput;
 import dev.vercim.handycam.rig.RigParams;
 import dev.vercim.handycam.rig.RigSimulator;
@@ -23,6 +24,11 @@ public final class PreviewSimulation {
     private final RigSimulator simulator;
     private final RigParams params;
 
+    // The body moves once per 20 Hz tick; its height is interpolated between the last two ticks so a jump is smooth.
+    private float previousHeight;
+    private float currentHeight;
+    private int stepsIntoTick = RigSimulator.STEPS_PER_TICK;
+
     public PreviewSimulation(RigParams params, Random rng) {
         this.params = params;
         this.simulator = new RigSimulator(new CameraRig(rng));
@@ -31,7 +37,26 @@ public final class PreviewSimulation {
     /** One fixed step of {@link RigSimulator#STEP_SECONDS} with these keys held. */
     public void step(InputState input) {
         body.setInput(input);
-        simulator.step(body::tick, params, RigView.DEFAULT);
+        stepsIntoTick = stepsIntoTick % RigSimulator.STEPS_PER_TICK + 1;
+        simulator.step(this::tickBody, params, RigView.DEFAULT);
+    }
+
+    private RigInput tickBody() {
+        previousHeight = currentHeight;
+        RigInput input = body.tick();
+        currentHeight = body.y();
+        return input;
+    }
+
+    /**
+     * How high the player is above the ground in blocks. It follows the real jump, about 1.25 blocks at the top, and
+     * is what lifts the camera in the scene. The body moves once per tick, so the height glides from the previous
+     * tick's value to the current one over the steps of the current tick (and {@code alpha}, the fraction of the next
+     * step already elapsed), a little behind the body but without 20 Hz jumps.
+     */
+    public float height(float alpha) {
+        float phase = (stepsIntoTick - 1 + alpha) / RigSimulator.STEPS_PER_TICK;
+        return previousHeight + (currentHeight - previousHeight) * phase;
     }
 
     /** The camera's current tilt, interpolated by the fraction of the next step already elapsed. */

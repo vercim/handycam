@@ -50,8 +50,8 @@ public record SettingsLayout(boolean narrow, Rect title, Rect list, Rect preview
         Rect footer = new Rect(MARGIN, footerY, inner, BUTTON_HEIGHT);
 
         if (width >= NARROW_BELOW) {
-            int listWidth = clamp(inner * 30 / 100, LIST_MIN, LIST_MAX);
-            int panelWidth = clamp(inner * 28 / 100, PANEL_MIN, PANEL_MAX);
+            int listWidth = clamp(inner * 34 / 100, LIST_MIN, LIST_MAX);
+            int panelWidth = clamp(inner * 26 / 100, PANEL_MIN, PANEL_MAX);
             int previewWidth = Math.max(0, inner - listWidth - panelWidth - 2 * GAP);
             int previewX = MARGIN + listWidth + GAP;
             int previewHeight = Math.max(0, contentHeight - BUTTON_HEIGHT - GAP);

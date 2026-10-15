@@ -1,9 +1,9 @@
 ## [Unreleased]
 
 ### Config
-- New settings screen. Options are listed by category on the left; the selected option's description and a tall slider (or an On/Off or choice list) are on the right; in the middle a live 3D preview shows a camera tilting as the game's camera physics would with the values you are editing, before you save.
-- The preview works from the main menu too. Click it and use the movement keys, jump and sprint to move a simulated player, drag to turn the view, scroll to zoom; Damage, Hit and Explosion buttons trigger the reactions you cannot get by walking.
-- Sliders show a percentage of the default value, with the default marked on the slider; a value you have changed and not saved is highlighted. Save applies the changes, Cancel and Esc drop them, Reset All sets everything to the defaults (applied on Save). Narrow windows put the preview on top.
+- New settings screen on a dark blue background. Options are listed by category on the left; the selected option's description and a tall slider (or an On/Off or choice list) are on the right; in the middle a live 3D preview shows the camera, a block of Steve's head, moving as the game's camera physics would with the values you are editing, before you save: it tilts, rises and falls with a jump, and moves up and down with breathing.
+- The preview works from the main menu too and has no frame to select: while the screen is open the movement, jump and sprint keys always drive a simulated player. Drag over the preview to turn the view, scroll to zoom; Damage, Hit and Explosion buttons trigger the reactions you cannot get by walking.
+- Sliders show a percentage of the default value, with the default marked on the slider; a value you have changed and not saved is highlighted. Save applies the changes, Cancel and Esc drop them, Reset All sets everything to the defaults (applied on Save). Buttons match the rest of the screen. Narrow windows put the preview on top.
 
 ### Fixes
 - A damaged or unreadable `handycam.json` no longer stops the game from starting: it is kept as `handycam.json.bak` and the defaults are used. A setting with an unusable value falls back to its default, and keys this version does not know are kept.

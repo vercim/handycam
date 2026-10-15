@@ -6,16 +6,17 @@ public final class Theme {
 
     private Theme() {}
 
-    // surfaces
-    public static final int PANEL = 0xFF14181F;
-    public static final int PANEL_BORDER = 0xFF3A404C;
-    public static final int TRACK = 0xFF0B0E13;
+    // surfaces: a dark blue screen, panels a shade lighter, the 3D view drawn straight onto the screen color
+    public static final int BACKGROUND = 0xFF0A1428;
+    public static final int PANEL = 0xFF101C36;
+    public static final int PANEL_BORDER = 0xFF2B4170;
+    public static final int TRACK = 0xFF070E1E;
 
     // text
-    public static final int TEXT = 0xFFE0E0E0;
-    public static final int TEXT_DIM = 0xFF9A9FA8;
-    public static final int TEXT_DISABLED = 0xFF5C616B;
-    public static final int CATEGORY = 0xFF8FB4FF;
+    public static final int TEXT = 0xFFE6ECFA;
+    public static final int TEXT_DIM = 0xFF9DAACB;
+    public static final int TEXT_DISABLED = 0xFF55627F;
+    public static final int CATEGORY = 0xFF7FB0FF;
     public static final int WARNING = 0xFFFF9A6A;
 
     // accents and states
@@ -24,9 +25,18 @@ public final class Theme {
     public static final int EDITED = 0xFFFFD35A;
     public static final int ROW_HOVER = 0x30FFFFFF;
     public static final int ROW_SELECTED = 0x40E8B040;
-    public static final int TICK = 0xFF6B7280;
-    public static final int SCROLLBAR = 0xFF4A5160;
-    public static final int SCROLLBAR_HOVER = 0xFF7A8396;
+    public static final int TICK = 0xFF5F72A0;
+    public static final int SCROLLBAR = 0xFF3A4C78;
+    public static final int SCROLLBAR_HOVER = 0xFF6A80B8;
+
+    // buttons
+    public static final int BUTTON = 0xFF16264A;
+    public static final int BUTTON_HOVER = 0xFF213A6E;
+    public static final int BUTTON_PRESSED = 0xFF0E1A36;
+    public static final int BUTTON_DISABLED = 0xFF0F1A32;
+    public static final int BUTTON_PRIMARY = 0xFF4A3A12;
+    public static final int BUTTON_PRIMARY_HOVER = 0xFF675018;
+    public static final int BUTTON_PRIMARY_PRESSED = 0xFF352A0D;
 
     // spacing
     public static final int PADDING = 4;

@@ -8,7 +8,7 @@
   "handycam.config.save": "Сохранить",
   "handycam.config.cancel": "Отмена",
   "handycam.config.reset_all": "Сбросить всё",
-  "handycam.config.reset": "По умолчанию",
+  "handycam.config.reset": "Сбросить",
   "handycam.config.unsaved": "Не сохранено",
   "handycam.config.panel.default": "По умолчанию: %s",
   "handycam.config.panel.requires": "Нужно включить: %s",
@@ -16,8 +16,7 @@
   "handycam.config.preview.hit": "Удар",
   "handycam.config.preview.explosion": "Взрыв",
   "handycam.config.preview.unavailable": "3D-превью недоступно",
-  "handycam.config.preview.hint_idle": "Кликните, затем %s %s %s %s — ходьба, %s — прыжок. Тяните мышью, чтобы повернуть вид.",
-  "handycam.config.preview.hint_captured": "Esc или клик вне окна — выйти. %s — бег.",
+  "handycam.config.preview.hint": "%s %s %s %s — ходьба, %s — прыжок, %s — бег. Тяните мышью, чтобы повернуть вид.",
 
   "handycam.config.category.general": "Основные",
   "handycam.config.category.directional_tilt": "Наклон",

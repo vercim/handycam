@@ -13,7 +13,8 @@ interface PreviewBackend extends AutoCloseable {
      * Renders the scene seen through the camera into the rectangle x, y, width, height (GUI coordinates) of the
      * current screen. Leaves the GL state as it found it.
      */
-    void render(Scene scene, OrbitCamera camera, float alpha, GuiGraphics graphics, int x, int y, int width, int height);
+    void render(Scene scene, OrbitCamera camera, float alpha, GuiGraphics graphics, int x, int y, int width, int height,
+                int backgroundArgb);
 
     /** Frees GPU resources. Must be called on the render thread. */
     @Override

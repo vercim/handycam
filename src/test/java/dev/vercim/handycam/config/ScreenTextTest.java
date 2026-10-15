@@ -96,10 +96,9 @@ class ScreenTextTest {
 
     @Test
     void theFormattedTextsHaveTheArgumentsTheScreenPasses() throws IOException {
-        // idle hint: up, left, down, right, jump; captured hint: sprint; the panel lines: one value each
+        // hint: up, left, down, right, jump, sprint; the panel lines: one value each
         JsonObject english = lang("en_us");
-        assertEquals(5, placeholders(english.get("handycam.config.preview.hint_idle").getAsString()));
-        assertEquals(1, placeholders(english.get("handycam.config.preview.hint_captured").getAsString()));
+        assertEquals(6, placeholders(english.get("handycam.config.preview.hint").getAsString()));
         assertEquals(1, placeholders(english.get("handycam.config.panel.default").getAsString()));
         assertEquals(1, placeholders(english.get("handycam.config.panel.requires").getAsString()));
     }

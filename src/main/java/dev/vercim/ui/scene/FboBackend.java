@@ -20,7 +20,8 @@ import org.lwjgl.opengl.GL14;
 
 /**
  * Draws the scene into an offscreen framebuffer with its own depth buffer, using the scene camera's projection and
- * view, then draws that texture into the GUI rectangle. The framebuffer is twice the size of the rectangle and
+ * view, then draws that texture into the GUI rectangle. The framebuffer is cleared to the widget's background color
+ * and is twice the size of the rectangle and
  * filtered down, which smooths the edges. Everything the scene pass changes (target, projection, model-view, depth,
  * blend, cull, scissor, shader color) is put back before the texture is drawn.
  */
@@ -28,7 +29,6 @@ final class FboBackend implements PreviewBackend {
 
     private static final int SUPERSAMPLE = 2;
     private static final int MAX_TEXTURE_SIDE = 8192;
-    private static final float[] BACKGROUND = {0.10f, 0.12f, 0.16f, 1f};
 
     private final Minecraft minecraft = Minecraft.getInstance();
     private final GlSceneRenderer renderer = new GlSceneRenderer(minecraft);
@@ -40,7 +40,7 @@ final class FboBackend implements PreviewBackend {
 
     @Override
     public void render(Scene scene, OrbitCamera camera, float alpha, GuiGraphics graphics,
-                       int x, int y, int width, int height) {
+                       int x, int y, int width, int height, int backgroundArgb) {
         double guiScale = minecraft.getWindow().getGuiScale();
         int pixelsWide = Math.max(1, (int) Math.round(width * guiScale));
         int pixelsHigh = Math.max(1, (int) Math.round(height * guiScale));
@@ -53,7 +53,7 @@ final class FboBackend implements PreviewBackend {
 
         GlState saved = GlState.capture();
         try {
-            drawScene(scene, camera, alpha, pixelsWide * factor, pixelsHigh * factor);
+            drawScene(scene, camera, alpha, pixelsWide * factor, pixelsHigh * factor, backgroundArgb);
         } finally {
             minecraft.getMainRenderTarget().bindWrite(true);
             saved.restore();
@@ -73,8 +73,10 @@ final class FboBackend implements PreviewBackend {
         target.setFilterMode(GL11.GL_LINEAR);
     }
 
-    private void drawScene(Scene scene, OrbitCamera camera, float alpha, int width, int height) {
-        target.setClearColor(BACKGROUND[0], BACKGROUND[1], BACKGROUND[2], BACKGROUND[3]);
+    private void drawScene(Scene scene, OrbitCamera camera, float alpha, int width, int height, int backgroundArgb) {
+        // Cleared to the color of whatever is behind the view, so an unframed view melts into the screen.
+        target.setClearColor((backgroundArgb >> 16 & 0xFF) / 255f, (backgroundArgb >> 8 & 0xFF) / 255f,
+                (backgroundArgb & 0xFF) / 255f, 1f);
         target.clear(Minecraft.ON_OSX);
         target.bindWrite(true);
 

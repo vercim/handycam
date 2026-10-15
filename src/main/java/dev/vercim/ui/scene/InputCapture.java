@@ -9,6 +9,10 @@ import java.util.Set;
  * on, the keys the user bound for movement are tracked from press and release events; the real key state is polled
  * when the window regains focus, so a release that never arrived (key let go over another window) cannot leave a
  * control stuck.
+ *
+ * <p>A preview that owns the whole screen can instead be {@linkplain #alwaysCaptured() always captured}: the keys
+ * count from the moment the screen opens, there is nothing to click or to leave, and Escape is not taken, so it
+ * still closes the screen.
  */
 public final class InputCapture {
 
@@ -29,9 +33,21 @@ public final class InputCapture {
     private final Bindings bindings;
     private final Set<Control> held = EnumSet.noneOf(Control.class);
     private boolean captured;
+    private boolean always;
 
     public InputCapture(Bindings bindings) {
         this.bindings = bindings;
+    }
+
+    /** Captures for good: {@link #release} only lets go of the held controls, and Escape is left to the screen. */
+    public InputCapture alwaysCaptured() {
+        this.always = true;
+        this.captured = true;
+        return this;
+    }
+
+    public boolean isAlwaysCaptured() {
+        return always;
     }
 
     public boolean isCaptured() {
@@ -42,9 +58,9 @@ public final class InputCapture {
         captured = true;
     }
 
-    /** Stops capturing and lets go of every control. */
+    /** Stops capturing (unless always captured) and lets go of every control. */
     public void release() {
-        captured = false;
+        captured = always;
         held.clear();
     }
 
@@ -54,6 +70,7 @@ public final class InputCapture {
     public boolean keyPressed(int keyCode, int scanCode) {
         if (!captured) return false;
         if (keyCode == KEY_ESCAPE) {
+            if (always) return false;
             release();
             return true;
         }

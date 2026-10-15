@@ -38,11 +38,12 @@ src/main/java/dev/vercim/
                                      as list rows); JDK + Gson only
   ui/scene/                        — 3D preview widget: Scene (what a mod implements), SceneRenderContext (the
                                      only drawing primitives a scene sees), PreviewWidget (fixed 1/120 s steps,
-                                     orbit camera, keyboard capture), OrbitCamera, InputCapture; FboBackend +
-                                     GlSceneRenderer are the only GL code (1.21.1: offscreen framebuffer)
+                                     orbit camera, keyboard capture; embedded() = no frame, keys always on, Esc left to
+                                     the screen), OrbitCamera, InputCapture; FboBackend + GlSceneRenderer are the only
+                                     GL code (1.21.1: offscreen framebuffer, cleared to the widget's background color)
   ui/widget/                       — the settings screen's widgets on vanilla AbstractWidget: OptionListWidget
                                      (categories + options), DescriptionPanel (selected option's text), VerticalSliderWidget
-                                     (numbers), ChoiceListWidget (toggles and enums); Theme (all colors and spacing),
+                                     (numbers), ChoiceListWidget (toggles and enums), ThemedButton; Theme (all colors and spacing, dark blue),
                                      SettingsLayout (wide: list | preview | panel; narrow: preview on top) and TextWrap
                                      are Minecraft-free and unit-tested; OptionText is the only place option texts are built
   handycam/
@@ -101,8 +102,10 @@ src/main/java/dev/vercim/
                                      HandycamConfigScreenNeoForge (wrapper)
   handycam/preview/                — what the config screen's preview shows: PreviewBody (a player walking and
                                      jumping in place with vanilla's arithmetic) + PreviewSimulation (body feeding
-                                     CameraRig) are Minecraft-free; HandycamPreviewScene draws the 3x3 platform and
-                                     the tilting camera; TiltDisplay amplifies angles for drawing only
+                                     CameraRig) are Minecraft-free; HandycamPreviewScene draws the 3x3 platform and the
+                                     camera as a block of Steve's head (SteveHead: colored boxes) that tilts, rises and
+                                     falls with the jump (real height, PreviewSimulation.height) and moves with the rig's
+                                     vertical offset; TiltDisplay amplifies angles and that offset for drawing only
   handycam/dev/                    — PreviewDebugScreen, PreviewSmokeTest: development aid for the preview
                                      (see docs/WORKFLOW.md), never shown to players
 src/test/java/                     — JUnit 5: ui.sim, ui.config, ui.widget (layout, text wrap) and rig unit tests,

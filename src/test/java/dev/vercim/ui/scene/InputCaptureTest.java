@@ -165,4 +165,65 @@ class InputCaptureTest {
         assertEquals(0, state.moveForward());
         assertEquals(0, state.moveRight());
     }
+
+    @Test
+    void anAlwaysCapturedPreviewTracksKeysWithoutAClick() {
+        InputCapture always = new InputCapture(bindings).alwaysCaptured();
+
+        assertTrue(always.isCaptured());
+        assertTrue(always.isAlwaysCaptured());
+        assertTrue(always.keyPressed(W, 0));
+        assertTrue(always.keyPressed(SPACE, 0));
+        assertTrue(always.state().forward());
+        assertTrue(always.state().jump());
+        assertTrue(always.keyReleased(W, 0));
+        assertFalse(always.state().forward());
+    }
+
+    @Test
+    void anAlwaysCapturedPreviewLeavesEscapeToTheScreen() {
+        InputCapture always = new InputCapture(bindings).alwaysCaptured();
+        always.keyPressed(W, 0);
+
+        assertFalse(always.keyPressed(InputCapture.KEY_ESCAPE, 0), "Escape must reach the screen and close it");
+        assertTrue(always.isCaptured());
+        assertTrue(always.state().forward(), "and it does not let go of the controls");
+    }
+
+    @Test
+    void releasingAnAlwaysCapturedPreviewOnlyLetsGoOfTheControls() {
+        InputCapture always = new InputCapture(bindings).alwaysCaptured();
+        always.keyPressed(W, 0);
+        always.keyPressed(D, 0);
+
+        always.release();
+
+        assertTrue(always.isCaptured());
+        assertFalse(always.state().forward());
+        assertFalse(always.state().right());
+        assertTrue(always.keyPressed(A, 0), "and it keeps working");
+        assertTrue(always.state().left());
+    }
+
+    @Test
+    void anAlwaysCapturedPreviewStillDropsControlsWhoseReleaseWasLost() {
+        InputCapture always = new InputCapture(bindings).alwaysCaptured();
+        press(W);
+        always.keyPressed(W, 0);
+        bindings.physicallyDown.remove(W);
+
+        always.poll();
+
+        assertFalse(always.state().forward());
+    }
+
+    @Test
+    void anOrdinaryPreviewStillEndsOnEscape() {
+        capture.capture();
+        press(W);
+
+        assertTrue(capture.keyPressed(InputCapture.KEY_ESCAPE, 0));
+        assertFalse(capture.isCaptured());
+        assertFalse(capture.isAlwaysCaptured());
+    }
 }

@@ -11,20 +11,22 @@ import dev.vercim.ui.widget.OptionListWidget;
 import dev.vercim.ui.widget.SettingsLayout;
 import dev.vercim.ui.widget.SettingsLayout.Rect;
 import dev.vercim.ui.widget.Theme;
+import dev.vercim.ui.widget.ThemedButton;
 import dev.vercim.ui.widget.VerticalSliderWidget;
 import net.minecraft.client.Options;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
 import java.util.List;
 
 /**
- * The settings screen. On the left every option under its category, in the middle a live 3D preview of the camera
- * driven by the values being edited, on the right the selected option: its description and an editor (a tall slider
- * for numbers, a list of values for toggles and choices). Narrow windows put the preview on top.
+ * The settings screen, on a dark blue background. On the left every option under its category, in the middle a live
+ * 3D preview of the camera driven by the values being edited, on the right the selected option: its description and
+ * an editor (a tall slider for numbers, a list of values for toggles and choices). Narrow windows put the preview on
+ * top. The preview has no frame and no "selected" state: while the screen is open the movement keys always move the
+ * simulated player, and dragging over the preview turns the view.
  *
  * <p>Edits live only in the {@link ConfigModel} until Save: the preview reads them, the game does not. Cancel, and
  * Escape, drop them. Both loaders open this screen through {@link #create}.
@@ -51,7 +53,7 @@ public final class HandycamConfigScreen extends Screen {
     private DescriptionPanel panel;
     private VerticalSliderWidget slider;
     private ChoiceListWidget choices;
-    private Button resetOption;
+    private ThemedButton resetOption;
 
     private HandycamConfigScreen(Screen parent, Runnable saveCallback) {
         super(Component.translatable("handycam.config.title"));
@@ -76,7 +78,8 @@ public final class HandycamConfigScreen extends Screen {
         layout = SettingsLayout.compute(width, height);
         if (preview == null) createWidgets();
 
-        preview.hints(idleHint(), capturedHint());
+        Component hint = hint();
+        preview.hints(hint, hint);
         place(list, layout.list());
         place(preview, layout.preview());
         place(panel, layout.panel());
@@ -95,6 +98,8 @@ public final class HandycamConfigScreen extends Screen {
 
     private void createWidgets() {
         preview = new PreviewWidget(0, 0, 0, 0, scene)
+                .embedded()
+                .background(Theme.BACKGROUND)
                 .unavailableMessage(Component.translatable("handycam.config.preview.unavailable"));
         list = new OptionListWidget(rows, this::select);
         panel = new DescriptionPanel();
@@ -113,17 +118,13 @@ public final class HandycamConfigScreen extends Screen {
         widget.setSize(rect.width(), rect.height());
     }
 
-    private Component idleHint() {
+    /** Which keys move the player, as the player has bound them. */
+    private Component hint() {
         Options o = minecraft.options;
-        return Component.translatable("handycam.config.preview.hint_idle",
+        return Component.translatable("handycam.config.preview.hint",
                 o.keyUp.getTranslatedKeyMessage(), o.keyLeft.getTranslatedKeyMessage(),
                 o.keyDown.getTranslatedKeyMessage(), o.keyRight.getTranslatedKeyMessage(),
-                o.keyJump.getTranslatedKeyMessage());
-    }
-
-    private Component capturedHint() {
-        return Component.translatable("handycam.config.preview.hint_captured",
-                minecraft.options.keySprint.getTranslatedKeyMessage());
+                o.keyJump.getTranslatedKeyMessage(), o.keySprint.getTranslatedKeyMessage());
     }
 
     /** Damage, hit and explosion: events the player cannot trigger by walking. */
@@ -133,18 +134,18 @@ public final class HandycamConfigScreen extends Screen {
         int x2 = r.x() + width + BUTTON_GAP;
         int x3 = r.x() + 2 * (width + BUTTON_GAP);
 
-        addRenderableWidget(Button.builder(Component.translatable("handycam.config.preview.damage"),
-                b -> scene.simulation().damage()).bounds(r.x(), r.y(), width, r.height()).build());
-        addRenderableWidget(Button.builder(Component.translatable("handycam.config.preview.hit"),
-                b -> scene.simulation().hit()).bounds(x2, r.y(), width, r.height()).build());
-        addRenderableWidget(Button.builder(Component.translatable("handycam.config.preview.explosion"),
-                b -> scene.simulation().explosion(1f)).bounds(x3, r.y(), Math.max(0, r.right() - x3), r.height()).build());
+        addRenderableWidget(new ThemedButton(Component.translatable("handycam.config.preview.damage"),
+                () -> scene.simulation().damage()).bounds(r.x(), r.y(), width, r.height()));
+        addRenderableWidget(new ThemedButton(Component.translatable("handycam.config.preview.hit"),
+                () -> scene.simulation().hit()).bounds(x2, r.y(), width, r.height()));
+        addRenderableWidget(new ThemedButton(Component.translatable("handycam.config.preview.explosion"),
+                () -> scene.simulation().explosion(1f)).bounds(x3, r.y(), Math.max(0, r.right() - x3), r.height()));
     }
 
     private void addResetButton() {
-        resetOption = addRenderableWidget(Button.builder(Component.translatable("handycam.config.reset"), b -> {
+        resetOption = addRenderableWidget(new ThemedButton(Component.translatable("handycam.config.reset"), () -> {
             if (selected != null) selected.resetToDefault();
-        }).bounds(0, 0, 10, DescriptionPanel.RESET_HEIGHT).build());
+        }).bounds(0, 0, 10, DescriptionPanel.RESET_HEIGHT));
     }
 
     private void addFooterButtons() {
@@ -152,12 +153,12 @@ public final class HandycamConfigScreen extends Screen {
         int width = Math.max(0, Math.min(FOOTER_BUTTON_MAX_WIDTH, (f.width() - 2 * BUTTON_GAP) / 3));
         int x = f.x() + (f.width() - (3 * width + 2 * BUTTON_GAP)) / 2;
 
-        addRenderableWidget(Button.builder(Component.translatable("handycam.config.save"), b -> save())
-                .bounds(x, f.y(), width, f.height()).build());
-        addRenderableWidget(Button.builder(Component.translatable("handycam.config.cancel"), b -> onClose())
-                .bounds(x + width + BUTTON_GAP, f.y(), width, f.height()).build());
-        addRenderableWidget(Button.builder(Component.translatable("handycam.config.reset_all"), b -> model.resetVisibleToDefault())
-                .bounds(x + 2 * (width + BUTTON_GAP), f.y(), width, f.height()).build());
+        addRenderableWidget(new ThemedButton(Component.translatable("handycam.config.save"), this::save)
+                .primary().bounds(x, f.y(), width, f.height()));
+        addRenderableWidget(new ThemedButton(Component.translatable("handycam.config.cancel"), this::onClose)
+                .bounds(x + width + BUTTON_GAP, f.y(), width, f.height()));
+        addRenderableWidget(new ThemedButton(Component.translatable("handycam.config.reset_all"), model::resetVisibleToDefault)
+                .bounds(x + 2 * (width + BUTTON_GAP), f.y(), width, f.height()));
     }
 
     // ---- the selected option
@@ -221,6 +222,12 @@ public final class HandycamConfigScreen extends Screen {
 
     // ---- drawing and input
 
+    /** A plain dark blue instead of the panorama, the dirt or the blurred world behind the screen. */
+    @Override
+    public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+        graphics.fill(0, 0, width, height, Theme.BACKGROUND);
+    }
+
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         super.render(graphics, mouseX, mouseY, partialTick);
@@ -235,7 +242,8 @@ public final class HandycamConfigScreen extends Screen {
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        // The preview gets the first chance, so Escape ends its keyboard capture instead of closing the screen.
+        // The preview gets the first chance, so a movement key never reaches a focused button (Space is the jump).
+        // Escape is not one of its keys and still closes the screen.
         if (preview != null && preview.keyPressed(keyCode, scanCode, modifiers)) return true;
         return super.keyPressed(keyCode, scanCode, modifiers);
     }
@@ -244,11 +252,5 @@ public final class HandycamConfigScreen extends Screen {
     public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
         if (preview != null && preview.keyReleased(keyCode, scanCode, modifiers)) return true;
         return super.keyReleased(keyCode, scanCode, modifiers);
-    }
-
-    @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (preview != null) preview.releaseCaptureIfOutside(mouseX, mouseY);
-        return super.mouseClicked(mouseX, mouseY, button);
     }
 }

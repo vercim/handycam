@@ -34,7 +34,7 @@ public final class PreviewWidget extends AbstractWidget implements AutoCloseable
 
     private static final int HINT_MAX_LINES = 4;
 
-    private static final int BACKGROUND = 0xFF14181F;
+    private static final int DEFAULT_BACKGROUND = 0xFF14181F;
     private static final int BORDER = 0xFF3A404C;
     private static final int BORDER_CAPTURED = 0xFFE8B040;
     private static final int TEXT = 0xFFE0E0E0;
@@ -49,6 +49,8 @@ public final class PreviewWidget extends AbstractWidget implements AutoCloseable
     private boolean failed;
     private boolean dragging;
     private boolean pauseWhenUnfocused = true;
+    private boolean embedded;
+    private int background = DEFAULT_BACKGROUND;
     private boolean wasFocused = true;
     private long lastFrameNanos;
 
@@ -66,6 +68,24 @@ public final class PreviewWidget extends AbstractWidget implements AutoCloseable
     public PreviewWidget hints(Component whenIdle, Component whenCaptured) {
         this.idleHint = whenIdle;
         this.capturedHint = whenCaptured;
+        return this;
+    }
+
+    /** The color behind the scene (ARGB, opaque): what the view is cleared to. */
+    public PreviewWidget background(int argb) {
+        this.background = argb;
+        return this;
+    }
+
+    /**
+     * For a view that is part of the screen rather than a box on it: no frame, and the movement keys control the
+     * scene from the moment the screen opens, with nothing to click and nothing to leave. Escape is left to the
+     * screen. Dragging still turns the view. Pair it with {@link #background} set to the screen's own color so the
+     * view has no visible edge.
+     */
+    public PreviewWidget embedded() {
+        this.embedded = true;
+        input.alwaysCaptured();
         return this;
     }
 
@@ -102,7 +122,7 @@ public final class PreviewWidget extends AbstractWidget implements AutoCloseable
         dragging = false;
     }
 
-    /** For the screen's own click handler: a click anywhere outside the preview ends the capture. */
+    /** For the screen's own click handler: a click anywhere outside the preview ends the capture (not when embedded). */
     public void releaseCaptureIfOutside(double mouseX, double mouseY) {
         if (!isMouseOver(mouseX, mouseY)) releaseCapture();
     }
@@ -116,7 +136,7 @@ public final class PreviewWidget extends AbstractWidget implements AutoCloseable
         double frameSeconds = lastFrameNanos == 0L ? 0.0 : (now - lastFrameNanos) / 1.0e9;
         lastFrameNanos = now;
 
-        graphics.fill(getX(), getY(), getX() + getWidth(), getY() + getHeight(), BACKGROUND);
+        graphics.fill(getX(), getY(), getX() + getWidth(), getY() + getHeight(), background);
 
         if (!failed) {
             boolean focused = minecraft.isWindowActive() || !pauseWhenUnfocused;
@@ -137,13 +157,15 @@ public final class PreviewWidget extends AbstractWidget implements AutoCloseable
             drawHint(graphics, minecraft.font);
         }
 
-        graphics.renderOutline(getX(), getY(), getWidth(), getHeight(), input.isCaptured() ? BORDER_CAPTURED : BORDER);
+        if (!embedded) {
+            graphics.renderOutline(getX(), getY(), getWidth(), getHeight(), input.isCaptured() ? BORDER_CAPTURED : BORDER);
+        }
     }
 
     private void drawScene(GuiGraphics graphics) {
         try {
             if (backend == null) backend = PreviewBackends.create();
-            backend.render(scene, camera, runner.alpha(), graphics, getX(), getY(), getWidth(), getHeight());
+            backend.render(scene, camera, runner.alpha(), graphics, getX(), getY(), getWidth(), getHeight(), background);
         } catch (RuntimeException | LinkageError e) {
             LOGGER.error("The 3D preview could not be drawn and is switched off", e);
             failed = true;
@@ -157,13 +179,16 @@ public final class PreviewWidget extends AbstractWidget implements AutoCloseable
                 getY() + (getHeight() - font.lineHeight) / 2, TEXT_DIM);
     }
 
-    /** The hint wraps to the width of the view, from the bottom edge up, so it never spills into the screen around it. */
+    /**
+     * The hint wraps to the width of the view and sits at the top, where the view is empty (that is where a jump
+     * goes), so it never spills into the screen around it or covers the scene.
+     */
     private void drawHint(GuiGraphics graphics, Font font) {
-        Component hint = input.isCaptured() ? capturedHint : idleHint;
+        Component hint = input.isCaptured() && !embedded ? capturedHint : idleHint;
         List<String> lines = TextWrap.wrap(hint.getString(), getWidth() - 8, font::width, HINT_MAX_LINES);
-        int y = getY() + getHeight() - 3 - lines.size() * font.lineHeight;
+        int y = getY() + 4;
         for (String line : lines) {
-            graphics.drawString(font, line, getX() + 4, y, input.isCaptured() ? TEXT : TEXT_DIM, true);
+            graphics.drawString(font, line, getX() + 4, y, input.isCaptured() && !embedded ? TEXT : TEXT_DIM, true);
             y += font.lineHeight;
         }
     }
@@ -212,7 +237,8 @@ public final class PreviewWidget extends AbstractWidget implements AutoCloseable
     @Override
     public void setFocused(boolean focused) {
         super.setFocused(focused);
-        if (!focused) releaseCapture();
+        // An embedded view keeps its keys whatever has focus: clicking the list must not drop a held W.
+        if (!focused && !embedded) releaseCapture();
     }
 
     @Override

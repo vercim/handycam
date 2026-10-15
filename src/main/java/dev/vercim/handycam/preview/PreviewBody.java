@@ -5,9 +5,10 @@ import dev.vercim.ui.scene.InputState;
 
 /**
  * A player that walks and jumps in place: it runs vanilla's movement arithmetic (acceleration, friction, gravity,
- * sprint) on its own state and reports, every 20 Hz tick, what the game would have fed the camera rig. Nothing here
- * ever moves in the scene; only the {@link RigInput} it produces matters. It faces one fixed direction, so
- * "forward" is always the same way and there is no mouse look.
+ * sprint) on its own state and reports, every 20 Hz tick, what the game would have fed the camera rig. It never moves
+ * sideways in the scene; the {@link RigInput} it produces matters, and its height ({@link #y()}) is the one thing the
+ * scene draws, so a jump lifts the camera. It faces one fixed direction, so "forward" is always the same way and
+ * there is no mouse look.
  *
  * <p>Speeds follow what the game's player reader sees: the horizontal velocity <em>after</em> friction has been
  * applied at the end of the tick, which is why a walking player reports about 0.39 of the 0.3-blocks-per-tick scale.
@@ -40,6 +41,11 @@ public final class PreviewBody {
     private InputState input = InputState.NONE;
     private float pendingDamage;
     private boolean pendingHit;
+
+    /** Height above the ground at the last tick, in blocks: 0 while standing, about 1.25 at the top of a jump. */
+    public float y() {
+        return y;
+    }
 
     /** The keys held right now; read at the next tick. */
     public void setInput(InputState input) {
