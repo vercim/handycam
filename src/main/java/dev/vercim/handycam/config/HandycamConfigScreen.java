@@ -1,5 +1,6 @@
 package dev.vercim.handycam.config;
 
+import dev.vercim.handycam.preview.HandycamPovScene;
 import dev.vercim.handycam.preview.HandycamPreviewScene;
 import dev.vercim.ui.config.ConfigModel;
 import dev.vercim.ui.config.Option;
@@ -22,11 +23,12 @@ import net.minecraft.network.chat.Component;
 import java.util.List;
 
 /**
- * The settings screen, on a dark blue background. On the left every option under its category, in the middle a live
- * 3D preview of the camera driven by the values being edited, on the right the selected option: its description and
- * an editor (a tall slider for numbers, a list of values for toggles and choices). Narrow windows put the preview on
- * top. The preview has no frame and no "selected" state: while the screen is open the movement keys always move the
- * simulated player, and dragging over the preview turns the view.
+ * The settings screen, on a dark blue background. On the left every option under its category; in the middle two live
+ * views of the camera driven by the values being edited, the player's own view (a crosshair and a hand) above a 3D view
+ * of the platform and the head; on the right the selected option: its description and an editor (a tall slider for
+ * numbers, a list of values for toggles and choices). Narrow windows put the two views on top, side by side. The views
+ * have no frame, no "selected" state and no mouse control of the camera: while the screen is open the movement keys
+ * always move the simulated player, and a left click on an empty spot, a view included, is a hit.
  *
  * <p>Edits live only in the {@link ConfigModel} until Save: the preview reads them, the game does not. Cancel, and
  * Escape, drop them. Both loaders open this screen through {@link #create}.
@@ -36,6 +38,8 @@ public final class HandycamConfigScreen extends Screen {
     private static final int SLIDER_MIN_HEIGHT = 56;
     private static final int BUTTON_GAP = 4;
     private static final int FOOTER_BUTTON_MAX_WIDTH = 120;
+    private static final int CROSSHAIR = 0xFFFFFFFF;
+    private static final int CROSSHAIR_EDGE = 0x80000000;
 
     private final Screen parent;
     private final Runnable saveCallback;
@@ -47,8 +51,9 @@ public final class HandycamConfigScreen extends Screen {
     private Option<?> selected;
 
     // Created once and put back on every init(): a screen throws its widgets away when it is resized, and the
-    // preview in particular must keep its scene and its GPU resources.
-    private PreviewWidget preview;
+    // views in particular must keep their scenes and their GPU resources.
+    private PreviewWidget view3d;
+    private PreviewWidget pov;
     private OptionListWidget list;
     private DescriptionPanel panel;
     private VerticalSliderWidget slider;
@@ -76,16 +81,18 @@ public final class HandycamConfigScreen extends Screen {
     @Override
     protected void init() {
         layout = SettingsLayout.compute(width, height);
-        if (preview == null) createWidgets();
+        if (view3d == null) createWidgets();
 
         Component hint = hint();
-        preview.hints(hint, hint);
+        pov.hints(hint, hint);   // over the sky of the first-person view, which is empty; the 3D view needs its top for a jump
         place(list, layout.list());
-        place(preview, layout.preview());
+        place(view3d, layout.view3d());
+        place(pov, layout.pov());
         place(panel, layout.panel());
 
         addRenderableWidget(list);
-        addRenderableWidget(preview);
+        addRenderableWidget(view3d);   // this one steps the simulation, so it comes before the view that reads it
+        addRenderableWidget(pov);
         addRenderableWidget(panel);
         addRenderableWidget(slider);
         addRenderableWidget(choices);
@@ -97,10 +104,19 @@ public final class HandycamConfigScreen extends Screen {
     }
 
     private void createWidgets() {
-        preview = new PreviewWidget(0, 0, 0, 0, scene)
+        Component unavailable = Component.translatable("handycam.config.preview.unavailable");
+        view3d = new PreviewWidget(0, 0, 0, 0, scene)
                 .embedded()
+                .interactive(false)
                 .background(Theme.BACKGROUND)
-                .unavailableMessage(Component.translatable("handycam.config.preview.unavailable"));
+                .unavailableMessage(unavailable);
+        pov = new PreviewWidget(0, 0, 0, 0,
+                new HandycamPovScene(scene.simulation(), () -> view3d.alpha(), () -> minecraft.options.fov().get()))
+                .embedded()
+                .interactive(false)
+                .background(Theme.POV_BACKGROUND)
+                .overlay(HandycamConfigScreen::drawCrosshair)
+                .unavailableMessage(unavailable);
         list = new OptionListWidget(rows, this::select);
         panel = new DescriptionPanel();
         slider = new VerticalSliderWidget();
@@ -111,6 +127,16 @@ public final class HandycamConfigScreen extends Screen {
             selected = options.get(0);
             list.select(selected);
         }
+    }
+
+    /** The game's crosshair: a plus in the middle of the view, with a dark edge so it shows on any background. */
+    private static void drawCrosshair(GuiGraphics graphics, int x, int y, int width, int height) {
+        int cx = x + width / 2;
+        int cy = y + height / 2;
+        graphics.fill(cx - 5, cy - 1, cx + 6, cy + 2, CROSSHAIR_EDGE);
+        graphics.fill(cx - 1, cy - 5, cx + 2, cy + 6, CROSSHAIR_EDGE);
+        graphics.fill(cx - 4, cy, cx + 5, cy + 1, CROSSHAIR);
+        graphics.fill(cx, cy - 4, cx + 1, cy + 5, CROSSHAIR);
     }
 
     private static void place(AbstractWidget widget, Rect rect) {
@@ -127,19 +153,16 @@ public final class HandycamConfigScreen extends Screen {
                 o.keyJump.getTranslatedKeyMessage(), o.keySprint.getTranslatedKeyMessage());
     }
 
-    /** Damage, hit and explosion: events the player cannot trigger by walking. */
+    /** Damage and explosion: events the player cannot trigger by walking. (A hit is a click on an empty spot.) */
     private void addPreviewButtons() {
         Rect r = layout.previewButtons();
-        int width = Math.max(0, (r.width() - 2 * BUTTON_GAP) / 3);
+        int width = Math.max(0, (r.width() - BUTTON_GAP) / 2);
         int x2 = r.x() + width + BUTTON_GAP;
-        int x3 = r.x() + 2 * (width + BUTTON_GAP);
 
         addRenderableWidget(new ThemedButton(Component.translatable("handycam.config.preview.damage"),
                 () -> scene.simulation().damage()).bounds(r.x(), r.y(), width, r.height()));
-        addRenderableWidget(new ThemedButton(Component.translatable("handycam.config.preview.hit"),
-                () -> scene.simulation().hit()).bounds(x2, r.y(), width, r.height()));
         addRenderableWidget(new ThemedButton(Component.translatable("handycam.config.preview.explosion"),
-                () -> scene.simulation().explosion(1f)).bounds(x3, r.y(), Math.max(0, r.right() - x3), r.height()));
+                () -> scene.simulation().explosion(1f)).bounds(x2, r.y(), Math.max(0, r.right() - x2), r.height()));
     }
 
     private void addResetButton() {
@@ -217,7 +240,8 @@ public final class HandycamConfigScreen extends Screen {
 
     @Override
     public void removed() {
-        if (preview != null) preview.close();
+        if (view3d != null) view3d.close();
+        if (pov != null) pov.close();
     }
 
     // ---- drawing and input
@@ -242,15 +266,29 @@ public final class HandycamConfigScreen extends Screen {
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        // The preview gets the first chance, so a movement key never reaches a focused button (Space is the jump).
+        // The 3D view gets the first chance, so a movement key never reaches a focused button (Space is the jump).
         // Escape is not one of its keys and still closes the screen.
-        if (preview != null && preview.keyPressed(keyCode, scanCode, modifiers)) return true;
+        if (view3d != null && view3d.keyPressed(keyCode, scanCode, modifiers)) return true;
         return super.keyPressed(keyCode, scanCode, modifiers);
     }
 
     @Override
     public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
-        if (preview != null && preview.keyReleased(keyCode, scanCode, modifiers)) return true;
+        if (view3d != null && view3d.keyReleased(keyCode, scanCode, modifiers)) return true;
         return super.keyReleased(keyCode, scanCode, modifiers);
+    }
+
+    /**
+     * A left click on an empty spot is a hit (the swing the game would report). The views take no clicks, so a click on
+     * one reaches here and is a hit too; a click on a control, the list or the panel is not.
+     */
+    @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (super.mouseClicked(mouseX, mouseY, button)) return true;
+        if (button == 0 && panel != null && !panel.isMouseOver(mouseX, mouseY)) {
+            scene.simulation().hit();
+            return true;
+        }
+        return false;
     }
 }

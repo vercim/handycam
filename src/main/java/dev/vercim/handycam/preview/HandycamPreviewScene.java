@@ -6,39 +6,36 @@ import dev.vercim.ui.scene.InputState;
 import dev.vercim.ui.scene.Scene;
 import dev.vercim.ui.scene.SceneContext;
 import dev.vercim.ui.scene.SceneRenderContext;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.state.BlockState;
 import org.joml.Vector3f;
 
 import java.util.Random;
 
 /**
- * Shows what the handheld camera would do: a block of Steve's head, the camera, floating over a 3x3 platform. It
- * tilts as the rig says it would while the player walks, sprints, jumps or is hit, rises and falls with a jump, and
- * moves up and down with the rig's vertical offset (breathing, walk bob). The keys only feed the simulated player;
- * the head never moves sideways. A faint copy of the view cone stays level at the player's real height, so tilt and
- * bob read against it, and a soft shadow on the platform shows where the head is above it. Angles and the vertical
- * offset are amplified for drawing (see {@link TiltDisplay}); a jump is drawn at its real height. None of that
- * changes the simulation.
+ * Shows what the handheld camera would do: the player head item, the camera, floating over a 3x3 platform at the
+ * height of a standing player's eyes. It moves as the rig says it would, at the strength the game would give it and
+ * not amplified: it tilts while the player walks, sprints, jumps or is hit, rises and falls with a jump (the real
+ * height of the jump), and moves up and down with the rig's vertical offset (breathing, walk bob). The keys only feed
+ * the simulated player; the head never moves sideways. A faint copy of the view cone stays level at the player's
+ * real height and without the rig's offset, so small tilts and bobs can be read against it, and a soft shadow on the
+ * platform shows where the head is above it.
  */
 public final class HandycamPreviewScene implements Scene {
 
-    private static final BlockState LIGHT = Blocks.GRASS_BLOCK.defaultBlockState();
-    private static final BlockState DARK = Blocks.MOSS_BLOCK.defaultBlockState();
-
-    /** Height of the head's center above the platform while the player stands. */
-    private static final float CAMERA_HEIGHT = 1.25f;
-    private static final float LINE = 0.035f;
+    private static final float EYE_HEIGHT = PreviewWorld.EYE_HEIGHT;
+    private static final float LINE = 0.02f;
 
     private static final int CONE = 0xFFFFD35A;
     private static final int AXIS = 0xFFFF6A5A;
     private static final int LEVEL = 0x60FFFFFF;
     private static final int SHADOW = 0x55000000;
-    private static final float SHADOW_HALF = 0.55f;
+    private static final float SHADOW_HALF = 0.4f;
 
     /** The view the scene opens with: from the front and a little to the side, so the face shows. */
     private static final float VIEW_YAW = 140f;
     private static final float VIEW_PITCH = 20f;
+    /** A narrow field of view for the camera we look through: little perspective distortion, a long distance. */
+    private static final float VIEW_FOV = 30f;
+    private static final float VIEW_DISTANCE = 8.5f;
 
     private final PreviewSimulation simulation;
 
@@ -46,14 +43,14 @@ public final class HandycamPreviewScene implements Scene {
         this.simulation = new PreviewSimulation(params, new Random());
     }
 
-    /** For the screen's hit, damage and explosion buttons. */
+    /** For the screen's hit, damage and explosion events, and for the first-person view that reads the same simulation. */
     public PreviewSimulation simulation() {
         return simulation;
     }
 
     @Override
     public void init(SceneContext context) {
-        context.camera().target(0f, 1.1f, 0f).distance(7.2f, 3.5f, 16f).angles(VIEW_YAW, VIEW_PITCH);
+        context.camera().target(0f, 0.95f, 0f).fov(VIEW_FOV).distance(VIEW_DISTANCE, 4f, 30f).angles(VIEW_YAW, VIEW_PITCH);
     }
 
     @Override
@@ -63,49 +60,47 @@ public final class HandycamPreviewScene implements Scene {
 
     @Override
     public void render(SceneRenderContext context, float alpha) {
-        for (int x = -1; x <= 1; x++) {
-            for (int z = -1; z <= 1; z++) {
-                context.drawBlock(((x + z) & 1) == 0 ? LIGHT : DARK, x - 0.5f, -1f, z - 0.5f);
-            }
-        }
+        PreviewWorld.drawPlatform(context);
 
         // where the head is above the platform
         context.drawBox(new Vector3f(-SHADOW_HALF, 0.004f, -SHADOW_HALF), new Vector3f(SHADOW_HALF, 0.01f, SHADOW_HALF), SHADOW);
 
-        RigOutput tilt = simulation.output(alpha);
-        float standingHeight = CAMERA_HEIGHT + simulation.height(alpha);
-        float headHeight = standingHeight + TiltDisplay.amplifyOffset(tilt.y());
+        RigOutput rig = simulation.output(alpha);
+        float standingHeight = EYE_HEIGHT + simulation.height(alpha);
 
         context.push();
         context.translate(0f, standingHeight, 0f);
-        drawCone(context, LEVEL, 0.02f);
+        drawCone(context, LEVEL, 0.01f);
         context.pop();
 
-        // The same order the game applies the rig's rotation to the camera: pitch, then yaw (negated), then roll.
+        // What the rig reports, as it reports it: the same order the game applies it to the camera (pitch, then yaw
+        // negated, then roll) and the same degrees and blocks.
         context.push();
-        context.translate(0f, headHeight, 0f);
-        context.rotateX(TiltDisplay.amplify(tilt.pitch()));
-        context.rotateY(-TiltDisplay.amplify(tilt.yaw()));
-        context.rotateZ(TiltDisplay.amplify(tilt.roll()));
+        context.translate(0f, standingHeight + rig.y(), 0f);
+        context.rotateX(rig.pitch());
+        context.rotateY(-rig.yaw());
+        context.rotateZ(rig.roll());
         drawHead(context);
         drawCone(context, CONE, LINE);
         context.pop();
     }
 
-    /** Steve's head, looking along -Z. */
+    /** The player head item: the head of the skin and, around it, the hat layer. */
     private static void drawHead(SceneRenderContext context) {
-        for (SteveHead.Part part : SteveHead.parts()) {
-            context.drawBox(part.min(), part.max(), part.argb());
-        }
+        context.drawTexturedBox(PreviewWorld.SKIN, PlayerHead.headMin(), PlayerHead.headMax(), PlayerHead.HEAD_UV, PreviewWorld.WHITE);
+        context.drawTexturedBox(PreviewWorld.SKIN, PlayerHead.hatMin(), PlayerHead.hatMax(), PlayerHead.HAT_UV, PreviewWorld.WHITE);
     }
 
-    /** The view cone out of the eyes: the four edges, the far rectangle and the line of sight. */
+    /**
+     * A pyramid out of the eyes that shows where the camera points: the four edges, the far rectangle and the line of
+     * sight. Its angle is fixed and drawn narrow so it stays small; it is not the game's field of view.
+     */
     private static void drawCone(SceneRenderContext context, int color, float width) {
-        float apexZ = SteveHead.frontZ() - 0.02f;
-        float farZ = -2.1f;
-        float halfWidth = 0.78f;
-        float halfHeight = 0.46f;
-        float eye = SteveHead.eyeY();
+        float apexZ = PlayerHead.frontZ() - 0.01f;
+        float farZ = -2.6f;
+        float halfWidth = 0.5f;
+        float halfHeight = 0.28f;
+        float eye = PlayerHead.eyeY();
 
         Vector3f apex = new Vector3f(0f, eye, apexZ);
         Vector3f a = new Vector3f(-halfWidth, eye + halfHeight, farZ);

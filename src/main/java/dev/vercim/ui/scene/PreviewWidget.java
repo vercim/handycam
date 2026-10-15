@@ -50,6 +50,8 @@ public final class PreviewWidget extends AbstractWidget implements AutoCloseable
     private boolean dragging;
     private boolean pauseWhenUnfocused = true;
     private boolean embedded;
+    private boolean interactive = true;
+    private Overlay overlay;
     private int background = DEFAULT_BACKGROUND;
     private boolean wasFocused = true;
     private long lastFrameNanos;
@@ -57,6 +59,12 @@ public final class PreviewWidget extends AbstractWidget implements AutoCloseable
     private Component idleHint = CommonComponents.EMPTY;
     private Component capturedHint = CommonComponents.EMPTY;
     private Component unavailable = CommonComponents.EMPTY;
+
+    /** Drawn over the finished view, inside its rectangle: a crosshair, a label. */
+    @FunctionalInterface
+    public interface Overlay {
+        void draw(GuiGraphics graphics, int x, int y, int width, int height);
+    }
 
     public PreviewWidget(int x, int y, int width, int height, Scene scene) {
         super(x, y, width, height, CommonComponents.EMPTY);
@@ -69,6 +77,29 @@ public final class PreviewWidget extends AbstractWidget implements AutoCloseable
         this.idleHint = whenIdle;
         this.capturedHint = whenCaptured;
         return this;
+    }
+
+    /**
+     * Whether the player can drag the view and zoom it (the default). A view that is not interactive is a picture
+     * with a fixed camera: it takes no clicks, drags or scrolling, so a click on it reaches whatever is behind.
+     */
+    public PreviewWidget interactive(boolean interactive) {
+        this.interactive = interactive;
+        return this;
+    }
+
+    /** Something drawn over the finished view. */
+    public PreviewWidget overlay(Overlay overlay) {
+        this.overlay = overlay;
+        return this;
+    }
+
+    /**
+     * The fraction of the next simulation step that has elapsed, as of the last drawn frame: what a second view of
+     * the same simulation passes to its own scene so both show the same moment.
+     */
+    public float alpha() {
+        return runner.alpha();
     }
 
     /** The color behind the scene (ARGB, opaque): what the view is cleared to. */
@@ -154,6 +185,7 @@ public final class PreviewWidget extends AbstractWidget implements AutoCloseable
         if (failed) {
             drawUnavailable(graphics, minecraft.font);
         } else {
+            if (overlay != null) overlay.draw(graphics, getX(), getY(), getWidth(), getHeight());
             drawHint(graphics, minecraft.font);
         }
 
@@ -165,7 +197,8 @@ public final class PreviewWidget extends AbstractWidget implements AutoCloseable
     private void drawScene(GuiGraphics graphics) {
         try {
             if (backend == null) backend = PreviewBackends.create();
-            backend.render(scene, camera, runner.alpha(), graphics, getX(), getY(), getWidth(), getHeight(), background);
+            float alpha = runner.alpha();
+            backend.render(scene, scene.camera(camera, alpha), alpha, graphics, getX(), getY(), getWidth(), getHeight(), background);
         } catch (RuntimeException | LinkageError e) {
             LOGGER.error("The 3D preview could not be drawn and is switched off", e);
             failed = true;
@@ -197,7 +230,7 @@ public final class PreviewWidget extends AbstractWidget implements AutoCloseable
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (!active || !visible || button != 0 || !isMouseOver(mouseX, mouseY)) return false;
+        if (!interactive || !active || !visible || button != 0 || !isMouseOver(mouseX, mouseY)) return false;
         if (!failed) input.capture();
         dragging = true;
         return true;
@@ -219,7 +252,7 @@ public final class PreviewWidget extends AbstractWidget implements AutoCloseable
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
-        if (!active || !visible || !isMouseOver(mouseX, mouseY)) return false;
+        if (!interactive || !active || !visible || !isMouseOver(mouseX, mouseY)) return false;
         camera.zoom(scrollY);
         return true;
     }

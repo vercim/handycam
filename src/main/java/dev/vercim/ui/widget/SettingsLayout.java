@@ -2,12 +2,13 @@
 package dev.vercim.ui.widget;
 
 /**
- * Where the parts of the settings screen go. Wide windows get three columns: the option list on the left, the
- * preview (with its buttons below) in the middle and the panel for the selected option on the right. Narrow windows
- * put the preview across the top and the list and the panel side by side underneath it. A title sits above and the
- * footer buttons below in both. Plain geometry, in GUI pixels, so it can be checked without the game.
+ * Where the parts of the settings screen go. Wide windows get three columns: the option list on the left, in the
+ * middle the first-person view above the 3D view (with the buttons for the events below them) and the panel for the
+ * selected option on the right. Narrow windows put the two views side by side across the top and the list and the
+ * panel side by side underneath. A title sits above and the footer buttons below in both. Plain geometry, in GUI
+ * pixels, so it can be checked without the game.
  */
-public record SettingsLayout(boolean narrow, Rect title, Rect list, Rect preview, Rect previewButtons,
+public record SettingsLayout(boolean narrow, Rect title, Rect list, Rect pov, Rect view3d, Rect previewButtons,
                              Rect panel, Rect footer) {
 
     public static final int MARGIN = 8;
@@ -24,6 +25,8 @@ public record SettingsLayout(boolean narrow, Rect title, Rect list, Rect preview
     private static final int PANEL_MIN = 96;
     private static final int PANEL_MAX = 200;
     private static final int PREVIEW_MIN_HEIGHT = 48;
+    /** Space between the first-person view and the 3D view. */
+    private static final int VIEW_GAP = 2;
 
     public record Rect(int x, int y, int width, int height) {
         public int right() { return x + width; }
@@ -52,21 +55,26 @@ public record SettingsLayout(boolean narrow, Rect title, Rect list, Rect preview
         if (width >= NARROW_BELOW) {
             int listWidth = clamp(inner * 34 / 100, LIST_MIN, LIST_MAX);
             int panelWidth = clamp(inner * 26 / 100, PANEL_MIN, PANEL_MAX);
-            int previewWidth = Math.max(0, inner - listWidth - panelWidth - 2 * GAP);
-            int previewX = MARGIN + listWidth + GAP;
-            int previewHeight = Math.max(0, contentHeight - BUTTON_HEIGHT - GAP);
+            int viewWidth = Math.max(0, inner - listWidth - panelWidth - 2 * GAP);
+            int viewX = MARGIN + listWidth + GAP;
+            int viewsHeight = Math.max(0, contentHeight - BUTTON_HEIGHT - GAP);
+            int povHeight = Math.max(0, (viewsHeight - VIEW_GAP) * 45 / 100);
+            int view3dHeight = Math.max(0, viewsHeight - VIEW_GAP - povHeight);
 
             return new SettingsLayout(false, title,
                     new Rect(MARGIN, top, listWidth, contentHeight),
-                    new Rect(previewX, top, previewWidth, previewHeight),
-                    new Rect(previewX, top + previewHeight + GAP, previewWidth, Math.min(BUTTON_HEIGHT, contentHeight)),
-                    new Rect(previewX + previewWidth + GAP, top, panelWidth, contentHeight),
+                    new Rect(viewX, top, viewWidth, povHeight),
+                    new Rect(viewX, top + povHeight + VIEW_GAP, viewWidth, view3dHeight),
+                    new Rect(viewX, top + viewsHeight + GAP, viewWidth, Math.min(BUTTON_HEIGHT, contentHeight)),
+                    new Rect(viewX + viewWidth + GAP, top, panelWidth, contentHeight),
                     footer);
         }
 
-        int previewHeight = Math.min(Math.max(0, contentHeight - BUTTON_HEIGHT - GAP),
+        int viewsHeight = Math.min(Math.max(0, contentHeight - BUTTON_HEIGHT - GAP),
                 Math.max(PREVIEW_MIN_HEIGHT, contentHeight * 34 / 100));
-        int buttonsY = top + previewHeight + GAP;
+        int povWidth = Math.max(0, (inner - VIEW_GAP) / 2);
+        int view3dWidth = Math.max(0, inner - VIEW_GAP - povWidth);
+        int buttonsY = top + viewsHeight + GAP;
         int lowerTop = buttonsY + BUTTON_HEIGHT + GAP;
         int lowerHeight = Math.max(0, bottom - lowerTop);
         int listWidth = Math.max(0, (inner - GAP) * 55 / 100);
@@ -74,7 +82,8 @@ public record SettingsLayout(boolean narrow, Rect title, Rect list, Rect preview
 
         return new SettingsLayout(true, title,
                 new Rect(MARGIN, lowerTop, listWidth, lowerHeight),
-                new Rect(MARGIN, top, inner, previewHeight),
+                new Rect(MARGIN, top, povWidth, viewsHeight),
+                new Rect(MARGIN + povWidth + VIEW_GAP, top, view3dWidth, viewsHeight),
                 new Rect(MARGIN, buttonsY, inner, BUTTON_HEIGHT),
                 new Rect(MARGIN + listWidth + GAP, lowerTop, panelWidth, lowerHeight),
                 footer);

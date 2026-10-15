@@ -18,6 +18,14 @@ public interface Scene {
      *
      * @param alpha how far the next step is through, 0 to 1, for interpolating between the last two states
      */
+    /**
+     * The camera to draw this frame through. By default the orbit camera the player drags; a scene that shows a view
+     * of its own (a first-person view) returns that instead.
+     */
+    default ViewCamera camera(OrbitCamera orbit, float alpha) {
+        return orbit;
+    }
+
     void render(SceneRenderContext context, float alpha);
 
     /** Called when the preview is closed. */

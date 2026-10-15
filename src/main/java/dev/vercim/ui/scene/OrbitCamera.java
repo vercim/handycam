@@ -8,7 +8,7 @@ import org.joml.Vector3f;
  * A camera that circles a target point: drag to turn it, scroll to move closer or away. Yaw is the angle around the
  * vertical axis (0 puts the eye on the +Z side looking toward -Z), pitch the elevation above the horizon.
  */
-public final class OrbitCamera {
+public final class OrbitCamera implements ViewCamera {
 
     public static final float MIN_PITCH = -5f;
     public static final float MAX_PITCH = 88f;
@@ -72,6 +72,7 @@ public final class OrbitCamera {
         distance = clamp((float) (distance * Math.pow(ZOOM_PER_NOTCH, scrollNotches)), minDistance, maxDistance);
     }
 
+    @Override
     public Vector3f eye(Vector3f dest) {
         double yawRad = Math.toRadians(yaw);
         double pitchRad = Math.toRadians(pitch);
@@ -81,11 +82,13 @@ public final class OrbitCamera {
                         target.z + (float) (Math.cos(yawRad) * flat));
     }
 
+    @Override
     public Matrix4f view(Matrix4f dest) {
         Vector3f eye = eye(new Vector3f());
         return dest.identity().lookAt(eye.x, eye.y, eye.z, target.x, target.y, target.z, 0f, 1f, 0f);
     }
 
+    @Override
     public Matrix4f projection(float aspect, Matrix4f dest) {
         return dest.identity().perspective((float) Math.toRadians(fovY), aspect, near, far);
     }

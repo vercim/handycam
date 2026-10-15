@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-only
 package dev.vercim.ui.scene;
 
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.state.BlockState;
 import org.joml.Vector3fc;
 
@@ -36,6 +37,13 @@ public interface SceneRenderContext {
 
     /** A solid box between two corners. */
     void drawBox(Vector3fc min, Vector3fc max, int argb);
+
+    /**
+     * A box whose faces show parts of a texture (a game texture, by its location), laid out as {@code uv} says. The
+     * texture is multiplied by {@code argb}, so white leaves it as it is; its transparent pixels are not drawn. The
+     * box's front is its -Z face.
+     */
+    void drawTexturedBox(ResourceLocation texture, Vector3fc min, Vector3fc max, BoxUv uv, int argb);
 
     /** A straight line as a thin strip that always faces the viewer. */
     default void drawLine(Vector3fc a, Vector3fc b, int argb) {

@@ -17,6 +17,7 @@ import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
 import org.joml.Matrix3f;
@@ -24,8 +25,8 @@ import org.joml.Vector3f;
 import org.joml.Vector3fc;
 
 /**
- * Collects a scene's draw calls into two vertex buffers (textured blocks, plain colors) and draws them with the
- * state the caller has set up (projection, model-view, render target). Blocks are drawn from their baked models
+ * Collects a scene's draw calls into vertex buffers (blocks, boxes with a texture of their own, plain colors) and
+ * draws them with the state the caller has set up (projection, model-view, render target). Blocks are drawn from their baked models
  * straight through the block renderer, with a fixed brightness and per-face shading instead of world light, so no
  * level is involved.
  */
@@ -34,6 +35,7 @@ final class GlSceneRenderer implements SceneRenderContext, AutoCloseable {
     private final Minecraft minecraft;
     private final ByteBufferBuilder blockBytes = new ByteBufferBuilder(1 << 18);
     private final ByteBufferBuilder colorBytes = new ByteBufferBuilder(1 << 16);
+    private final ByteBufferBuilder texturedBytes = new ByteBufferBuilder(1 << 14);
     private final TransformStack stack = new TransformStack();
     private final ShadedConsumer shaded = new ShadedConsumer();
     private final Vector3f eye = new Vector3f();
@@ -42,6 +44,8 @@ final class GlSceneRenderer implements SceneRenderContext, AutoCloseable {
 
     private BufferBuilder blocks;
     private BufferBuilder colors;
+    private BufferBuilder textured;
+    private ResourceLocation texturedTexture;
 
     GlSceneRenderer(Minecraft minecraft) {
         this.minecraft = minecraft;
@@ -52,12 +56,15 @@ final class GlSceneRenderer implements SceneRenderContext, AutoCloseable {
         eye.set(eyePosition);
         blocks = null;
         colors = null;
+        textured = null;
+        texturedTexture = null;
         blockBytes.clear();
         colorBytes.clear();
+        texturedBytes.clear();
         stack.reset();
     }
 
-    /** Draws what the scene submitted: blocks first, then the colored shapes on top of them. */
+    /** Draws what the scene submitted: blocks, then the textured boxes, then the colored shapes on top of them. */
     void flush() {
         if (blocks != null) {
             MeshData mesh = blocks.build();
@@ -68,6 +75,7 @@ final class GlSceneRenderer implements SceneRenderContext, AutoCloseable {
                 BufferUploader.drawWithShader(mesh);
             }
         }
+        flushTextured();
         if (colors != null) {
             MeshData mesh = colors.build();
             colors = null;
@@ -76,6 +84,28 @@ final class GlSceneRenderer implements SceneRenderContext, AutoCloseable {
                 BufferUploader.drawWithShader(mesh);
             }
         }
+    }
+
+    /** Draws the pending textured boxes with their texture. */
+    private void flushTextured() {
+        if (textured == null) return;
+        MeshData mesh = textured.build();
+        textured = null;
+        if (mesh != null) {
+            RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
+            RenderSystem.setShaderTexture(0, texturedTexture);
+            BufferUploader.drawWithShader(mesh);
+        }
+    }
+
+    /** The builder for boxes with this texture; boxes with another texture that are pending are drawn first. */
+    private BufferBuilder texturedBuilder(ResourceLocation texture) {
+        if (textured != null && !texture.equals(texturedTexture)) flushTextured();
+        if (textured == null) {
+            textured = new BufferBuilder(texturedBytes, VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+            texturedTexture = texture;
+        }
+        return textured;
     }
 
     private BufferBuilder blockBuilder() {
@@ -142,6 +172,18 @@ final class GlSceneRenderer implements SceneRenderContext, AutoCloseable {
     }
 
     @Override
+    public void drawTexturedBox(ResourceLocation texture, Vector3fc min, Vector3fc max, BoxUv uv, int argb) {
+        BufferBuilder builder = texturedBuilder(texture);
+        Shapes.texturedBox(stack.current(), min, max, uv, (shade, a, b, c, d, t) -> {
+            int color = Shading.apply(argb, shade);
+            builder.addVertex(a.x(), a.y(), a.z()).setUv(t[0], t[1]).setColor(color);
+            builder.addVertex(b.x(), b.y(), b.z()).setUv(t[2], t[3]).setColor(color);
+            builder.addVertex(c.x(), c.y(), c.z()).setUv(t[4], t[5]).setColor(color);
+            builder.addVertex(d.x(), d.y(), d.z()).setUv(t[6], t[7]).setColor(color);
+        });
+    }
+
+    @Override
     public void drawLine(Vector3fc a, Vector3fc b, int argb, float width) {
         stack.transform(a.x(), a.y(), a.z(), wa);
         stack.transform(b.x(), b.y(), b.z(), wb);
@@ -158,8 +200,10 @@ final class GlSceneRenderer implements SceneRenderContext, AutoCloseable {
     public void close() {
         blocks = null;
         colors = null;
+        textured = null;
         blockBytes.close();
         colorBytes.close();
+        texturedBytes.close();
     }
 
     /**

@@ -36,15 +36,17 @@ src/main/java/dev/vercim/
                                      load/save keyed by option id); NumericScale (slider position <-> value, the
                                      default as a snap point), ValueFormat ("% of default"), OptionRows (the model
                                      as list rows); JDK + Gson only
-  ui/scene/                        — 3D preview widget: Scene (what a mod implements), SceneRenderContext (the
-                                     only drawing primitives a scene sees), PreviewWidget (fixed 1/120 s steps,
+  ui/scene/                        — 3D preview widget: Scene (what a mod implements; it may pick its own ViewCamera),
+                                     SceneRenderContext (the only drawing primitives a scene sees: blocks, boxes, boxes
+                                     with a game texture laid out by BoxUv, lines), PreviewWidget (fixed 1/120 s steps,
                                      orbit camera, keyboard capture; embedded() = no frame, keys always on, Esc left to
-                                     the screen), OrbitCamera, InputCapture; FboBackend + GlSceneRenderer are the only
-                                     GL code (1.21.1: offscreen framebuffer, cleared to the widget's background color)
+                                     the screen; interactive(false) = fixed camera, no clicks; overlay), OrbitCamera,
+                                     InputCapture; FboBackend + GlSceneRenderer are the only GL code (1.21.1: offscreen
+                                     framebuffer, cleared to the widget's background color)
   ui/widget/                       — the settings screen's widgets on vanilla AbstractWidget: OptionListWidget
                                      (categories + options), DescriptionPanel (selected option's text), VerticalSliderWidget
                                      (numbers), ChoiceListWidget (toggles and enums), ThemedButton; Theme (all colors and spacing, dark blue),
-                                     SettingsLayout (wide: list | preview | panel; narrow: preview on top) and TextWrap
+                                     SettingsLayout (wide: list | first-person view over 3D view | panel; narrow: the two views side by side on top) and TextWrap
                                      are Minecraft-free and unit-tested; OptionText is the only place option texts are built
   handycam/
     HandycamMod.java               — shared init (config dir + HandycamConfig.load)
@@ -85,8 +87,9 @@ src/main/java/dev/vercim/
     HandycamOptions.java           — every config field as an Option: category, range, toggle requirements, keys
     HandycamRigParams.java         — RigParams backed by the saved config (the game)
     PendingRigParams.java          — RigParams backed by the values being edited (the config screen preview)
-    HandycamConfigScreen.java      — the settings screen (both loaders): option list, live 3D preview, panel with
-                                     the selected option's description and editor; Save/Cancel/Reset All
+    HandycamConfigScreen.java      — the settings screen (both loaders): option list, first-person view and 3D view
+                                     (no mouse camera, click an empty spot = hit), panel with the selected option's
+                                     description and editor; Save/Cancel/Reset All
   mixin/
     CameraMixin.java               — injects the rig's pitch/yaw/roll/y into the vanilla camera
     CameraAccessor.java            — @Accessor/@Invoker for Camera fields and move()
@@ -100,12 +103,15 @@ src/main/java/dev/vercim/
                                      HandycamConfigScreen (wrapper)
   neoforge/                        — HandycamNeoForge, HandycamNeoForgeClient (MOD-bus setup, F10 key),
                                      HandycamConfigScreenNeoForge (wrapper)
-  handycam/preview/                — what the config screen's preview shows: PreviewBody (a player walking and
-                                     jumping in place with vanilla's arithmetic) + PreviewSimulation (body feeding
-                                     CameraRig) are Minecraft-free; HandycamPreviewScene draws the 3x3 platform and the
-                                     camera as a block of Steve's head (SteveHead: colored boxes) that tilts, rises and
-                                     falls with the jump (real height, PreviewSimulation.height) and moves with the rig's
-                                     vertical offset; TiltDisplay amplifies angles and that offset for drawing only
+  handycam/preview/                — what the config screen's views show: PreviewBody (a player walking and jumping in
+                                     place with vanilla's arithmetic) + PreviewSimulation (body feeding CameraRig; smooth
+                                     jump height) are Minecraft-free, so are PlayerHead (the player head item: 0.5-block
+                                     cube + hat layer, UVs of the default skin) and PovCamera (the first-person camera, placed
+                                     like the head). HandycamPreviewScene (3D view) draws the 3x3 platform and the head,
+                                     textured with the real skin, at eye height 1.62, moved exactly as the rig reports it,
+                                     not amplified: pitch/yaw/roll, the jump's real height, the rig's vertical offset.
+                                     HandycamPovScene (first-person view, reads the same simulation) draws the world from the
+                                     eyes in the player's FOV with a floor, columns and a hand; PreviewWorld is what both share
   handycam/dev/                    — PreviewDebugScreen, PreviewSmokeTest: development aid for the preview
                                      (see docs/WORKFLOW.md), never shown to players
 src/test/java/                     — JUnit 5: ui.sim, ui.config, ui.widget (layout, text wrap) and rig unit tests,

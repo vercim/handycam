@@ -13,6 +13,14 @@ final class Shapes {
         void quad(float shade, Vector3fc a, Vector3fc b, Vector3fc c, Vector3fc d);
     }
 
+    /**
+     * Receives one textured quad: like {@link QuadSink}, plus {@code uv}, eight numbers: u and v of the four corners
+     * in the same order.
+     */
+    interface TexturedQuadSink {
+        void quad(float shade, Vector3fc a, Vector3fc b, Vector3fc c, Vector3fc d, float[] uv);
+    }
+
     private Shapes() {}
 
     /** The six faces of the box between {@code min} and {@code max}, moved by {@code transform}. */
@@ -26,6 +34,53 @@ final class Shapes {
         face(transform, sink, 0, 0, 1, x0, y0, z1, x1, y0, z1, x1, y1, z1, x0, y1, z1);       // south
         face(transform, sink, -1, 0, 0, x0, y0, z0, x0, y0, z1, x0, y1, z1, x0, y1, z0);      // west
         face(transform, sink, 1, 0, 0, x1, y0, z1, x1, y0, z0, x1, y1, z0, x1, y1, z1);       // east
+    }
+
+    /**
+     * The six faces of the box between {@code min} and {@code max}, moved by {@code transform}, each showing its part
+     * of the texture as {@link BoxUv} lays it out. On every face the texture is read the way the game reads an entity
+     * model: on the front, the top of the image is the top of the box and its right is toward -X; on the back toward
+     * +X; on the right side (+X) toward the front, on the left side (-X) toward the back; on the top toward -X and
+     * toward the front; on the bottom toward -X and toward the back.
+     */
+    static void texturedBox(Matrix4fc transform, Vector3fc min, Vector3fc max, BoxUv uv, TexturedQuadSink sink) {
+        float x0 = min.x(), y0 = min.y(), z0 = min.z();
+        float x1 = max.x(), y1 = max.y(), z1 = max.z();
+        // Each corner: its position, then how far along the face's u and v it is (0 or 1). The corners are in the
+        // same order as in box().
+        float[][] up = {
+                {x0, y1, z1, 1, 0}, {x1, y1, z1, 0, 0}, {x1, y1, z0, 0, 1}, {x0, y1, z0, 1, 1}};
+        float[][] down = {
+                {x0, y0, z0, 1, 0}, {x1, y0, z0, 0, 0}, {x1, y0, z1, 0, 1}, {x0, y0, z1, 1, 1}};
+        float[][] front = {
+                {x1, y0, z0, 0, 1}, {x0, y0, z0, 1, 1}, {x0, y1, z0, 1, 0}, {x1, y1, z0, 0, 0}};
+        float[][] back = {
+                {x0, y0, z1, 0, 1}, {x1, y0, z1, 1, 1}, {x1, y1, z1, 1, 0}, {x0, y1, z1, 0, 0}};
+        float[][] left = {
+                {x0, y0, z0, 0, 1}, {x0, y0, z1, 1, 1}, {x0, y1, z1, 1, 0}, {x0, y1, z0, 0, 0}};
+        float[][] right = {
+                {x1, y0, z1, 0, 1}, {x1, y0, z0, 1, 1}, {x1, y1, z0, 1, 0}, {x1, y1, z1, 0, 0}};
+
+        texturedFace(transform, sink, 0, 1, 0, uv.up(), up);
+        texturedFace(transform, sink, 0, -1, 0, uv.down(), down);
+        texturedFace(transform, sink, 0, 0, -1, uv.front(), front);
+        texturedFace(transform, sink, 0, 0, 1, uv.back(), back);
+        texturedFace(transform, sink, -1, 0, 0, uv.left(), left);
+        texturedFace(transform, sink, 1, 0, 0, uv.right(), right);
+    }
+
+    private static void texturedFace(Matrix4fc m, TexturedQuadSink sink, float nx, float ny, float nz,
+                                     BoxUv.Rect rect, float[][] corners) {
+        Vector3f normal = m.transformDirection(nx, ny, nz, new Vector3f());
+        Vector3f[] points = new Vector3f[4];
+        float[] uv = new float[8];
+        for (int i = 0; i < 4; i++) {
+            float[] c = corners[i];
+            points[i] = m.transformPosition(c[0], c[1], c[2], new Vector3f());
+            uv[i * 2] = rect.u0() + (rect.u1() - rect.u0()) * c[3];
+            uv[i * 2 + 1] = rect.v0() + (rect.v1() - rect.v0()) * c[4];
+        }
+        sink.quad(Shading.of(normal.x, normal.y, normal.z), points[0], points[1], points[2], points[3], uv);
     }
 
     private static void face(Matrix4fc m, QuadSink sink, float nx, float ny, float nz,

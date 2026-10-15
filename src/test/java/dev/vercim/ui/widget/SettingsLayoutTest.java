@@ -15,7 +15,7 @@ class SettingsLayoutTest {
     };
 
     private static List<Rect> parts(SettingsLayout layout) {
-        return List.of(layout.title(), layout.list(), layout.preview(), layout.previewButtons(),
+        return List.of(layout.title(), layout.list(), layout.pov(), layout.view3d(), layout.previewButtons(),
                 layout.panel(), layout.footer());
     }
 
@@ -46,30 +46,48 @@ class SettingsLayoutTest {
     }
 
     @Test
-    void wideWindowsPutTheListLeftThePanelRightAndThePreviewBetween() {
+    void wideWindowsPutTheListLeftThePanelRightAndTheTwoViewsStackedBetween() {
         SettingsLayout layout = SettingsLayout.compute(854, 480);
 
         assertFalse(layout.narrow());
-        assertTrue(layout.list().right() <= layout.preview().x());
-        assertTrue(layout.preview().right() <= layout.panel().x());
-        assertEquals(layout.preview().x(), layout.previewButtons().x());
-        assertEquals(layout.preview().width(), layout.previewButtons().width());
-        assertTrue(layout.previewButtons().y() >= layout.preview().bottom());
+        assertTrue(layout.list().right() <= layout.pov().x());
+        assertTrue(layout.pov().right() <= layout.panel().x());
+        assertEquals(layout.pov().x(), layout.view3d().x());
+        assertEquals(layout.pov().width(), layout.view3d().width());
+        assertTrue(layout.pov().bottom() <= layout.view3d().y(), "the first-person view is above the 3D view");
+        assertEquals(layout.view3d().x(), layout.previewButtons().x());
+        assertEquals(layout.view3d().width(), layout.previewButtons().width());
+        assertTrue(layout.previewButtons().y() >= layout.view3d().bottom());
         assertEquals(layout.list().y(), layout.panel().y());
-        assertTrue(layout.preview().width() > layout.list().width(), "the preview is the big part");
+        assertEquals(layout.list().y(), layout.pov().y());
+        assertTrue(layout.pov().width() > layout.list().width(), "the views are the big part");
     }
 
     @Test
-    void narrowWindowsPutThePreviewOnTop() {
+    void theTwoViewsShareTheColumnHeightAboutEvenly() {
+        for (int[] size : new int[][] {{427, 240}, {854, 480}, {1920, 1080}}) {
+            SettingsLayout layout = SettingsLayout.compute(size[0], size[1]);
+            int pov = layout.pov().height();
+            int d3 = layout.view3d().height();
+            assertTrue(pov > 0 && d3 > 0, size[0] + "x" + size[1]);
+            assertTrue(Math.abs(pov - d3) <= (pov + d3) / 4, size[0] + "x" + size[1] + ": " + pov + " and " + d3);
+        }
+    }
+
+    @Test
+    void narrowWindowsPutTheTwoViewsSideBySideOnTop() {
         SettingsLayout layout = SettingsLayout.compute(320, 240);
 
         assertTrue(layout.narrow());
-        assertTrue(layout.preview().bottom() <= layout.previewButtons().y());
+        assertTrue(layout.pov().right() <= layout.view3d().x());
+        assertEquals(layout.pov().y(), layout.view3d().y());
+        assertEquals(layout.pov().height(), layout.view3d().height());
+        assertTrue(layout.pov().bottom() <= layout.previewButtons().y());
         assertTrue(layout.previewButtons().bottom() <= layout.list().y());
         assertTrue(layout.previewButtons().bottom() <= layout.panel().y());
         assertTrue(layout.list().right() <= layout.panel().x());
         assertEquals(layout.list().y(), layout.panel().y());
-        assertTrue(layout.preview().height() >= 48);
+        assertTrue(layout.pov().height() >= 48);
         assertTrue(layout.list().height() >= 80, "the lower half stays usable: " + layout.list());
     }
 
@@ -86,8 +104,9 @@ class SettingsLayoutTest {
 
         assertTrue(layout.list().width() >= 100);
         assertTrue(layout.panel().width() >= 96);
-        assertTrue(layout.preview().width() >= 120);
-        assertTrue(layout.preview().height() >= 100);
+        assertTrue(layout.pov().width() >= 120);
+        assertTrue(layout.pov().height() >= 60);
+        assertTrue(layout.view3d().height() >= 60);
         assertEquals(20, layout.footer().height());
     }
 
