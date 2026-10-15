@@ -17,6 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
  *
  * <ul>
  *   <li>{@code dev.vercim.ui.sim}: JDK and JOML only;</li>
+ *   <li>{@code dev.vercim.ui.config}: no Minecraft or loaders (Gson and the JDK only);</li>
  *   <li>{@code dev.vercim.ui}: nothing from {@code dev.vercim.handycam};</li>
  *   <li>{@code dev.vercim.handycam.rig}: no Minecraft, no loaders, no game-side handycam packages.</li>
  * </ul>
@@ -53,6 +54,12 @@ class PackageBoundariesTest {
         assertTrue(Files.isDirectory(sourceRoot().resolve("dev/vercim/ui/sim")), "sim package missing");
         assertEquals(List.of(), violations("dev/vercim/ui/sim",
                 MINECRAFT_AND_LOADERS + "|dev\\.vercim\\.handycam|dev\\.vercim\\.ui\\.(?!sim)\\w+"));
+    }
+
+    @Test
+    void uiConfigPackageIsFreeOfMinecraft() throws IOException {
+        assertTrue(Files.isDirectory(sourceRoot().resolve("dev/vercim/ui/config")), "ui.config package missing");
+        assertEquals(List.of(), violations("dev/vercim/ui/config", MINECRAFT_AND_LOADERS));
     }
 
     @Test
