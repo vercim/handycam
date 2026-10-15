@@ -59,8 +59,9 @@ public abstract class GameRendererMixin {
     // enableVanillaFov = false drops the vanilla FOV effects one by one instead of overriding the result, so
     // the spyglass and zoom mods (which change the result) keep working. Sprint/speed/bow is cut in
     // AbstractClientPlayerMixin.
+    // NeoForge moves the body of modifyFovBasedOnDeathOrFluid(FF)F into a (FFZ)F overload (for its FOV event).
     //? if >=26.1 {
-    /*@Redirect(method = "modifyFovBasedOnDeathOrFluid",
+    /*@Redirect(method = {"modifyFovBasedOnDeathOrFluid(FF)F", "modifyFovBasedOnDeathOrFluid(FFZ)F"},
               at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;isDeadOrDying()Z"))
     *///?} else {
     @Redirect(method = "getFov",
@@ -71,7 +72,7 @@ public abstract class GameRendererMixin {
     }
 
     //? if >=26.1 {
-    /*@Redirect(method = "modifyFovBasedOnDeathOrFluid",
+    /*@Redirect(method = {"modifyFovBasedOnDeathOrFluid(FF)F", "modifyFovBasedOnDeathOrFluid(FFZ)F"},
               at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;lerp(FFF)F"))
     private float handycam$skipFluidFov(float delta, float start, float end) {
         return handycam$stripVanillaFov() ? 1.0f : Mth.lerp(delta, start, end);

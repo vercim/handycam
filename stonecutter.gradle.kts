@@ -3,12 +3,13 @@
 plugins {
     id("dev.kikugie.stonecutter")
     id("net.fabricmc.fabric-loom-remap") version "1.18.4" apply false
+    id("net.fabricmc.fabric-loom") version "1.18.4" apply false
 }
 
 stonecutter active file(".sc_active_version")
 
 stonecutter parameters {
-    constants.match(current.project.substringAfterLast('-'), "fabric", "neoforge")
+    constants.match(current.project.substringAfterLast('-'), "fabric", "neoforge", "forge")
 }
 
 tasks.register<org.gradle.api.tasks.Delete>("clean") {

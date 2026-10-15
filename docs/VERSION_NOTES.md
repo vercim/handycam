@@ -81,6 +81,48 @@ Likely trouble spots, in order: `Camera`, `Gui`, `GameRenderer` mixins; then `Pl
 
 ## Target entries
 
+### MC 26.1 — Fabric / NeoForge
+
+Targets: `26.1-fabric`, `26.1-neoforge` · first mod version: 2.1.0 · date: 2026-10-15
+
+Minecraft 26.1 is unobfuscated (Mojang names at runtime) and needs Java 25; this is the biggest API step in the matrix.
+
+#### Dependencies
+```properties
+java_version=25
+fabric_loader_min_version=0.18.4
+fabric_api_version=0.145.1+26.1
+cloth_config_version=26.1.154
+modmenu_version=18.0.2              # Fabric only, optional
+neoforge_version=26.1.0.19-beta
+neoforge_loader_version_range=[4,)
+```
+NeoForge metadata pins Minecraft to `[26.1,26.1.1)` and Cloth Config to `[26.1,)`. `mixin_compatibility_level` stays `JAVA_21`.
+
+#### API differences (vs. 1.21.11)
+| Area | 1.21.11 | 26.1 | Where / condition |
+|---|---|---|---|
+| Camera hook | `Camera.setup(Level, Entity, boolean, boolean, float)` at `TAIL` | `Camera.update(DeltaTracker)` at `TAIL`; entity via `entity()`, perspective via `isDetached()` and `CameraType.isMirrored()`, partial tick via `getCameraEntityPartialTicks(DeltaTracker)` | `mixin/CameraMixin.java`, `//? if >=26.1` |
+| Applying the shake | mutate `Camera.rotation` in place | the view-rotation matrix is cached (`matrixPropertiesDirty`) and `forwards` / `up` / `left` derive from yaw/pitch: call `setRotation(yRot + yaw, xRot - pitch)` (it invalidates the cache and refreshes the vectors), then add the roll to the quaternion | `mixin/CameraMixin.java`, `mixin/CameraAccessor.java` |
+| FOV pipeline | `GameRenderer.getFov(Camera, float, boolean)`, `getProjectionMatrix(float)` | moved into `Camera`: `calculateFov(float)` → `modifyFovBasedOnDeathOrFluid(float, float)` (same `isDeadOrDying()` and `Mth.lerp(FFF)F` calls, single `lerp`), world projection through `setupPerspective(zNear, zFar, fov, width, height)`; the hand has its own `calculateHudFov` | `mixin/GameRendererMixin.java` (targets `Camera` from 26.1) |
+| Crosshair | `Gui.renderCrosshair(GuiGraphics, DeltaTracker)` | `Gui.extractCrosshair(GuiGraphicsExtractor, DeltaTracker)` | `mixin/GuiMixin.java`, `//? if >=26.1` |
+| Fabric key mapping API | `KeyBindingHelper.registerKeyBinding` | `KeyMappingHelper.registerKeyMapping` (`fabric-key-mapping-api-v1`) | `fabric/client/HandycamFabricClient.java` |
+| Overlay message | `LocalPlayer.displayClientMessage(Component, true)` | `sendOverlayMessage(Component)` | `HandycamKeys.java` |
+| Fabric Loom | `net.fabricmc.fabric-loom-remap`: `mappings`, `modImplementation`, `remapJar` | `net.fabricmc.fabric-loom` (no mappings, `implementation`, `jar`); `loom-back-compat` picks the variant and `loomx.modJar` names the release task | `build.fabric.gradle.kts` |
+
+`AbstractClientPlayer.getFieldOfViewModifier(boolean, float)`, the explosion packet, `ItemUseAnimation`, `KeyMapping.Category` with `Identifier`, and the NeoForge entry points are unchanged from 1.21.11.
+
+#### Quirks
+- Do not add `@Accessor`s for `Camera.forwards` / `up` / `left`: next to the static `FORWARDS` / `UP` / `LEFT` constants Mixin binds the getter to the static field (logs `should be static as its target is`), so writing through it would corrupt the constant.
+- NeoForge patches `Camera.modifyFovBasedOnDeathOrFluid(FF)F` into a delegate for a new `(FFZ)F` overload that holds the original body (its FOV event); the redirects therefore name both descriptors.
+- `Camera.update` runs on the title screen too, with no entity and no level: check the entity before reading `getCameraEntityPartialTicks`.
+- Layers keep their 1.21.1 pitch convention (positive pitch tilts the view up) on every version; `CameraMixin` negates the pitch for the 26.1 `setRotation` path. The old per-version sign flips in the Architectury ports are no longer needed.
+- `Camera.update` builds the culling frustum before the `TAIL` hook runs, so the shake is not part of culling; the shake is a few degrees at most.
+- A 1.20.1-era world is not loaded by `--quickPlaySingleplayer` on 26.1 (the world layout changed): generate a test world with a 26.x server.
+
+#### Verified
+- 2026-10-15, mod 2.1.0 (dev build): see the 1.21.4 entry for the checks run; Fabric ☑ NeoForge ☑; on Fabric a debug print confirmed the 26.1 hook runs every frame and the camera follows `player rotation + layer offsets` (pitch negated). Packaged-JAR gameplay in a clean profile: ☐
+
 ### MC 1.21.11 — Fabric / NeoForge
 
 Targets: `1.21.11-fabric`, `1.21.11-neoforge` · first mod version: 2.1.0 · date: 2026-10-15
