@@ -25,8 +25,9 @@ public final class OrbitCamera {
     private float fovY = 50f;
     private float near = 0.1f;
     private float far = 200f;
-    private float fitHalfWidth;
-    private float aspect = 1f;
+    private boolean orthographic;
+    private float minHalfWidth;
+    private float minHalfHeight;
 
     public OrbitCamera target(float x, float y, float z) {
         target.set(x, y, z);
@@ -52,17 +53,16 @@ public final class OrbitCamera {
     }
 
     /**
-     * Keeps at least this much of the scene visible to each side of the target, whatever the shape of the view: in a
-     * tall narrow view the eye moves back as far as needed (up to the maximum distance). 0, the default, turns it off.
+     * Switches to a parallel (isometric) projection: things do not shrink with distance, so equal blocks look equal
+     * and parallel edges stay parallel. The view shows at least {@code halfWidth} blocks to each side of the target
+     * and {@code halfHeight} above and below it, scaled up to fill the view whatever its shape: the tighter of the two
+     * decides, so a tall narrow view is fitted by its width and a wide low one by its height. The field of view does
+     * not apply.
      */
-    public OrbitCamera fitHalfWidth(float blocks) {
-        this.fitHalfWidth = blocks;
-        return this;
-    }
-
-    /** The shape of the view the camera is drawn into, width over height; set by the widget before each frame. */
-    public OrbitCamera aspect(float aspect) {
-        this.aspect = Math.max(0.05f, aspect);
+    public OrbitCamera orthographic(float halfWidth, float halfHeight) {
+        this.orthographic = true;
+        this.minHalfWidth = halfWidth;
+        this.minHalfHeight = halfHeight;
         return this;
     }
 
@@ -76,11 +76,11 @@ public final class OrbitCamera {
     public float pitch() { return pitch; }
     public float distance() { return distance; }
 
-    /** How far the eye really is from the target: {@link #distance()}, or farther if {@link #fitHalfWidth} asks for it. */
-    public float effectiveDistance() {
-        if (fitHalfWidth <= 0f) return distance;
-        float needed = fitHalfWidth / ((float) Math.tan(Math.toRadians(fovY) / 2.0) * aspect);
-        return Math.min(maxDistance, Math.max(distance, needed));
+    public boolean isOrthographic() { return orthographic; }
+
+    /** For a parallel projection: half the height of what a view {@code aspect} (width over height) wide shows, in blocks. */
+    public float orthographicHalfHeight(float aspect) {
+        return Math.max(minHalfHeight, minHalfWidth / Math.max(aspect, 0.05f));
     }
     public float fov() { return fovY; }
     public Vector3f target(Vector3f dest) { return dest.set(target); }
@@ -99,7 +99,6 @@ public final class OrbitCamera {
     public Vector3f eye(Vector3f dest) {
         double yawRad = Math.toRadians(yaw);
         double pitchRad = Math.toRadians(pitch);
-        float distance = effectiveDistance();
         double flat = Math.cos(pitchRad) * distance;
         return dest.set(target.x + (float) (Math.sin(yawRad) * flat),
                         target.y + (float) (Math.sin(pitchRad) * distance),
@@ -112,6 +111,11 @@ public final class OrbitCamera {
     }
 
     public Matrix4f projection(float aspect, Matrix4f dest) {
+        if (orthographic) {
+            float halfHeight = orthographicHalfHeight(aspect);
+            float halfWidth = halfHeight * aspect;
+            return dest.identity().ortho(-halfWidth, halfWidth, -halfHeight, halfHeight, near, far);
+        }
         return dest.identity().perspective((float) Math.toRadians(fovY), aspect, near, far);
     }
 

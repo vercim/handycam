@@ -264,21 +264,4 @@ class ConfigModelTest {
         Files.writeString(empty, "");
         assertThrows(IOException.class, () -> model.load(empty));
     }
-
-    @Test
-    void resetVisibleToDefaultLeavesHiddenOptionsAlone() {
-        intensity.setPending(1f);
-        octaves.setPending(2);
-        hidden.setPending(3f);
-        model.applyPending();
-        assertEquals(3f, store.hiddenValue);
-
-        model.resetVisibleToDefault();
-
-        assertEquals(2f, intensity.pending());
-        assertEquals(4, octaves.pending());
-        assertEquals(3f, hidden.pending(), "the option of a hidden category keeps its value");
-        assertFalse(hidden.isDirty());
-        assertTrue(intensity.isDirty());
-    }
 }

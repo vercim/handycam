@@ -38,8 +38,6 @@ public final class PreviewBody {
     private static final float EYE_FOLLOW = 0.5f;
 
     /** Height of the player's box standing and crouching. */
-    public static final float STANDING_HEIGHT = 1.8f;
-    public static final float CROUCHING_HEIGHT = 1.5f;
 
     /** Blocks per tick along the facing direction and to the left, after friction. */
     private float forward;

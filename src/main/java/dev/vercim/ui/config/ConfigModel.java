@@ -164,16 +164,6 @@ public final class ConfigModel {
         for (Option<?> option : byId.values()) option.resetToDefault();
     }
 
-    /**
-     * Like {@link #resetAllToDefault}, but leaves the options of hidden categories alone: a screen that does not
-     * show them must not change them either.
-     */
-    public void resetVisibleToDefault() {
-        for (Category category : visibleCategories()) {
-            for (Option<?> option : category.options()) option.resetToDefault();
-        }
-    }
-
     // ---- persistence
 
     /** JSON keys that are not options, kept across a load/save round trip. */

@@ -7,10 +7,8 @@
 
   "handycam.config.save": "Save",
   "handycam.config.cancel": "Cancel",
-  "handycam.config.reset_all": "Reset All",
   "handycam.config.reset": "Reset",
   "handycam.config.unsaved": "Unsaved",
-  "handycam.config.panel.default": "Default: %s",
   "handycam.config.panel.requires": "Requires: %s",
   "handycam.config.preview.unavailable": "3D preview unavailable",
 

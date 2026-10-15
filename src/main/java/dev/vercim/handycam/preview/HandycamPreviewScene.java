@@ -26,20 +26,22 @@ public final class HandycamPreviewScene implements Scene {
     private static final int CONE = 0xFFFFD35A;
     private static final int AXIS = 0xFFFF6A5A;
     private static final int LEVEL = 0x60FFFFFF;
-    private static final int HITBOX = 0x90FFFFFF;
-    private static final int EYE_LINE = 0xFFFF2020;
-    private static final float HITBOX_LINE = 0.012f;
     private static final int SHADOW = 0x55000000;
     private static final float SHADOW_HALF = 0.4f;
 
-    /** The view the scene opens with: from the front and a little to the side, so the face shows. */
-    private static final float VIEW_YAW = 140f;
-    private static final float VIEW_PITCH = 20f;
-    /** A narrow field of view for the camera we look through: little perspective distortion, a long distance. */
-    private static final float VIEW_FOV = 30f;
-    private static final float VIEW_DISTANCE = 9.2f;
-    /** The platform's corners, seen from the side, reach about this far from the middle: a tall narrow view backs off to show them. */
-    private static final float VIEW_HALF_WIDTH = 2.5f;
+    /**
+     * The view, as in Create's Ponder: parallel projection from above and a corner, at the angle of an isometric
+     * drawing (35 degrees of elevation), so the platform is a clean diamond, the head shows its face and one side, and
+     * the view cone points out to the right. The scene is framed to hold the platform, the head at the top of a jump and
+     * the end of the cone, and is scaled up to fill the view whatever its shape.
+     */
+    private static final float VIEW_YAW = 135f;
+    private static final float VIEW_PITCH = 35f;
+    private static final float VIEW_DISTANCE = 20f;
+    /** The target is above the platform so the jump fits: the scene reaches 2.1 blocks below it and 2.8 above, on the screen. */
+    private static final float VIEW_TARGET_Y = 0.45f;
+    private static final float VIEW_HALF_WIDTH = 2.4f;
+    private static final float VIEW_HALF_HEIGHT = 2.6f;
 
     private final PreviewSimulation simulation;
 
@@ -54,7 +56,8 @@ public final class HandycamPreviewScene implements Scene {
 
     @Override
     public void init(SceneContext context) {
-        context.camera().target(0f, 0.8f, 0f).fov(VIEW_FOV).distance(VIEW_DISTANCE, 4f, 30f).fitHalfWidth(VIEW_HALF_WIDTH).angles(VIEW_YAW, VIEW_PITCH);
+        context.camera().target(0f, VIEW_TARGET_Y, 0f).orthographic(VIEW_HALF_WIDTH, VIEW_HALF_HEIGHT)
+                .distance(VIEW_DISTANCE, 4f, 30f).angles(VIEW_YAW, VIEW_PITCH);
     }
 
     @Override
@@ -89,18 +92,6 @@ public final class HandycamPreviewScene implements Scene {
         drawCone(context, CONE, LINE);
         context.pop();
 
-        drawHitbox(context, feet);
-    }
-
-    /** The player's box with its eye line, like the game's hitbox display: a yardstick next to the blocks. */
-    private void drawHitbox(SceneRenderContext context, float feet) {
-        boolean crouching = simulation.crouching();
-        for (PlayerHitbox.Edge e : PlayerHitbox.edges(feet, crouching)) {
-            context.drawLine(e.from(), e.to(), HITBOX, HITBOX_LINE);
-        }
-        for (PlayerHitbox.Edge e : PlayerHitbox.eyeLine(feet, crouching)) {
-            context.drawLine(e.from(), e.to(), EYE_LINE, HITBOX_LINE);
-        }
     }
 
     /** The player head item: the head of the skin and, around it, the hat layer. */

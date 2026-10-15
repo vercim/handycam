@@ -7,10 +7,8 @@
 
   "handycam.config.save": "Сохранить",
   "handycam.config.cancel": "Отмена",
-  "handycam.config.reset_all": "Сбросить всё",
   "handycam.config.reset": "Сбросить",
   "handycam.config.unsaved": "Не сохранено",
-  "handycam.config.panel.default": "По умолчанию: %s",
   "handycam.config.panel.requires": "Нужно включить: %s",
   "handycam.config.preview.unavailable": "3D-превью недоступно",
 

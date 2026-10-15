@@ -96,9 +96,8 @@ class ScreenTextTest {
 
     @Test
     void theFormattedTextsHaveTheArgumentsTheScreenPasses() throws IOException {
-        // the panel lines: one value each
+        // the panel's note: the name of the toggle it needs
         JsonObject english = lang("en_us");
-        assertEquals(1, placeholders(english.get("handycam.config.panel.default").getAsString()));
         assertEquals(1, placeholders(english.get("handycam.config.panel.requires").getAsString()));
     }
 }

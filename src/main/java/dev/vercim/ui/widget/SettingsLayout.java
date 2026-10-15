@@ -3,14 +3,14 @@ package dev.vercim.ui.widget;
 
 /**
  * Where the parts of the settings screen go. Wide windows get three columns. The option list is on the left with
- * Save and Cancel under it, the panel for the selected option is on the right with Reset All under it, and the 3D
+ * Save and Cancel under it, the panel for the selected option is on the right with Reset under it, and the 3D
  * view takes the whole height of the screen between them. The buttons are never wider than the column they belong
  * to. Narrow windows put the 3D view across the top and the list and the panel, with their buttons, underneath. The
  * title is above the list and a status text above the panel (across the top row in narrow windows). Plain geometry,
  * in GUI pixels, so it can be checked without the game.
  */
 public record SettingsLayout(boolean narrow, Rect title, Rect status, Rect list, Rect view3d, Rect panel,
-                             Rect save, Rect cancel, Rect resetAll) {
+                             Rect save, Rect cancel, Rect reset) {
 
     public static final int MARGIN = 8;
     public static final int GAP = 6;

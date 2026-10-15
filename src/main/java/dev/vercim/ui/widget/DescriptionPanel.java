@@ -14,23 +14,16 @@ import net.minecraft.network.chat.Component;
 import java.util.List;
 
 /**
- * The panel for the selected option: its name, its description, a note when a toggle it depends on is off, and the
- * default value at the bottom, above the reset button. What is left in between is the area for the editor
- * ({@link #controls()}), which the hosting screen fills with a slider or a choice list. The panel only draws; it
- * takes no clicks, so the editors and the reset button on top of it stay reachable.
+ * The panel for the selected option: its name, its description and a note when a toggle it depends on is off. What
+ * is left below is the area for the editor ({@link #controls()}), which the hosting screen fills with a slider or a
+ * choice list. The panel only draws; it takes no clicks, so the editors on top of it stay reachable.
  *
  * <p>Call {@link #layout()} after changing the option, the size, or anything the option's state affects.
  */
 public final class DescriptionPanel extends AbstractWidget {
 
-    /** Height of the reset button the host puts at the bottom of the panel. */
-    public static final int RESET_HEIGHT = 20;
-
     private static final int TITLE_LINES = 2;
     private static final int REQUIRES_LINES = 2;
-
-    /** A panel shorter than this drops the "default" line to leave room for the editor. */
-    private static final int COMPACT_BELOW = 110;
 
     private Option<?> option;
     private int minControlHeight = 0;
@@ -38,9 +31,7 @@ public final class DescriptionPanel extends AbstractWidget {
     private List<String> titleLines = List.of();
     private List<String> descriptionLines = List.of();
     private List<String> requiresLines = List.of();
-    private String defaultLine = "";
     private Rect controls = new Rect(0, 0, 0, 0);
-    private int footerY;
 
     public DescriptionPanel() {
         super(0, 0, 0, 0, CommonComponents.EMPTY);
@@ -60,15 +51,9 @@ public final class DescriptionPanel extends AbstractWidget {
         return controls;
     }
 
-    /** Top of the reset button. */
-    public int resetTop() {
-        return getY() + getHeight() - Theme.PADDING - RESET_HEIGHT;
-    }
-
     public void layout() {
         if (option == null) {
             titleLines = descriptionLines = requiresLines = List.of();
-            defaultLine = "";
             controls = new Rect(getX(), getY(), 0, 0);
             return;
         }
@@ -86,10 +71,7 @@ public final class DescriptionPanel extends AbstractWidget {
                 : TextWrap.wrap(Component.translatable("handycam.config.panel.requires",
                         OptionText.name(unmetRequirement(option))).getString(), width, font::width, REQUIRES_LINES);
 
-        boolean compact = getHeight() < COMPACT_BELOW;
-        int footerHeight = compact ? Theme.PADDING + RESET_HEIGHT + Theme.PADDING
-                : Theme.PADDING + lineHeight + Theme.PADDING + RESET_HEIGHT + Theme.PADDING;
-        int limit = getY() + getHeight() - footerHeight;
+        int limit = getY() + getHeight() - Theme.PADDING;
         // The editor comes first: the description only gets what is left, which in a very short panel is nothing.
         int spare = limit - y - requiresLines.size() * lineHeight - minControlHeight;
         int descriptionRoom = Math.max(0, spare / lineHeight);
@@ -100,9 +82,6 @@ public final class DescriptionPanel extends AbstractWidget {
         y += requiresLines.size() * lineHeight;
         if (!requiresLines.isEmpty()) y += Theme.PADDING;
 
-        defaultLine = compact ? ""
-                : Component.translatable("handycam.config.panel.default", OptionText.defaultValue(option)).getString();
-        footerY = limit + Theme.PADDING;
         int controlsTop = Math.min(y, Math.max(getY(), limit));
         controls = new Rect(x, controlsTop, width, Math.max(0, limit - controlsTop));
     }
@@ -126,8 +105,8 @@ public final class DescriptionPanel extends AbstractWidget {
         int x = getX() + Theme.PADDING;
         int y = getY() + Theme.PADDING;
 
-        // In a panel too short for its text, the text is cut off above the reset button instead of running over it.
-        graphics.enableScissor(getX() + 1, getY() + 1, getX() + getWidth() - 1, Math.max(getY() + 1, resetTop()));
+        // In a panel too short for its text, the text is cut off at the border instead of running out of it.
+        graphics.enableScissor(getX() + 1, getY() + 1, getX() + getWidth() - 1, Math.max(getY() + 1, getY() + getHeight() - 1));
         for (String line : titleLines) {
             graphics.drawString(font, line, x, y, Theme.TEXT, true);
             y += lineHeight;
@@ -142,8 +121,6 @@ public final class DescriptionPanel extends AbstractWidget {
             graphics.drawString(font, line, x, y, Theme.WARNING, false);
             y += lineHeight;
         }
-
-        if (!defaultLine.isEmpty()) graphics.drawString(font, defaultLine, x, footerY, Theme.TEXT_DIM, false);
         graphics.disableScissor();
     }
 

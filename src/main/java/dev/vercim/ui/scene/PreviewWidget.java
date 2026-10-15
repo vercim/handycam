@@ -176,7 +176,6 @@ public final class PreviewWidget extends AbstractWidget implements AutoCloseable
         try {
             if (backend == null) backend = PreviewBackends.create();
             float alpha = runner.alpha();
-            camera.aspect((float) getWidth() / Math.max(1, getHeight()));
             backend.render(scene, camera, alpha, graphics, getX(), getY(), getWidth(), getHeight(), background);
         } catch (RuntimeException | LinkageError e) {
             LOGGER.error("The 3D preview could not be drawn and is switched off", e);

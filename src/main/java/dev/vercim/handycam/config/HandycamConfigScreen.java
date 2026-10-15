@@ -51,7 +51,9 @@ public final class HandycamConfigScreen extends Screen {
     private DescriptionPanel panel;
     private VerticalSliderWidget slider;
     private ChoiceListWidget choices;
-    private ThemedButton resetOption;
+    private ThemedButton reset;
+    /** Everything on the screen that is not the view, to tell a click on a control, even a dimmed one, from an empty spot. */
+    private List<AbstractWidget> controls = List.of();
 
     private HandycamConfigScreen(Screen parent, Runnable saveCallback) {
         super(Component.translatable("handycam.config.title"));
@@ -86,7 +88,6 @@ public final class HandycamConfigScreen extends Screen {
         addRenderableWidget(slider);
         addRenderableWidget(choices);
 
-        addResetButton();
         addButtons();
         layoutPanel();
     }
@@ -114,20 +115,16 @@ public final class HandycamConfigScreen extends Screen {
         widget.setSize(rect.width(), rect.height());
     }
 
-    private void addResetButton() {
-        resetOption = addRenderableWidget(new ThemedButton(Component.translatable("handycam.config.reset"), () -> {
-            if (selected != null) selected.resetToDefault();
-        }).bounds(0, 0, 10, DescriptionPanel.RESET_HEIGHT));
-    }
-
-    /** Save and Cancel under the list, Reset All under the panel: each as wide as the column it sits under. */
+    /** Save and Cancel under the list, Reset under the panel: each as wide as the column it sits under. */
     private void addButtons() {
-        addRenderableWidget(new ThemedButton(Component.translatable("handycam.config.save"), this::save)
+        ThemedButton save = addRenderableWidget(new ThemedButton(Component.translatable("handycam.config.save"), this::save)
                 .primary().bounds(layout.save().x(), layout.save().y(), layout.save().width(), layout.save().height()));
-        addRenderableWidget(new ThemedButton(Component.translatable("handycam.config.cancel"), this::onClose)
+        ThemedButton cancel = addRenderableWidget(new ThemedButton(Component.translatable("handycam.config.cancel"), this::onClose)
                 .bounds(layout.cancel().x(), layout.cancel().y(), layout.cancel().width(), layout.cancel().height()));
-        addRenderableWidget(new ThemedButton(Component.translatable("handycam.config.reset_all"), model::resetVisibleToDefault)
-                .bounds(layout.resetAll().x(), layout.resetAll().y(), layout.resetAll().width(), layout.resetAll().height()));
+        reset = addRenderableWidget(new ThemedButton(Component.translatable("handycam.config.reset"), () -> {
+            if (selected != null) model.resetToDefault(selected);
+        }).bounds(layout.reset().x(), layout.reset().y(), layout.reset().width(), layout.reset().height()));
+        controls = List.of(list, panel, slider, choices, save, cancel, reset);
     }
 
     // ---- the selected option
@@ -162,11 +159,8 @@ public final class HandycamConfigScreen extends Screen {
         slider.active = enabled;
         choices.active = enabled;
 
-        if (resetOption != null) {
-            resetOption.setPosition(panel.getX() + Theme.PADDING, panel.resetTop());
-            resetOption.setSize(Math.max(0, panel.getWidth() - 2 * Theme.PADDING), DescriptionPanel.RESET_HEIGHT);
-            resetOption.active = !selected.isDefault();
-        }
+        // Reset puts the selected option back to its default; there is nothing to do while it already is.
+        if (reset != null) reset.active = !selected.isDefault();
     }
 
     // ---- leaving
@@ -226,14 +220,25 @@ public final class HandycamConfigScreen extends Screen {
 
     /**
      * A left click on an empty spot is a hit (the swing the game would report). The view takes no clicks, so a click on
-     * it reaches here and is a hit too; a click on a control, the list or the panel is not.
+     * it reaches here and is a hit too; a click on the list, the panel or a button is not, a dimmed button included.
      */
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (super.mouseClicked(mouseX, mouseY, button)) return true;
-        if (button == 0 && panel != null && !panel.isMouseOver(mouseX, mouseY)) {
+        if (button == 0 && !overAControl(mouseX, mouseY)) {
             scene.simulation().hit();
             return true;
+        }
+        return false;
+    }
+
+    /** A dimmed widget does not report the mouse as over it, so the bounds are checked here. */
+    private boolean overAControl(double mouseX, double mouseY) {
+        for (AbstractWidget control : controls) {
+            if (control.visible && mouseX >= control.getX() && mouseX < control.getX() + control.getWidth()
+                    && mouseY >= control.getY() && mouseY < control.getY() + control.getHeight()) {
+                return true;
+            }
         }
         return false;
     }

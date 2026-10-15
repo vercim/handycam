@@ -28,10 +28,6 @@ public final class OptionText {
         return value(option, option.pending());
     }
 
-    public static Component defaultValue(Option<?> option) {
-        return value(option, option.defaultValue());
-    }
-
     /** A value of this option as text: On/Off, the translated name of a choice, or the number. */
     @SuppressWarnings({"unchecked", "rawtypes"})
     public static Component value(Option<?> option, Object value) {

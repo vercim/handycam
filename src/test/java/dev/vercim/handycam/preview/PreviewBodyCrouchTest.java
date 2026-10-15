@@ -94,9 +94,7 @@ class PreviewBodyCrouchTest {
     }
 
     @Test
-    void theHeightsOfTheBoxAreTheGamesOwn() {
-        assertEquals(1.8f, PreviewBody.STANDING_HEIGHT);
-        assertEquals(1.5f, PreviewBody.CROUCHING_HEIGHT);
+    void theEyeHeightsAreTheGamesOwn() {
         assertEquals(1.62f, PreviewBody.STANDING_EYE);
         assertEquals(1.27f, PreviewBody.CROUCHING_EYE);
     }

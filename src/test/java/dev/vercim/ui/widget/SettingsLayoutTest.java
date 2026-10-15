@@ -16,7 +16,7 @@ class SettingsLayoutTest {
 
     private static List<Rect> parts(SettingsLayout layout) {
         return List.of(layout.title(), layout.status(), layout.list(), layout.view3d(), layout.panel(),
-                layout.save(), layout.cancel(), layout.resetAll());
+                layout.save(), layout.cancel(), layout.reset());
     }
 
     @Test
@@ -54,11 +54,11 @@ class SettingsLayoutTest {
             assertTrue(layout.save().x() >= layout.list().x(), where);
             assertTrue(layout.cancel().right() <= layout.list().right(), where);
             assertTrue(layout.save().right() <= layout.cancel().x(), where);
-            assertTrue(layout.resetAll().x() >= layout.panel().x(), where);
-            assertTrue(layout.resetAll().right() <= layout.panel().right(), where);
+            assertTrue(layout.reset().x() >= layout.panel().x(), where);
+            assertTrue(layout.reset().right() <= layout.panel().right(), where);
             // and they sit under the column, not beside it
             assertTrue(layout.save().y() >= layout.list().bottom(), where);
-            assertTrue(layout.resetAll().y() >= layout.panel().bottom(), where);
+            assertTrue(layout.reset().y() >= layout.panel().bottom(), where);
         }
     }
 
@@ -118,7 +118,7 @@ class SettingsLayoutTest {
         assertTrue(layout.panel().height() >= 150);
         assertEquals(20, layout.save().height());
         assertTrue(layout.save().width() >= 60, "room for a label: " + layout.save());
-        assertTrue(layout.resetAll().width() >= 90, "room for a label: " + layout.resetAll());
+        assertTrue(layout.reset().width() >= 60, "room for a label: " + layout.reset());
     }
 
     @Test
@@ -127,7 +127,7 @@ class SettingsLayoutTest {
             SettingsLayout layout = SettingsLayout.compute(size[0], size[1]);
             assertEquals(size[1] - SettingsLayout.MARGIN, layout.save().bottom());
             assertEquals(size[1] - SettingsLayout.MARGIN, layout.cancel().bottom());
-            assertEquals(size[1] - SettingsLayout.MARGIN, layout.resetAll().bottom());
+            assertEquals(size[1] - SettingsLayout.MARGIN, layout.reset().bottom());
             assertEquals(SettingsLayout.MARGIN, layout.title().y());
             assertEquals(SettingsLayout.MARGIN, layout.status().y());
         }

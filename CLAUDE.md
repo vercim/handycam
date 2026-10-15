@@ -40,15 +40,16 @@ src/main/java/dev/vercim/
                                      drawing primitives a scene sees: blocks, boxes, boxes with a game texture laid out
                                      by BoxUv, lines), PreviewWidget (fixed 1/120 s steps, orbit camera, keyboard
                                      capture; embedded() = no frame, keys always on, Esc left to the screen;
-                                     interactive(false) = fixed camera, no clicks), OrbitCamera (fitHalfWidth: backs
-                                     off in a tall narrow view so the scene's width still fits), InputCapture
+                                     interactive(false) = fixed camera, no clicks), OrbitCamera (perspective, or
+                                     orthographic(halfWidth, halfHeight): a parallel view scaled to show at least that
+                                     much whatever the view's shape), InputCapture
                                      (Control/InputState: movement, jump, sprint, crouch); FboBackend + GlSceneRenderer
                                      are the only GL code (1.21.1: offscreen framebuffer, cleared to the widget's
                                      background color)
   ui/widget/                       — the settings screen's widgets on vanilla AbstractWidget: OptionListWidget
                                      (categories + options), DescriptionPanel (selected option's text), VerticalSliderWidget
                                      (numbers), ChoiceListWidget (toggles and enums), ThemedButton; Theme (all colors and spacing: neutral dark grays, amber accent),
-                                     SettingsLayout (wide: list with Save/Cancel | 3D view, full height | panel with Reset All; narrow: the view across the top) and TextWrap
+                                     SettingsLayout (wide: list with Save/Cancel | 3D view, full height | panel with Reset; narrow: the view across the top) and TextWrap
                                      are Minecraft-free and unit-tested; OptionText is the only place option texts are built
   handycam/
     HandycamMod.java               — shared init (config dir + HandycamConfig.load)
@@ -91,7 +92,7 @@ src/main/java/dev/vercim/
     PendingRigParams.java          — RigParams backed by the values being edited (the config screen preview)
     HandycamConfigScreen.java      — the settings screen (both loaders): option list, 3D view (no mouse camera,
                                      click an empty spot = hit), panel with the selected option's description and
-                                     editor; Save/Cancel/Reset All
+                                     editor; Save/Cancel/Reset (the selected option)
   mixin/
     CameraMixin.java               — injects the rig's pitch/yaw/roll/y into the vanilla camera
     CameraAccessor.java            — @Accessor/@Invoker for Camera fields and move()
@@ -109,10 +110,11 @@ src/main/java/dev/vercim/
                                      in place with vanilla's arithmetic) + PreviewSimulation (body feeding CameraRig;
                                      smooth jump height, eye height, crouching: slower, no sprint, eyes 1.62 -> 1.27) are
                                      Minecraft-free, so are PlayerHead (the player head item: 0.5-block cube + hat layer,
-                                     UVs of the default skin) and PlayerHitbox (the F3+B box and eye line).
-                                     HandycamPreviewScene draws the 3x3 platform (PreviewWorld), the head (real skin) and
-                                     the hitbox, at the camera's eye height, moved exactly as the rig reports it, not
-                                     amplified: pitch/yaw/roll, the jump's real height, the rig's vertical offset
+                                     UVs of the default skin). HandycamPreviewScene draws the 3x3 platform
+                                     (PreviewWorld) and the head (real skin) at the camera's eye height, moved exactly
+                                     as the rig reports it, not amplified: pitch/yaw/roll, the jump's real height, the
+                                     rig's vertical offset; the view is parallel (isometric, like Create's Ponder), 35
+                                     degrees up, from the front right corner
   handycam/dev/                    — PreviewDebugScreen, PreviewSmokeTest: development aid for the preview
                                      (see docs/WORKFLOW.md), never shown to players
 src/test/java/                     — JUnit 5: ui.sim, ui.config, ui.widget (layout, text wrap) and rig unit tests,

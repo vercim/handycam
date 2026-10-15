@@ -144,37 +144,53 @@ class OrbitCameraTest {
     }
 
     @Test
-    void aWideViewKeepsTheDistanceItWasGiven() {
-        OrbitCamera camera = new OrbitCamera().angles(0f, 0f).fov(30f).distance(9.2f, 4f, 30f).fitHalfWidth(2.5f).aspect(1.6f);
+    void aParallelProjectionDoesNotShrinkThingsWithDistance() {
+        OrbitCamera camera = new OrbitCamera().orthographic(2f, 3f);
+        Matrix4f projection = camera.projection(1f, new Matrix4f());
 
-        assertEquals(9.2f, camera.effectiveDistance(), 1e-5f);
-        assertEquals(9.2f, eye(camera).length(), 1e-4f);
+        Vector4f near = projection.transform(new Vector4f(1f, 1f, -5f, 1f));
+        Vector4f far = projection.transform(new Vector4f(1f, 1f, -50f, 1f));
+
+        assertEquals(near.x / near.w, far.x / far.w, 1e-6f);
+        assertEquals(near.y / near.w, far.y / far.w, 1e-6f);
+        assertTrue(camera.isOrthographic());
     }
 
     @Test
-    void aTallNarrowViewBacksOffUntilTheAskedWidthFits() {
-        OrbitCamera camera = new OrbitCamera().angles(0f, 0f).fov(30f).distance(9.2f, 4f, 30f).fitHalfWidth(2.5f).aspect(0.6f);
+    void aTallNarrowViewIsFittedByItsWidth() {
+        OrbitCamera camera = new OrbitCamera().orthographic(2.4f, 2.6f);
 
-        float distance = camera.effectiveDistance();
+        float halfHeight = camera.orthographicHalfHeight(0.5f);
 
-        assertTrue(distance > 9.2f);
-        // at that distance the half width the view shows at the target is just the one asked for
-        float shown = distance * (float) Math.tan(Math.toRadians(15.0)) * 0.6f;
-        assertEquals(2.5f, shown, 1e-3f);
-        assertEquals(distance, eye(camera).length(), 1e-4f);
+        assertEquals(4.8f, halfHeight, 1e-5f);    // 2.4 to each side needs 4.8 up and down in a view half as wide as tall
+        Vector4f edge = camera.projection(0.5f, new Matrix4f()).transform(new Vector4f(2.4f, 0f, -1f, 1f));
+        assertEquals(1f, edge.x / edge.w, 1e-5f);
     }
 
     @Test
-    void backingOffStopsAtTheMaximumDistance() {
-        OrbitCamera camera = new OrbitCamera().fov(30f).distance(9.2f, 4f, 20f).fitHalfWidth(2.5f).aspect(0.05f);
+    void aWideLowViewIsFittedByItsHeight() {
+        OrbitCamera camera = new OrbitCamera().orthographic(2.4f, 2.6f);
 
-        assertEquals(20f, camera.effectiveDistance(), 1e-5f);
+        assertEquals(2.6f, camera.orthographicHalfHeight(3f), 1e-5f);
+        Vector4f top = camera.projection(3f, new Matrix4f()).transform(new Vector4f(0f, 2.6f, -1f, 1f));
+        assertEquals(1f, top.y / top.w, 1e-5f);
     }
 
     @Test
-    void withoutAFitWidthTheShapeOfTheViewChangesNothing() {
-        OrbitCamera camera = new OrbitCamera().fov(30f).distance(9.2f, 4f, 30f).aspect(0.2f);
+    void theDistanceDoesNotChangeWhatAParallelViewShows() {
+        OrbitCamera near = new OrbitCamera().orthographic(2f, 2f).distance(10f, 1f, 50f);
+        OrbitCamera far = new OrbitCamera().orthographic(2f, 2f).distance(40f, 1f, 50f);
 
-        assertEquals(9.2f, camera.effectiveDistance(), 1e-5f);
+        assertEquals(near.orthographicHalfHeight(1.5f), far.orthographicHalfHeight(1.5f));
+    }
+
+    @Test
+    void withoutOrthographicTheCameraIsAPerspectiveOne() {
+        OrbitCamera camera = new OrbitCamera();
+
+        assertFalse(camera.isOrthographic());
+        Vector4f near = camera.projection(1f, new Matrix4f()).transform(new Vector4f(1f, 0f, -5f, 1f));
+        Vector4f far = camera.projection(1f, new Matrix4f()).transform(new Vector4f(1f, 0f, -50f, 1f));
+        assertTrue(Math.abs(near.x / near.w) > Math.abs(far.x / far.w), "farther is smaller");
     }
 }
