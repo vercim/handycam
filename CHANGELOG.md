@@ -1,3 +1,8 @@
+## [Unreleased]
+
+### Fixes
+- A damaged or unreadable `handycam.json` no longer stops the game from starting: it is kept as `handycam.json.bak` and the defaults are used. A setting with an unusable value falls back to its default, and keys this version does not know are kept.
+
 ## [2.0.1-beta] - 2026-10-11
 
 ### Compatibility
