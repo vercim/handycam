@@ -3,15 +3,15 @@ package dev.vercim.handycam.camera.layers;
 import dev.vercim.handycam.camera.CameraOffset;
 import dev.vercim.handycam.camera.PlayerState;
 import dev.vercim.handycam.camera.ShakeLayer;
-import dev.vercim.handycam.camera.math.FractalNoise;
-import dev.vercim.handycam.camera.math.SpringSimulator;
+import dev.vercim.ui.sim.FractalNoise;
+import dev.vercim.ui.sim.Spring1D;
 import dev.vercim.handycam.config.HandycamConfig;
 
 public class DamageShakeLayer implements ShakeLayer {
 
-    private final SpringSimulator pitchSpring = new SpringSimulator(60f, 8f);
-    private final SpringSimulator yawSpring   = new SpringSimulator(60f, 8f);
-    private final SpringSimulator rollSpring  = new SpringSimulator(60f, 8f);
+    private final Spring1D pitchSpring = new Spring1D(60f, 8f);
+    private final Spring1D yawSpring   = new Spring1D(60f, 8f);
+    private final Spring1D rollSpring  = new Spring1D(60f, 8f);
 
     private final FractalNoise pitchA = new FractalNoise(0x11223344L, 4, 8f,  0.55f);
     private final FractalNoise pitchB = new FractalNoise(0xAABB1122L, 3, 22f, 0.5f);
@@ -40,7 +40,7 @@ public class DamageShakeLayer implements ShakeLayer {
     @Override
     public CameraOffset compute(PlayerState state, float time, float dt) {
         HandycamConfig cfg = HandycamConfig.get();
-        boolean springActive = Math.abs(pitchSpring.getPosition()) > 0.001f;
+        boolean springActive = Math.abs(pitchSpring.position()) > 0.001f;
         if (!cfg.damageEnabled || (traumaAmount < 0.01f && !springActive)) return CameraOffset.ZERO;
 
         float sp = pitchSpring.update(0f, dt);

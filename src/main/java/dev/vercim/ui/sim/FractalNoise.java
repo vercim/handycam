@@ -1,4 +1,5 @@
-package dev.vercim.handycam.camera.math;
+// SPDX-License-Identifier: LGPL-3.0-only
+package dev.vercim.ui.sim;
 
 public final class FractalNoise {
 

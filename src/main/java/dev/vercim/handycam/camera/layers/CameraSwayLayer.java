@@ -3,16 +3,16 @@ package dev.vercim.handycam.camera.layers;
 import dev.vercim.handycam.camera.CameraOffset;
 import dev.vercim.handycam.camera.PlayerState;
 import dev.vercim.handycam.camera.ShakeLayer;
-import dev.vercim.handycam.camera.math.SpringSimulator;
+import dev.vercim.ui.sim.Spring1D;
 import dev.vercim.handycam.config.HandycamConfig;
 
 public class CameraSwayLayer implements ShakeLayer {
 
-    private final SpringSimulator rollSpring     = new SpringSimulator(120f, 22f);
+    private final Spring1D rollSpring     = new Spring1D(120f, 22f);
 
-    private final SpringSimulator yawLagSpring   = new SpringSimulator(60f,  15f);
+    private final Spring1D yawLagSpring   = new Spring1D(60f,  15f);
 
-    private final SpringSimulator pitchLagSpring = new SpringSimulator(40f,  12f);
+    private final Spring1D pitchLagSpring = new Spring1D(40f,  12f);
 
     @Override
     public CameraOffset compute(PlayerState state, float time, float dt) {

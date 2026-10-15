@@ -3,15 +3,15 @@ package dev.vercim.handycam.camera.layers;
 import dev.vercim.handycam.camera.CameraOffset;
 import dev.vercim.handycam.camera.PlayerState;
 import dev.vercim.handycam.camera.ShakeLayer;
-import dev.vercim.handycam.camera.math.FractalNoise;
-import dev.vercim.handycam.camera.math.SpringSimulator;
+import dev.vercim.ui.sim.FractalNoise;
+import dev.vercim.ui.sim.Spring1D;
 import dev.vercim.handycam.config.HandycamConfig;
 
 public class StrafeTiltLayer implements ShakeLayer {
 
-    private final SpringSimulator rollSpring = new SpringSimulator(500f, 44f);
+    private final Spring1D rollSpring = new Spring1D(500f, 44f);
 
-    private final SpringSimulator yawSpring  = new SpringSimulator(400f, 40f);
+    private final Spring1D yawSpring  = new Spring1D(400f, 40f);
 
     private float smoothStrafe = 0f;
 

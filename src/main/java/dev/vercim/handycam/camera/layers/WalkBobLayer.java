@@ -3,7 +3,7 @@ package dev.vercim.handycam.camera.layers;
 import dev.vercim.handycam.camera.CameraOffset;
 import dev.vercim.handycam.camera.PlayerState;
 import dev.vercim.handycam.camera.ShakeLayer;
-import dev.vercim.handycam.camera.math.FractalNoise;
+import dev.vercim.ui.sim.FractalNoise;
 import dev.vercim.handycam.config.HandycamConfig;
 
 public class WalkBobLayer implements ShakeLayer {

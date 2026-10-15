@@ -1,6 +1,11 @@
-package dev.vercim.handycam.camera.math;
+// SPDX-License-Identifier: LGPL-3.0-only
+package dev.vercim.ui.sim;
 
-public final class SpringSimulator {
+/**
+ * Underdamped spring pulled toward a target: {@code a = (target - x) * stiffness - v * damping}, integrated with
+ * semi-implicit Euler in sub-steps of at most 1/120 s so a long frame does not blow it up.
+ */
+public final class Spring1D {
 
     private final float stiffness;
     private final float damping;
@@ -9,7 +14,7 @@ public final class SpringSimulator {
 
     private static final float SUB_STEP = 1f / 120f;
 
-    public SpringSimulator(float stiffness, float damping) {
+    public Spring1D(float stiffness, float damping) {
         this.stiffness = stiffness;
         this.damping = damping;
     }
@@ -46,7 +51,11 @@ public final class SpringSimulator {
         velocity = 0f;
     }
 
-    public float getPosition() {
+    public float position() {
         return position;
+    }
+
+    public float velocity() {
+        return velocity;
     }
 }

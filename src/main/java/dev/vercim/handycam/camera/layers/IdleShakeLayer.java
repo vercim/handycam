@@ -3,8 +3,8 @@ package dev.vercim.handycam.camera.layers;
 import dev.vercim.handycam.camera.CameraOffset;
 import dev.vercim.handycam.camera.PlayerState;
 import dev.vercim.handycam.camera.ShakeLayer;
-import dev.vercim.handycam.camera.math.FractalNoise;
-import dev.vercim.handycam.camera.math.SpringSimulator;
+import dev.vercim.ui.sim.FractalNoise;
+import dev.vercim.ui.sim.Spring1D;
 import dev.vercim.handycam.config.HandycamConfig;
 
 import java.util.Random;
@@ -15,9 +15,9 @@ public class IdleShakeLayer implements ShakeLayer {
     private final FractalNoise noiseYaw   = new FractalNoise(0x5E6F7A8BL, 4, 0.3f, 0.5f);
     private final FractalNoise noiseRoll  = new FractalNoise(0x9C0D1E2FL, 3, 0.2f, 0.4f);
 
-    private final SpringSimulator tremorPitch = new SpringSimulator(25f, 9f);
-    private final SpringSimulator tremorYaw   = new SpringSimulator(20f, 8f);
-    private final SpringSimulator tremorRoll  = new SpringSimulator(18f, 8f);
+    private final Spring1D tremorPitch = new Spring1D(25f, 9f);
+    private final Spring1D tremorYaw   = new Spring1D(20f, 8f);
+    private final Spring1D tremorRoll  = new Spring1D(18f, 8f);
 
     private float tremorPitchTarget = 0f;
     private float tremorYawTarget   = 0f;

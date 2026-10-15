@@ -5,17 +5,17 @@ import dev.vercim.handycam.camera.CrosshairSwaySystem;
 import dev.vercim.handycam.camera.PixelScale;
 import dev.vercim.handycam.camera.PlayerState;
 import dev.vercim.handycam.camera.ShakeLayer;
-import dev.vercim.handycam.camera.math.FractalNoise;
-import dev.vercim.handycam.camera.math.SpringSimulator;
+import dev.vercim.ui.sim.FractalNoise;
+import dev.vercim.ui.sim.Spring1D;
 import dev.vercim.handycam.config.HandycamConfig;
 
 public class BowShotLayer implements ShakeLayer {
 
-    private final SpringSimulator pitchSpring = new SpringSimulator(80f, 14f);
-    private final SpringSimulator yawSpring   = new SpringSimulator(60f, 12f);
+    private final Spring1D pitchSpring = new Spring1D(80f, 14f);
+    private final Spring1D yawSpring   = new Spring1D(60f, 12f);
 
-    private final SpringSimulator bowYawDraw      = new SpringSimulator(30f, 8f);
-    private final SpringSimulator crossbowPitchDraw = new SpringSimulator(30f, 8f);
+    private final Spring1D bowYawDraw      = new Spring1D(30f, 8f);
+    private final Spring1D crossbowPitchDraw = new Spring1D(30f, 8f);
 
     private final FractalNoise noiseP = new FractalNoise(0xB0501A1FL, 2, 8f, 0.5f);
     private final FractalNoise noiseY = new FractalNoise(0xB0502B2EL, 2, 7f, 0.5f);

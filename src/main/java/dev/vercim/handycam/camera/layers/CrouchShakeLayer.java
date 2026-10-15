@@ -3,13 +3,13 @@ package dev.vercim.handycam.camera.layers;
 import dev.vercim.handycam.camera.CameraOffset;
 import dev.vercim.handycam.camera.PlayerState;
 import dev.vercim.handycam.camera.ShakeLayer;
-import dev.vercim.handycam.camera.math.SpringSimulator;
+import dev.vercim.ui.sim.Spring1D;
 import dev.vercim.handycam.config.HandycamConfig;
 
 public class CrouchShakeLayer implements ShakeLayer {
 
-    private final SpringSimulator pitchSpring = new SpringSimulator(100f, 18f);
-    private final SpringSimulator rollSpring  = new SpringSimulator(80f, 15f);
+    private final Spring1D pitchSpring = new Spring1D(100f, 18f);
+    private final Spring1D rollSpring  = new Spring1D(80f, 15f);
 
     private float pitchTarget = 0f;
     private float rollTarget  = 0f;

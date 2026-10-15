@@ -3,15 +3,15 @@ package dev.vercim.handycam.camera.layers;
 import dev.vercim.handycam.camera.CameraOffset;
 import dev.vercim.handycam.camera.PlayerState;
 import dev.vercim.handycam.camera.ShakeLayer;
-import dev.vercim.handycam.camera.math.FractalNoise;
-import dev.vercim.handycam.camera.math.SpringSimulator;
+import dev.vercim.ui.sim.FractalNoise;
+import dev.vercim.ui.sim.Spring1D;
 import dev.vercim.handycam.config.HandycamConfig;
 
 public class ForwardTiltLayer implements ShakeLayer {
 
-    private final SpringSimulator pitchSpring = new SpringSimulator(450f, 42f);
+    private final Spring1D pitchSpring = new Spring1D(450f, 42f);
 
-    private final SpringSimulator rollSpring  = new SpringSimulator(350f, 37f);
+    private final Spring1D rollSpring  = new Spring1D(350f, 37f);
 
     private float smoothForward = 0f;
 

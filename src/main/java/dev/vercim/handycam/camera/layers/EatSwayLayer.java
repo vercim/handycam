@@ -5,7 +5,7 @@ import dev.vercim.handycam.camera.CrosshairSwaySystem;
 import dev.vercim.handycam.camera.PixelScale;
 import dev.vercim.handycam.camera.PlayerState;
 import dev.vercim.handycam.camera.ShakeLayer;
-import dev.vercim.handycam.camera.math.FractalNoise;
+import dev.vercim.ui.sim.FractalNoise;
 import dev.vercim.handycam.config.HandycamConfig;
 
 public class EatSwayLayer implements ShakeLayer {
