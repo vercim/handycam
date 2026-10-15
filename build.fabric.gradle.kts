@@ -49,6 +49,17 @@ dependencies {
     modImplementation("net.fabricmc.fabric-api:fabric-api:${project.property("fabric_api_version")}")
     modImplementation("me.shedaniel.cloth:cloth-config-fabric:${project.property("cloth_config_version")}")
     modImplementation("com.terraformersmc:modmenu:${project.property("modmenu_version")}")
+
+    testImplementation(platform("org.junit:junit-bom:5.11.4"))
+    testImplementation("org.junit.jupiter:junit-jupiter")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+}
+
+tasks.test {
+    useJUnitPlatform()
+    // Tests read the shared source tree (package-boundary checks) and fixtures from it.
+    systemProperty("handycam.rootDir", rootProject.projectDir.absolutePath)
+    System.getProperty("handycam.captureGolden")?.let { systemProperty("handycam.captureGolden", it) }
 }
 
 tasks.processResources {
