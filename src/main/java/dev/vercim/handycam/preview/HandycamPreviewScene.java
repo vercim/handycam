@@ -38,6 +38,8 @@ public final class HandycamPreviewScene implements Scene {
     /** A narrow field of view for the camera we look through: little perspective distortion, a long distance. */
     private static final float VIEW_FOV = 30f;
     private static final float VIEW_DISTANCE = 9.2f;
+    /** The platform's corners, seen from the side, reach about this far from the middle: a tall narrow view backs off to show them. */
+    private static final float VIEW_HALF_WIDTH = 2.5f;
 
     private final PreviewSimulation simulation;
 
@@ -45,14 +47,14 @@ public final class HandycamPreviewScene implements Scene {
         this.simulation = new PreviewSimulation(params, new Random());
     }
 
-    /** For the screen's hit, damage and explosion events, and for the first-person view that reads the same simulation. */
+    /** For the screen's hit event. */
     public PreviewSimulation simulation() {
         return simulation;
     }
 
     @Override
     public void init(SceneContext context) {
-        context.camera().target(0f, 0.8f, 0f).fov(VIEW_FOV).distance(VIEW_DISTANCE, 4f, 30f).angles(VIEW_YAW, VIEW_PITCH);
+        context.camera().target(0f, 0.8f, 0f).fov(VIEW_FOV).distance(VIEW_DISTANCE, 4f, 30f).fitHalfWidth(VIEW_HALF_WIDTH).angles(VIEW_YAW, VIEW_PITCH);
     }
 
     @Override

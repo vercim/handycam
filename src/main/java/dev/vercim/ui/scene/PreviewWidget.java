@@ -34,11 +34,11 @@ public final class PreviewWidget extends AbstractWidget implements AutoCloseable
 
     private static final int HINT_MAX_LINES = 4;
 
-    private static final int DEFAULT_BACKGROUND = 0xFF14181F;
-    private static final int BORDER = 0xFF3A404C;
+    private static final int DEFAULT_BACKGROUND = 0xFF161616;
+    private static final int BORDER = 0xFF404040;
     private static final int BORDER_CAPTURED = 0xFFE8B040;
     private static final int TEXT = 0xFFE0E0E0;
-    private static final int TEXT_DIM = 0xFF9A9FA8;
+    private static final int TEXT_DIM = 0xFFA0A0A0;
 
     private final Scene scene;
     private final OrbitCamera camera = new OrbitCamera();
@@ -51,7 +51,6 @@ public final class PreviewWidget extends AbstractWidget implements AutoCloseable
     private boolean pauseWhenUnfocused = true;
     private boolean embedded;
     private boolean interactive = true;
-    private Overlay overlay;
     private int background = DEFAULT_BACKGROUND;
     private boolean wasFocused = true;
     private long lastFrameNanos;
@@ -59,12 +58,6 @@ public final class PreviewWidget extends AbstractWidget implements AutoCloseable
     private Component idleHint = CommonComponents.EMPTY;
     private Component capturedHint = CommonComponents.EMPTY;
     private Component unavailable = CommonComponents.EMPTY;
-
-    /** Drawn over the finished view, inside its rectangle: a crosshair, a label. */
-    @FunctionalInterface
-    public interface Overlay {
-        void draw(GuiGraphics graphics, int x, int y, int width, int height);
-    }
 
     public PreviewWidget(int x, int y, int width, int height, Scene scene) {
         super(x, y, width, height, CommonComponents.EMPTY);
@@ -86,20 +79,6 @@ public final class PreviewWidget extends AbstractWidget implements AutoCloseable
     public PreviewWidget interactive(boolean interactive) {
         this.interactive = interactive;
         return this;
-    }
-
-    /** Something drawn over the finished view. */
-    public PreviewWidget overlay(Overlay overlay) {
-        this.overlay = overlay;
-        return this;
-    }
-
-    /**
-     * The fraction of the next simulation step that has elapsed, as of the last drawn frame: what a second view of
-     * the same simulation passes to its own scene so both show the same moment.
-     */
-    public float alpha() {
-        return runner.alpha();
     }
 
     /** The color behind the scene (ARGB, opaque): what the view is cleared to. */
@@ -185,7 +164,6 @@ public final class PreviewWidget extends AbstractWidget implements AutoCloseable
         if (failed) {
             drawUnavailable(graphics, minecraft.font);
         } else {
-            if (overlay != null) overlay.draw(graphics, getX(), getY(), getWidth(), getHeight());
             drawHint(graphics, minecraft.font);
         }
 
@@ -198,7 +176,8 @@ public final class PreviewWidget extends AbstractWidget implements AutoCloseable
         try {
             if (backend == null) backend = PreviewBackends.create();
             float alpha = runner.alpha();
-            backend.render(scene, scene.camera(camera, alpha), alpha, graphics, getX(), getY(), getWidth(), getHeight(), background);
+            camera.aspect((float) getWidth() / Math.max(1, getHeight()));
+            backend.render(scene, camera, alpha, graphics, getX(), getY(), getWidth(), getHeight(), background);
         } catch (RuntimeException | LinkageError e) {
             LOGGER.error("The 3D preview could not be drawn and is switched off", e);
             failed = true;

@@ -168,6 +168,8 @@ Still not done: a Gradle build of either target and a run in the game (see the p
 
 ### Stage 5, third round (the second sketch and the follow-up requests)
 
+*The first-person view described here was removed in round five.*
+
 These replace the round 2 notes where they differ: no amplification, no colored-box head, no Hit button, no mouse camera.
 
 - **Layout from the second sketch.** The option list on the left, the selected option's panel on the right and, between them, two views stacked: the first-person view ("POV") above the 3D view, the Damage and Explosion buttons under them. `SettingsLayout` gives the two views the column's height (45 % and 55 %, 2 pixels apart); below 380 GUI pixels of width they stand side by side across the top. The views have different backgrounds (the 3D view is the screen's dark blue and has no visible edge, the POV has a lighter blue sky) and no frame.
@@ -183,6 +185,8 @@ Not verified, and the first things to look at in a real build: the textured-box 
 
 ### Stage 5, fourth round (screenshots from the game and the next requests)
 
+*The first-person view, its world and its HUD described here were removed in round five; the rest stands.*
+
 The first screenshots from a real game arrived at this point: the 3D view, the textures of the blocks and of the skin, the arm and the themed buttons all drew as intended (only the first-person view was criticised, below). These replace the third-round notes where they differ.
 
 - **The Damage and Explosion buttons and the key hint are gone**, so the views have no controls on or under them. The first-person view lost its text; its texts and the lang keys of the removed controls are deleted.
@@ -195,3 +199,12 @@ The first screenshots from a real game arrived at this point: the 3D view, the t
 How it was checked: 294 unit tests (new: crouch physics and eye height, the HUD layout against the game's coordinates, the hitbox, the new layout including that no button is wider than its column) and 37 headless checks on stubs (HUD sprites drawn, hearts and food counted, crouch through the screen, buttons in their columns, the views' height). Pictures from the software rasterizer, which now clips polygons at the camera's near plane (it used to drop a polygon with a vertex behind the camera, which hid the ground and the arm): the whole screen standing, jumping and crouching in wide and narrow windows, and the arm candidates. They are not the game: the HUD is drawn with colored stand-ins for the sprites, the textures are painted stand-ins, and the fonts differ.
 
 Not verified, and the first things to look at in a real build: the sprite names (`hud/...`) and `GuiGraphics.blitSprite`, `renderItem` inside a scaled pose and a scissor, the crosshair's blend through `RenderSystem.blendFuncSeparate`, `Blocks.DIRT_PATH`, `OAK_LEAVES` (tinted by the default foliage color) and the flowers drawn through `drawBlock`, `Options.keyShift`, the cost of about 400 blocks per frame, and how the arm and the sun look next to the game's own.
+
+### Stage 5, fifth round (one view, less blue)
+
+- **The first-person view is gone**, completely: `HandycamPovScene`, `PovCamera`, `PovWorld`, `PovHud`, `PovHudLayout` and their tests are deleted, and so is what only it needed in the shared code: the `ViewCamera` interface and `Scene.camera` (the backends take the `OrbitCamera` again), `PreviewWidget.overlay` and `alpha()`, the unlit `drawQuad` primitive in `SceneRenderContext` and `GlSceneRenderer`, `Theme.POV_BACKGROUND`. That takes the least verified code out of the GL path (the sprite names, `blitSprite` in a scaled pose, the blend call, about 400 `drawBlock` per frame); the textured-box path for the head stays.
+- **Layout.** `SettingsLayout` has one view: wide windows put it between the list and the panel from the top margin to the bottom margin; narrow windows (below 380 GUI pixels) across the whole width on top, 40 % of the height there.
+- **The camera fits a tall narrow view.** With a single full-height view in a three-column layout the view is taller than wide at most window sizes (about 0.7 wide for 1), and a platform seen from the side at yaw 140 is about 4.2 blocks wide, more than a 30 degree camera 9.2 blocks away shows in a view that narrow. `OrbitCamera.fitHalfWidth(2.5)` makes the eye back off, up to the maximum distance, until 2.5 blocks to each side of the target fit; `PreviewWidget` tells the camera the shape of its rectangle before each frame. A wide view (aspect 1.0 and more) is left as it was. The price is that the head and the platform are smaller in a tall view.
+- **Less blue.** The palette in `Theme` is neutral dark grays (screen 141414, panels 1D1D1D, buttons 2A2A2A, borders and scrollbars gray) with amber as the only color: selection, the Save button, edited values, the slider's fill and the category names (a light amber now, it was light blue). The widget's own default colors in `PreviewWidget` (frame, text, background of the debug screen) are gray as well. The 3D view's clear color is the screen's, so it still has no seam. The blocks' green and the red and yellow lines of the cone are the game's and the scene's, not the interface's.
+
+How it was checked: 284 unit tests (the layout test for one view, four new for the camera's fit: a wide view is untouched, a tall one backs off to exactly the asked half width, the maximum distance caps it, no fit width means no change) and the same 37 headless checks on stubs, adapted (one view, no HUD sprites, the screen's color behind it). Pictures from the software rasterizer at 427x240 and 320x240 show the gray screen, the whole platform in the tall view and the strip view on top in the narrow layout. They are not the game.

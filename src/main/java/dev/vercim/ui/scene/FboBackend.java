@@ -39,7 +39,7 @@ final class FboBackend implements PreviewBackend {
     private TextureTarget target;
 
     @Override
-    public void render(Scene scene, ViewCamera camera, float alpha, GuiGraphics graphics,
+    public void render(Scene scene, OrbitCamera camera, float alpha, GuiGraphics graphics,
                        int x, int y, int width, int height, int backgroundArgb) {
         double guiScale = minecraft.getWindow().getGuiScale();
         int pixelsWide = Math.max(1, (int) Math.round(width * guiScale));
@@ -73,7 +73,7 @@ final class FboBackend implements PreviewBackend {
         target.setFilterMode(GL11.GL_LINEAR);
     }
 
-    private void drawScene(Scene scene, ViewCamera camera, float alpha, int width, int height, int backgroundArgb) {
+    private void drawScene(Scene scene, OrbitCamera camera, float alpha, int width, int height, int backgroundArgb) {
         // Cleared to the color of whatever is behind the view, so an unframed view melts into the screen.
         target.setClearColor((backgroundArgb >> 16 & 0xFF) / 255f, (backgroundArgb >> 8 & 0xFF) / 255f,
                 (backgroundArgb & 0xFF) / 255f, 1f);

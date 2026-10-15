@@ -5,7 +5,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
-/** What the two views share: the platform the player stands on and the skin. */
+/** What the 3D view is made of besides the head: the platform the player stands on, and the skin. */
 final class PreviewWorld {
 
     static final ResourceLocation SKIN = ResourceLocation.withDefaultNamespace(PlayerHead.SKIN_TEXTURE);

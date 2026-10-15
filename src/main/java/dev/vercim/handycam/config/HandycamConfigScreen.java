@@ -1,6 +1,5 @@
 package dev.vercim.handycam.config;
 
-import dev.vercim.handycam.preview.HandycamPovScene;
 import dev.vercim.handycam.preview.HandycamPreviewScene;
 import dev.vercim.ui.config.ConfigModel;
 import dev.vercim.ui.config.Option;
@@ -22,12 +21,12 @@ import net.minecraft.network.chat.Component;
 import java.util.List;
 
 /**
- * The settings screen, on a dark blue background. On the left every option under its category; in the middle two live
- * views of the camera driven by the values being edited, the player's own view (a crosshair and a hand) above a 3D view
- * of the platform and the head; on the right the selected option: its description and an editor (a tall slider for
- * numbers, a list of values for toggles and choices). Narrow windows put the two views on top, side by side. The views
- * have no frame, no "selected" state and no mouse control of the camera: while the screen is open the movement keys
- * always move the simulated player, and a left click on an empty spot, a view included, is a hit.
+ * The settings screen, on a dark gray background. On the left every option under its category; in the middle a live 3D
+ * view of the camera, a head over a platform, driven by the values being edited; on the right the selected option: its
+ * description and an editor (a tall slider for numbers, a list of values for toggles and choices). Narrow windows put
+ * the view on top. The view has no frame, no "selected" state and no mouse control of the camera: while the screen is
+ * open the movement keys always move the simulated player, and a left click on an empty spot, the view included, is a
+ * hit.
  *
  * <p>Edits live only in the {@link ConfigModel} until Save: the preview reads them, the game does not. Cancel, and
  * Escape, drop them. Both loaders open this screen through {@link #create}.
@@ -46,9 +45,8 @@ public final class HandycamConfigScreen extends Screen {
     private Option<?> selected;
 
     // Created once and put back on every init(): a screen throws its widgets away when it is resized, and the
-    // views in particular must keep their scenes and their GPU resources.
+    // view in particular must keep its scene and its GPU resources.
     private PreviewWidget view3d;
-    private PreviewWidget pov;
     private OptionListWidget list;
     private DescriptionPanel panel;
     private VerticalSliderWidget slider;
@@ -80,12 +78,10 @@ public final class HandycamConfigScreen extends Screen {
 
         place(list, layout.list());
         place(view3d, layout.view3d());
-        place(pov, layout.pov());
         place(panel, layout.panel());
 
         addRenderableWidget(list);
-        addRenderableWidget(view3d);   // this one steps the simulation, so it comes before the view that reads it
-        addRenderableWidget(pov);
+        addRenderableWidget(view3d);
         addRenderableWidget(panel);
         addRenderableWidget(slider);
         addRenderableWidget(choices);
@@ -96,19 +92,11 @@ public final class HandycamConfigScreen extends Screen {
     }
 
     private void createWidgets() {
-        Component unavailable = Component.translatable("handycam.config.preview.unavailable");
         view3d = new PreviewWidget(0, 0, 0, 0, scene)
                 .embedded()
                 .interactive(false)
                 .background(Theme.BACKGROUND)
-                .unavailableMessage(unavailable);
-        pov = new PreviewWidget(0, 0, 0, 0,
-                new HandycamPovScene(scene.simulation(), () -> view3d.alpha(), () -> minecraft.options.fov().get()))
-                .embedded()
-                .interactive(false)
-                .background(Theme.POV_BACKGROUND)
-                .overlay(HandycamPovScene.hud())
-                .unavailableMessage(unavailable);
+                .unavailableMessage(Component.translatable("handycam.config.preview.unavailable"));
         list = new OptionListWidget(rows, this::select);
         panel = new DescriptionPanel();
         slider = new VerticalSliderWidget();
@@ -199,12 +187,11 @@ public final class HandycamConfigScreen extends Screen {
     @Override
     public void removed() {
         if (view3d != null) view3d.close();
-        if (pov != null) pov.close();
     }
 
     // ---- drawing and input
 
-    /** A plain dark blue instead of the panorama, the dirt or the blurred world behind the screen. */
+    /** A plain dark gray instead of the panorama, the dirt or the blurred world behind the screen. */
     @Override
     public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         graphics.fill(0, 0, width, height, Theme.BACKGROUND);
@@ -225,7 +212,7 @@ public final class HandycamConfigScreen extends Screen {
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        // The 3D view gets the first chance, so a movement key never reaches a focused button (Space is the jump).
+        // The view gets the first chance, so a movement key never reaches a focused button (Space is the jump).
         // Escape is not one of its keys and still closes the screen.
         if (view3d != null && view3d.keyPressed(keyCode, scanCode, modifiers)) return true;
         return super.keyPressed(keyCode, scanCode, modifiers);
@@ -238,8 +225,8 @@ public final class HandycamConfigScreen extends Screen {
     }
 
     /**
-     * A left click on an empty spot is a hit (the swing the game would report). The views take no clicks, so a click on
-     * one reaches here and is a hit too; a click on a control, the list or the panel is not.
+     * A left click on an empty spot is a hit (the swing the game would report). The view takes no clicks, so a click on
+     * it reaches here and is a hit too; a click on a control, the list or the panel is not.
      */
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {

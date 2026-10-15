@@ -8,7 +8,7 @@ import org.joml.Vector3f;
  * A camera that circles a target point: drag to turn it, scroll to move closer or away. Yaw is the angle around the
  * vertical axis (0 puts the eye on the +Z side looking toward -Z), pitch the elevation above the horizon.
  */
-public final class OrbitCamera implements ViewCamera {
+public final class OrbitCamera {
 
     public static final float MIN_PITCH = -5f;
     public static final float MAX_PITCH = 88f;
@@ -25,6 +25,8 @@ public final class OrbitCamera implements ViewCamera {
     private float fovY = 50f;
     private float near = 0.1f;
     private float far = 200f;
+    private float fitHalfWidth;
+    private float aspect = 1f;
 
     public OrbitCamera target(float x, float y, float z) {
         target.set(x, y, z);
@@ -49,6 +51,21 @@ public final class OrbitCamera implements ViewCamera {
         return this;
     }
 
+    /**
+     * Keeps at least this much of the scene visible to each side of the target, whatever the shape of the view: in a
+     * tall narrow view the eye moves back as far as needed (up to the maximum distance). 0, the default, turns it off.
+     */
+    public OrbitCamera fitHalfWidth(float blocks) {
+        this.fitHalfWidth = blocks;
+        return this;
+    }
+
+    /** The shape of the view the camera is drawn into, width over height; set by the widget before each frame. */
+    public OrbitCamera aspect(float aspect) {
+        this.aspect = Math.max(0.05f, aspect);
+        return this;
+    }
+
     public OrbitCamera clip(float near, float far) {
         this.near = near;
         this.far = far;
@@ -58,6 +75,13 @@ public final class OrbitCamera implements ViewCamera {
     public float yaw() { return yaw; }
     public float pitch() { return pitch; }
     public float distance() { return distance; }
+
+    /** How far the eye really is from the target: {@link #distance()}, or farther if {@link #fitHalfWidth} asks for it. */
+    public float effectiveDistance() {
+        if (fitHalfWidth <= 0f) return distance;
+        float needed = fitHalfWidth / ((float) Math.tan(Math.toRadians(fovY) / 2.0) * aspect);
+        return Math.min(maxDistance, Math.max(distance, needed));
+    }
     public float fov() { return fovY; }
     public Vector3f target(Vector3f dest) { return dest.set(target); }
 
@@ -72,23 +96,21 @@ public final class OrbitCamera implements ViewCamera {
         distance = clamp((float) (distance * Math.pow(ZOOM_PER_NOTCH, scrollNotches)), minDistance, maxDistance);
     }
 
-    @Override
     public Vector3f eye(Vector3f dest) {
         double yawRad = Math.toRadians(yaw);
         double pitchRad = Math.toRadians(pitch);
+        float distance = effectiveDistance();
         double flat = Math.cos(pitchRad) * distance;
         return dest.set(target.x + (float) (Math.sin(yawRad) * flat),
                         target.y + (float) (Math.sin(pitchRad) * distance),
                         target.z + (float) (Math.cos(yawRad) * flat));
     }
 
-    @Override
     public Matrix4f view(Matrix4f dest) {
         Vector3f eye = eye(new Vector3f());
         return dest.identity().lookAt(eye.x, eye.y, eye.z, target.x, target.y, target.z, 0f, 1f, 0f);
     }
 
-    @Override
     public Matrix4f projection(float aspect, Matrix4f dest) {
         return dest.identity().perspective((float) Math.toRadians(fovY), aspect, near, far);
     }

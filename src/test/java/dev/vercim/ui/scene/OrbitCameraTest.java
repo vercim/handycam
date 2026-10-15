@@ -142,4 +142,39 @@ class OrbitCameraTest {
         assertEquals(0f, camera.rightX(), 1e-4f);
         assertEquals(-1f, camera.rightZ(), 1e-4f);
     }
+
+    @Test
+    void aWideViewKeepsTheDistanceItWasGiven() {
+        OrbitCamera camera = new OrbitCamera().angles(0f, 0f).fov(30f).distance(9.2f, 4f, 30f).fitHalfWidth(2.5f).aspect(1.6f);
+
+        assertEquals(9.2f, camera.effectiveDistance(), 1e-5f);
+        assertEquals(9.2f, eye(camera).length(), 1e-4f);
+    }
+
+    @Test
+    void aTallNarrowViewBacksOffUntilTheAskedWidthFits() {
+        OrbitCamera camera = new OrbitCamera().angles(0f, 0f).fov(30f).distance(9.2f, 4f, 30f).fitHalfWidth(2.5f).aspect(0.6f);
+
+        float distance = camera.effectiveDistance();
+
+        assertTrue(distance > 9.2f);
+        // at that distance the half width the view shows at the target is just the one asked for
+        float shown = distance * (float) Math.tan(Math.toRadians(15.0)) * 0.6f;
+        assertEquals(2.5f, shown, 1e-3f);
+        assertEquals(distance, eye(camera).length(), 1e-4f);
+    }
+
+    @Test
+    void backingOffStopsAtTheMaximumDistance() {
+        OrbitCamera camera = new OrbitCamera().fov(30f).distance(9.2f, 4f, 20f).fitHalfWidth(2.5f).aspect(0.05f);
+
+        assertEquals(20f, camera.effectiveDistance(), 1e-5f);
+    }
+
+    @Test
+    void withoutAFitWidthTheShapeOfTheViewChangesNothing() {
+        OrbitCamera camera = new OrbitCamera().fov(30f).distance(9.2f, 4f, 30f).aspect(0.2f);
+
+        assertEquals(9.2f, camera.effectiveDistance(), 1e-5f);
+    }
 }

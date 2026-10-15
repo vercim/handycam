@@ -15,7 +15,7 @@ class SettingsLayoutTest {
     };
 
     private static List<Rect> parts(SettingsLayout layout) {
-        return List.of(layout.title(), layout.status(), layout.list(), layout.pov(), layout.view3d(), layout.panel(),
+        return List.of(layout.title(), layout.status(), layout.list(), layout.view3d(), layout.panel(),
                 layout.save(), layout.cancel(), layout.resetAll());
     }
 
@@ -63,53 +63,39 @@ class SettingsLayoutTest {
     }
 
     @Test
-    void wideWindowsPutTheListLeftThePanelRightAndTheTwoViewsStackedBetween() {
+    void wideWindowsPutTheListLeftThePanelRightAndTheViewBetween() {
         SettingsLayout layout = SettingsLayout.compute(854, 480);
 
         assertFalse(layout.narrow());
-        assertTrue(layout.list().right() <= layout.pov().x());
-        assertTrue(layout.pov().right() <= layout.panel().x());
-        assertEquals(layout.pov().x(), layout.view3d().x());
-        assertEquals(layout.pov().width(), layout.view3d().width());
-        assertTrue(layout.pov().bottom() <= layout.view3d().y(), "the first-person view is above the 3D view");
-        assertTrue(layout.pov().width() > layout.list().width(), "the views are the big part");
+        assertTrue(layout.list().right() <= layout.view3d().x());
+        assertTrue(layout.view3d().right() <= layout.panel().x());
+        assertTrue(layout.view3d().width() > layout.list().width(), "the view is the big part");
+        assertTrue(layout.view3d().width() > layout.panel().width(), "the view is the big part");
     }
 
     @Test
-    void theViewsTakeTheWholeHeightOfTheScreenBetweenTheMargins() {
+    void theViewTakesTheWholeHeightOfTheScreenBetweenTheMargins() {
         for (int[] size : new int[][] {{427, 240}, {480, 270}, {854, 480}, {1920, 1080}}) {
             SettingsLayout layout = SettingsLayout.compute(size[0], size[1]);
             String where = size[0] + "x" + size[1];
 
-            assertEquals(SettingsLayout.MARGIN, layout.pov().y(), where);
+            assertEquals(SettingsLayout.MARGIN, layout.view3d().y(), where);
             assertEquals(size[1] - SettingsLayout.MARGIN, layout.view3d().bottom(), where);
         }
     }
 
     @Test
-    void theTwoViewsShareTheColumnHeightAboutEvenly() {
-        for (int[] size : new int[][] {{427, 240}, {854, 480}, {1920, 1080}}) {
-            SettingsLayout layout = SettingsLayout.compute(size[0], size[1]);
-            int pov = layout.pov().height();
-            int d3 = layout.view3d().height();
-            assertTrue(pov > 0 && d3 > 0, size[0] + "x" + size[1]);
-            assertTrue(Math.abs(pov - d3) <= (pov + d3) / 4, size[0] + "x" + size[1] + ": " + pov + " and " + d3);
-        }
-    }
-
-    @Test
-    void narrowWindowsPutTheTwoViewsSideBySideOnTop() {
+    void narrowWindowsPutTheViewAcrossTheTop() {
         SettingsLayout layout = SettingsLayout.compute(320, 240);
 
         assertTrue(layout.narrow());
-        assertTrue(layout.pov().right() <= layout.view3d().x());
-        assertEquals(layout.pov().y(), layout.view3d().y());
-        assertEquals(layout.pov().height(), layout.view3d().height());
-        assertTrue(layout.pov().bottom() <= layout.list().y());
+        assertEquals(SettingsLayout.MARGIN, layout.view3d().x());
+        assertEquals(320 - SettingsLayout.MARGIN, layout.view3d().right());
+        assertTrue(layout.view3d().bottom() <= layout.list().y());
         assertTrue(layout.view3d().bottom() <= layout.panel().y());
         assertTrue(layout.list().right() <= layout.panel().x());
         assertEquals(layout.list().y(), layout.panel().y());
-        assertTrue(layout.pov().height() >= 48);
+        assertTrue(layout.view3d().height() >= 48);
         assertTrue(layout.list().height() >= 60, "the lower half stays usable: " + layout.list());
     }
 
@@ -126,9 +112,8 @@ class SettingsLayoutTest {
 
         assertTrue(layout.list().width() >= 100);
         assertTrue(layout.panel().width() >= 96);
-        assertTrue(layout.pov().width() >= 120);
-        assertTrue(layout.pov().height() >= 80);
-        assertTrue(layout.view3d().height() >= 80);
+        assertTrue(layout.view3d().width() >= 150);
+        assertTrue(layout.view3d().height() >= 150);
         assertTrue(layout.list().height() >= 150);
         assertTrue(layout.panel().height() >= 150);
         assertEquals(20, layout.save().height());

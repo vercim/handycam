@@ -172,15 +172,6 @@ final class GlSceneRenderer implements SceneRenderContext, AutoCloseable {
     }
 
     @Override
-    public void drawQuad(Vector3fc a, Vector3fc b, Vector3fc c, Vector3fc d, int argb) {
-        BufferBuilder builder = colorBuilder();
-        for (Vector3fc corner : new Vector3fc[] {a, b, c, d}) {
-            stack.transform(corner.x(), corner.y(), corner.z(), wa);
-            builder.addVertex(wa.x(), wa.y(), wa.z()).setColor(argb);
-        }
-    }
-
-    @Override
     public void drawTexturedBox(ResourceLocation texture, Vector3fc min, Vector3fc max, BoxUv uv, int argb) {
         BufferBuilder builder = texturedBuilder(texture);
         Shapes.texturedBox(stack.current(), min, max, uv, (shade, a, b, c, d, t) -> {
