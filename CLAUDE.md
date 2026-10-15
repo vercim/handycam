@@ -91,8 +91,12 @@ src/main/java/dev/vercim/
                                      HandycamConfigScreen (wrapper)
   neoforge/                        — HandycamNeoForge, HandycamNeoForgeClient (MOD-bus setup, F10 key),
                                      HandycamConfigScreenNeoForge (wrapper)
-  handycam/dev/                    — DemoScene, PreviewDebugScreen, PreviewSmokeTest: development aid for the
-                                     preview renderer (see docs/WORKFLOW.md), never shown to players
+  handycam/preview/                — what the config screen's preview shows: PreviewBody (a player walking and
+                                     jumping in place with vanilla's arithmetic) + PreviewSimulation (body feeding
+                                     CameraRig) are Minecraft-free; HandycamPreviewScene draws the 3x3 platform and
+                                     the tilting camera; TiltDisplay amplifies angles for drawing only
+  handycam/dev/                    — PreviewDebugScreen, PreviewSmokeTest: development aid for the preview
+                                     (see docs/WORKFLOW.md), never shown to players
 src/test/java/                     — JUnit 5: ui.sim and rig unit tests, rig-vs-golden equivalence, package boundaries
 src/test/resources/                — camera-golden.bin.gz (output of the pre-rig layer stack)
 src/main/resources/

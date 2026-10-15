@@ -80,6 +80,28 @@ class RigSimulatorTest {
     }
 
     @Test
+    void stepRunsOneFixedStepAndMatchesAdvance() {
+        RigOutput[] out = new RigOutput[2];
+        for (int i = 0; i < 2; i++) {
+            TestParams tp = new TestParams();
+            RigSimulator sim = simulator();
+            AtomicInteger ticks = new AtomicInteger();
+            for (int n = 0; n < 24; n++) {
+                RigSimulator.TickSource source = () -> ticks.getAndIncrement() == 0
+                        ? WALKING.withEvents(0f, 3f, 20f, false) : WALKING;
+                if (i == 0) {
+                    sim.step(source, tp.params, RigView.DEFAULT);
+                } else {
+                    sim.advance(RigSimulator.STEP_SECONDS, source, tp.params, RigView.DEFAULT);
+                }
+            }
+            out[i] = sim.output(1f);
+            assertEquals(4, ticks.get());
+        }
+        assertEquals(out[0], out[1]);
+    }
+
+    @Test
     void startsAtRest() {
         TestParams tp = new TestParams();
         RigSimulator sim = simulator();

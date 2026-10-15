@@ -92,13 +92,13 @@ JUnit 5 tests live in `src/test` and run on every target. They need no game: the
 The 3D preview (`ui/scene`) draws into an offscreen framebuffer, which unit tests cannot cover. Two development switches open a demo screen from the title screen (`handycam/dev`); set them through `JAVA_TOOL_OPTIONS` so Gradle passes them to the game:
 
 ```powershell
-$env:JAVA_TOOL_OPTIONS = "-Dhandycam.previewDemo=true"            # open the demo to play with: click, WASD, Space, drag, wheel, Esc
-$env:JAVA_TOOL_OPTIONS = "-Dhandycam.previewSmoke=C:/tmp/preview.png"  # scripted session: save a screenshot, then quit
+$env:JAVA_TOOL_OPTIONS = "-Dhandycam.previewDemo=true"            # open the preview to play with: click, WASD, Space (Ctrl sprints), drag, wheel, Esc
+$env:JAVA_TOOL_OPTIONS = "-Dhandycam.previewSmoke=C:/tmp/preview.png"  # scripted session: saves preview-walking/jump/landing/damage/scale-1.png next to the path, then quits
 .\gradlew.bat runActiveClient
 Remove-Item Env:JAVA_TOOL_OPTIONS
 ```
 
-With neither property set the hook does nothing. Check the screenshot for: a chequered platform with textured, shaded blocks, a red box with a dark "camera" box and a yellow line, red/green/blue axes at a corner, and the GUI around the view undisturbed.
+With neither property set the hook does nothing. Check the screenshots for: a 3x3 platform of textured, shaded blocks, the camera floating above it with a yellow view cone that tilts away from the faint level cone (clearly after the landing and the damage, slightly while walking), and the GUI around the view undisturbed. The scripted session does not pause when the window is unfocused.
 
 ## CI
 

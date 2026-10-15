@@ -43,6 +43,8 @@ public final class PreviewWidget extends AbstractWidget implements AutoCloseable
     private PreviewBackend backend;
     private boolean failed;
     private boolean dragging;
+    private boolean pauseWhenUnfocused = true;
+    private boolean wasFocused = true;
     private long lastFrameNanos;
 
     private Component idleHint = CommonComponents.EMPTY;
@@ -65,6 +67,15 @@ public final class PreviewWidget extends AbstractWidget implements AutoCloseable
     /** Shown instead of the view if it cannot be drawn. */
     public PreviewWidget unavailableMessage(Component message) {
         this.unavailable = message;
+        return this;
+    }
+
+    /**
+     * Whether the simulation stands still while the game window is not focused (the default). Automated checks
+     * that run in the background switch it off.
+     */
+    public PreviewWidget pauseWhenUnfocused(boolean pause) {
+        this.pauseWhenUnfocused = pause;
         return this;
     }
 
@@ -103,13 +114,16 @@ public final class PreviewWidget extends AbstractWidget implements AutoCloseable
         graphics.fill(getX(), getY(), getX() + getWidth(), getY() + getHeight(), BACKGROUND);
 
         if (!failed) {
-            if (minecraft.isWindowActive()) {
-                input.poll();
+            boolean focused = minecraft.isWindowActive() || !pauseWhenUnfocused;
+            if (focused) {
+                // Releases that arrived while another window had focus were never seen: check the real keys once.
+                if (!wasFocused) input.poll();
                 InputState state = input.state();
                 runner.advance(frameSeconds, dt -> scene.tick(dt, state));
             } else {
                 runner.reset();
             }
+            wasFocused = focused;
             drawScene(graphics);
         }
         if (failed) {

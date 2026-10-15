@@ -111,3 +111,14 @@ Besides the camera offset the layers produce crosshair offsets (`MouseLeadLayer`
 - Checked in the dev client on Fabric and NeoForge with the scripted session (`PreviewSmokeTest`): textured, face-shaded blocks with depth, boxes, line strips, the hint text and the capture border, the surrounding GUI untouched, the same picture on both loaders; a GUI scale change mid-session (screen re-init, framebuffer resize) kept the scene and drew correctly; forcing the backend to throw showed the placeholder, logged the error once and left the game running. Not checked: other rendering mods (Sodium, Iris), macOS, window resize by dragging.
 - A screen re-runs `init()` on every resize and discards its widgets, so the host should create the `PreviewWidget` once and re-add it with `setPosition`/`setSize` (the debug screen does); recreating it would drop the scene and leak the framebuffer.
 - A screen does not tell a widget about clicks elsewhere or let it see Escape before closing, so the host screen has to call `releaseCaptureIfOutside` from its `mouseClicked` and offer `keyPressed` to the widget first (`PreviewDebugScreen` shows both).
+
+## Stage 4 notes
+
+Changes to the plan, from the author's sketch of the screen (see Stage 5):
+
+- The platform is 3x3x1 blocks and the scene has no steps or collision. The simulated player walks and jumps **in place**: nothing in the scene moves, the camera floats over the middle of the platform and only its **tilt** is drawn (pitch, yaw, roll as the rig reports them). The rig's offsets (vertical bob, breathing) are therefore not drawn.
+- Keys: W A S D and Space feed the simulated player; Ctrl (the sprint binding) is kept because sprint changes several effects. The mouse drag still turns the view, wheel zooms; there is no mouse look, so the turn-sway and crosshair-drift settings cannot be seen.
+- `PreviewBody` runs vanilla's movement arithmetic (acceleration, friction, gravity, sprint jump boost) at 20 Hz and reports what the game's player reader sees. That is the velocity after friction, so walking reports about 0.39 on the rig's 0.3-blocks-per-tick scale and sprinting 0.51, not 1.0; the earlier test scenario used larger values. Jumps last 12 ticks and land with a fall of 1.25 blocks, as in the game.
+- Real tilts are small: about 1 degree while walking, 4 for a landing or a hit, 4-5 for an explosion. `TiltDisplay` amplifies angles for drawing (x5 for small ones, easing off below 40 degrees); a faint level copy of the view cone stays put so the tilt reads against it.
+- `RigSimulator.step` runs one fixed step for hosts that already step at 1/120 s. The input poll of `InputCapture` now runs when focus returns, as specified, not every frame. `PreviewWidget.pauseWhenUnfocused(false)` lets the scripted check run in the background.
+- Checked in the dev client (screenshots of walking, jump, landing, damage and a GUI scale change).

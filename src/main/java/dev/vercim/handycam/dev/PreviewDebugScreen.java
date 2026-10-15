@@ -1,21 +1,30 @@
 package dev.vercim.handycam.dev;
 
 import com.mojang.blaze3d.platform.NativeImage;
+import dev.vercim.handycam.config.HandycamConfig;
+import dev.vercim.handycam.config.HandycamOptions;
+import dev.vercim.handycam.config.PendingRigParams;
+import dev.vercim.handycam.preview.HandycamPreviewScene;
+import dev.vercim.ui.config.ConfigModel;
 import dev.vercim.ui.scene.PreviewWidget;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Screenshot;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * Hosts a {@link PreviewWidget} with the {@link DemoScene}. Development aid for the preview renderer, opened by
- * {@link PreviewSmokeTest}; with a screenshot path it plays a short scripted session, saves the frame and quits the
- * game, so the renderer can be checked without a person at the keyboard. Strings are plain text on purpose: the
- * screen is never shown to players.
+ * Hosts a {@link PreviewWidget} with the {@link HandycamPreviewScene}, driven by the values in a model built on the
+ * saved config. Development aid for the preview renderer, opened by {@link PreviewSmokeTest}; with a screenshot path
+ * it plays a short timed session, saves screenshots of the interesting moments and quits the game, so the preview
+ * can be checked without a person at the keyboard. Strings are plain text on purpose: the screen is never shown to
+ * players.
  */
 final class PreviewDebugScreen extends Screen {
 
@@ -23,15 +32,23 @@ final class PreviewDebugScreen extends Screen {
     private static final int KEY_D = 68;
     private static final int KEY_SPACE = 32;
 
+    private record Step(double seconds, Runnable action) {}
+
     private final Path screenshot;
+    private final ConfigModel model = HandycamOptions.create(HandycamConfig.get());
+    private final HandycamPreviewScene scene = new HandycamPreviewScene(new PendingRigParams(model));
+    private final List<Step> script = new ArrayList<>();
+    private final int originalGuiScale;
     private PreviewWidget preview;
-    private int frame;
-    private int originalGuiScale;
+    private GuiGraphics currentGraphics;
+    private long startNanos;
+    private int next;
 
     PreviewDebugScreen(Path screenshot) {
         super(Component.literal("Handycam preview (development)"));
         this.screenshot = screenshot;
         this.originalGuiScale = Minecraft.getInstance().options.guiScale().get();
+        if (screenshot != null) buildScript();
     }
 
     /**
@@ -41,14 +58,22 @@ final class PreviewDebugScreen extends Screen {
     @Override
     protected void init() {
         if (preview == null) {
-            preview = new PreviewWidget(0, 0, 0, 0, new DemoScene())
-                    .hints(Component.literal("Click to move: WASD, Space. Drag to turn the view, wheel to zoom."),
+            preview = new PreviewWidget(0, 0, 0, 0, scene)
+                    .hints(Component.literal("Click, then W A S D and Space (Ctrl sprints). Drag to turn the view."),
                             Component.literal("Esc or a click outside to let go."))
-                    .unavailableMessage(Component.literal("3D preview unavailable"));
+                    .unavailableMessage(Component.literal("3D preview unavailable"))
+                    .pauseWhenUnfocused(screenshot == null);
         }
         preview.setPosition(20, 28);
-        preview.setSize(width - 40, height - 52);
+        preview.setSize(width - 40, height - 56);
         addRenderableWidget(preview);
+
+        addRenderableWidget(Button.builder(Component.literal("Damage"), b -> scene.simulation().damage())
+                .bounds(20, height - 24, 70, 20).build());
+        addRenderableWidget(Button.builder(Component.literal("Hit"), b -> scene.simulation().hit())
+                .bounds(94, height - 24, 70, 20).build());
+        addRenderableWidget(Button.builder(Component.literal("Explosion"), b -> scene.simulation().explosion(1f))
+                .bounds(168, height - 24, 70, 20).build());
     }
 
     @Override
@@ -59,38 +84,43 @@ final class PreviewDebugScreen extends Screen {
         if (screenshot != null) runScript(graphics);
     }
 
-    /** Frame-counted session: click, walk diagonally, jump, turn the view, then save a screenshot and quit. */
-    private void runScript(GuiGraphics graphics) {
-        frame++;
-        double centreX = preview.getX() + preview.getWidth() / 2.0;
-        double centreY = preview.getY() + preview.getHeight() / 2.0;
+    // ---- scripted session
 
-        switch (frame) {
-            case 5 -> {
-                preview.mouseClicked(centreX, centreY, 0);
-                preview.mouseReleased(centreX, centreY, 0);
-            }
-            case 10 -> {
-                preview.keyPressed(KEY_W, 0, 0);
-                preview.keyPressed(KEY_D, 0, 0);
-            }
-            case 70 -> preview.keyPressed(KEY_SPACE, 0, 0);
-            case 75 -> preview.keyReleased(KEY_SPACE, 0, 0);
-            case 100 -> {
-                preview.keyReleased(KEY_W, 0, 0);
-                preview.keyReleased(KEY_D, 0, 0);
-            }
-            case 110 -> {
-                preview.mouseClicked(centreX, centreY, 0);
-                preview.mouseDragged(centreX + 90, centreY - 25, 0, 90, -25);
-                preview.mouseReleased(centreX, centreY, 0);
-                preview.mouseScrolled(centreX, centreY, 0, 1.0);
-            }
-            case 125 -> changeGuiScale(1);
-            case 150 -> save(graphics);
-            case 152 -> changeGuiScale(originalGuiScale);
-            case 155 -> minecraft.stop();
-            default -> { }
+    private void buildScript() {
+        script.add(new Step(0.3, () -> {
+            double x = preview.getX() + preview.getWidth() / 2.0;
+            double y = preview.getY() + preview.getHeight() / 2.0;
+            preview.mouseClicked(x, y, 0);
+            preview.mouseReleased(x, y, 0);
+        }));
+        script.add(new Step(0.6, () -> {
+            preview.keyPressed(KEY_W, 0, 0);
+            preview.keyPressed(KEY_D, 0, 0);
+        }));
+        script.add(new Step(2.2, () -> shot("walking")));
+        script.add(new Step(2.4, () -> {
+            preview.keyReleased(KEY_W, 0, 0);
+            preview.keyReleased(KEY_D, 0, 0);
+        }));
+        script.add(new Step(3.5, () -> preview.keyPressed(KEY_SPACE, 0, 0)));
+        script.add(new Step(3.55, () -> preview.keyReleased(KEY_SPACE, 0, 0)));
+        script.add(new Step(3.7, () -> shot("jump")));
+        script.add(new Step(4.2, () -> shot("landing")));
+        script.add(new Step(5.0, () -> scene.simulation().damage()));
+        script.add(new Step(5.1, () -> shot("damage")));
+        script.add(new Step(5.6, () -> changeGuiScale(1)));
+        script.add(new Step(6.0, () -> shot("scale-1")));
+        script.add(new Step(6.1, () -> changeGuiScale(originalGuiScale)));
+        script.add(new Step(6.5, () -> minecraft.stop()));
+    }
+
+    private void runScript(GuiGraphics graphics) {
+        long now = System.nanoTime();
+        if (startNanos == 0L) startNanos = now;
+        double elapsed = (now - startNanos) / 1.0e9;
+        currentGraphics = graphics;
+        while (next < script.size() && elapsed >= script.get(next).seconds()) {
+            script.get(next++).action().run();
         }
     }
 
@@ -99,14 +129,17 @@ final class PreviewDebugScreen extends Screen {
         minecraft.options.guiScale().set(scale);
     }
 
-    private void save(GuiGraphics graphics) {
-        graphics.flush();
+    private void shot(String label) {
+        currentGraphics.flush();
+        String name = screenshot.getFileName().toString().replaceFirst("\\.png$", "") + "-" + label + ".png";
         try (NativeImage image = Screenshot.takeScreenshot(Minecraft.getInstance().getMainRenderTarget())) {
-            image.writeToFile(screenshot);
+            image.writeToFile(screenshot.resolveSibling(name));
         } catch (IOException e) {
             throw new IllegalStateException("Could not save the preview screenshot", e);
         }
     }
+
+    // ---- input
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {

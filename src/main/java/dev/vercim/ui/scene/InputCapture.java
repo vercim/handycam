@@ -6,8 +6,8 @@ import java.util.Set;
 
 /**
  * Keyboard capture for a preview. A click turns it on; Escape, a click elsewhere or losing focus turns it off. While
- * on, the keys the user bound for movement are tracked from press and release events, and the real key state is
- * polled every tick so a release that never arrived (focus lost, key let go over another window) cannot leave a
+ * on, the keys the user bound for movement are tracked from press and release events; the real key state is polled
+ * when the window regains focus, so a release that never arrived (key let go over another window) cannot leave a
  * control stuck.
  */
 public final class InputCapture {
@@ -71,7 +71,10 @@ public final class InputCapture {
         return true;
     }
 
-    /** Call once per tick: drops controls whose key is no longer physically down. */
+    /**
+     * Drops controls whose key is no longer physically down. Call when focus comes back to the window: a key let go
+     * while another window had focus never sent its release.
+     */
     public void poll() {
         if (held.isEmpty()) return;
         held.removeIf(control -> bindings.canPoll(control) && !bindings.isDown(control));

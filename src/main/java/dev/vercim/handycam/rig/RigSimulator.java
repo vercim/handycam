@@ -37,17 +37,23 @@ public final class RigSimulator {
 
     /** Advances by a rendered frame of {@code frameSeconds}; returns how many fixed steps ran. */
     public int advance(double frameSeconds, TickSource source, RigParams params, RigView view) {
-        return runner.advance(frameSeconds, dt -> {
-            if (stepInTick == 0) {
-                currentInput = source.nextTick();
-                rig.tick(currentInput, params);
-            }
-            stepInTick = (stepInTick + 1) % STEPS_PER_TICK;
+        return runner.advance(frameSeconds, dt -> step(source, params, view));
+    }
 
-            clock += dt;
-            previous = current;
-            current = rig.compute(currentInput, params, view, (float) clock, (float) dt);
-        });
+    /**
+     * Runs exactly one fixed step, for a host that already steps at {@link #STEP_SECONDS} (the preview widget);
+     * {@link #output(float)} then takes that host's own interpolation fraction.
+     */
+    public void step(TickSource source, RigParams params, RigView view) {
+        if (stepInTick == 0) {
+            currentInput = source.nextTick();
+            rig.tick(currentInput, params);
+        }
+        stepInTick = (stepInTick + 1) % STEPS_PER_TICK;
+
+        clock += STEP_SECONDS;
+        previous = current;
+        current = rig.compute(currentInput, params, view, (float) clock, (float) STEP_SECONDS);
     }
 
     /** The output for the current moment, interpolated by the fraction of a step left over by {@link #advance}. */
