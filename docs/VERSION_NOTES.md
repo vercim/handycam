@@ -81,6 +81,37 @@ Likely trouble spots, in order: `Camera`, `Gui`, `GameRenderer` mixins; then `Pl
 
 ## Target entries
 
+### MC 1.21.10 — Fabric / NeoForge
+
+Targets: `1.21.10-fabric`, `1.21.10-neoforge` · first mod version: 2.1.0 · date: 2026-10-15
+
+#### Dependencies
+```properties
+java_version=21
+fabric_loader_min_version=0.17.0
+fabric_api_version=0.138.4+1.21.10
+cloth_config_version=20.0.149
+modmenu_version=16.0.1              # Fabric only, optional
+neoforge_version=21.10.64
+neoforge_loader_version_range=[4,)
+```
+NeoForge metadata pins Minecraft to `[1.21.10,1.21.11)` and Cloth Config to `[20,)`.
+
+#### API differences (vs. 1.21.4)
+| Area | 1.21.4 | 1.21.10 | Where / condition |
+|---|---|---|---|
+| `GuiGraphics.pose()` | `PoseStack`: `pushPose()` / `popPose()`, `translate(x, y, z)`, `scale(x, y, z)` | `Matrix3x2fStack`: `pushMatrix()` / `popMatrix()`, `translate(x, y)`, `scale(x, y)` | `mixin/GuiMixin.java`, `//? if >=1.21.10` |
+| Key mapping category | `String` (`key.categories.handycam`) | `KeyMapping.Category.register(ResourceLocation)` (lang key `key.category.handycam.handycam`) | `HandycamKeys.java`, `//? if >=1.21.10` |
+| NeoForge `@EventBusSubscriber` | `bus = Bus.MOD` is required | `bus` is gone; the bus follows from the event type | `neoforge/HandycamNeoForgeClient.java`, `//? if neoforge && >=1.21.10` |
+
+`Camera.setup()` (`BlockGetter`), `GameRenderer.getFov()` (`float`), `getProjectionMatrix(float)`, `AbstractClientPlayer.getFieldOfViewModifier(boolean, float)`, the explosion packet (`center()`), and `Gui.renderCrosshair(GuiGraphics, DeltaTracker)` are unchanged from 1.21.4.
+
+#### Quirks
+- NeoForge 21.10 with Cloth Config 20.0.149 shows a "Warning while loading mods" screen (Cloth Config uses `@OnlyIn`) in front of the main menu; it blocks unattended runs until `showLoadWarnings = false` is set in `config/neoforge-client.toml`.
+
+#### Verified
+- 2026-10-15, mod 2.1.0 (dev build): see the 1.21.4 entry for the checks run; Fabric ☑ NeoForge ☑. Packaged-JAR gameplay in a clean profile: ☐
+
 ### MC 1.21.4 — Fabric / NeoForge
 
 Targets: `1.21.4-fabric`, `1.21.4-neoforge` · first mod version: 2.1.0 · date: 2026-10-15
