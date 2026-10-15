@@ -125,6 +125,7 @@ Applying offsets: `rotateX(pitch)` → `rotateY(-yaw)` → `rotateZ(roll)` (yaw 
 
 #### Quirks
 - 2.0.0-alpha first packaged build registered the Mixin config correctly for both loaders (the `1.3.2` fix); keep verifying it on every release.
+- Settings screen and preview widgets (1.21.1; the screen and widgets were written without a Gradle build available, see [preview-findings.md](preview-findings.md)): `Screen.init()` runs again and throws every widget away on each resize, so stateful widgets (the preview, the option list) are created once and re-added; `Screen.render` already draws the background; `AbstractWidget.mouseScrolled` has four parameters (`x, y, scrollX, scrollY`); a click elsewhere is not passed to a widget and Escape reaches the screen before the widgets, so the screen gives the preview the first chance at keys and calls `releaseCaptureIfOutside`; widget text is measured as plain strings (`Font.width(String)`), and `TextWrap` wraps it instead of `Font.split`, which keeps the wrapping testable. Not used by the settings screen any more: Cloth Config (still declared, see D7 in the findings report).
 - NeoForge (ModDevGradle) test classpath lacks JOML and Gson although the main classpath has them; `build.neoforge.gradle.kts` declares both for tests. Fabric needs nothing extra.
 
 #### Verified

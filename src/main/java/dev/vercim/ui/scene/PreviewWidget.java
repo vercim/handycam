@@ -3,6 +3,7 @@ package dev.vercim.ui.scene;
 
 import com.mojang.logging.LogUtils;
 import dev.vercim.ui.sim.FixedStepRunner;
+import dev.vercim.ui.widget.TextWrap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -12,6 +13,8 @@ import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import org.slf4j.Logger;
+
+import java.util.List;
 
 /**
  * A live 3D view of a {@link Scene} inside a screen. It owns the scene, simulates it in fixed 1/120 s steps, steers
@@ -28,6 +31,8 @@ public final class PreviewWidget extends AbstractWidget implements AutoCloseable
     private static final Logger LOGGER = LogUtils.getLogger();
 
     public static final double STEP_SECONDS = 1.0 / 120.0;
+
+    private static final int HINT_MAX_LINES = 4;
 
     private static final int BACKGROUND = 0xFF14181F;
     private static final int BORDER = 0xFF3A404C;
@@ -152,11 +157,15 @@ public final class PreviewWidget extends AbstractWidget implements AutoCloseable
                 getY() + (getHeight() - font.lineHeight) / 2, TEXT_DIM);
     }
 
+    /** The hint wraps to the width of the view, from the bottom edge up, so it never spills into the screen around it. */
     private void drawHint(GuiGraphics graphics, Font font) {
         Component hint = input.isCaptured() ? capturedHint : idleHint;
-        if (hint.getString().isEmpty()) return;
-        graphics.drawString(font, hint, getX() + 4, getY() + getHeight() - font.lineHeight - 3,
-                input.isCaptured() ? TEXT : TEXT_DIM, true);
+        List<String> lines = TextWrap.wrap(hint.getString(), getWidth() - 8, font::width, HINT_MAX_LINES);
+        int y = getY() + getHeight() - 3 - lines.size() * font.lineHeight;
+        for (String line : lines) {
+            graphics.drawString(font, line, getX() + 4, y, input.isCaptured() ? TEXT : TEXT_DIM, true);
+            y += font.lineHeight;
+        }
     }
 
     // ---- input

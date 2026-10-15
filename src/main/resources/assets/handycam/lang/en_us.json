@@ -5,6 +5,20 @@
 
   "handycam.config.title": "Settings",
 
+  "handycam.config.save": "Save",
+  "handycam.config.cancel": "Cancel",
+  "handycam.config.reset_all": "Reset All",
+  "handycam.config.reset": "Reset to Default",
+  "handycam.config.unsaved": "Unsaved",
+  "handycam.config.panel.default": "Default: %s",
+  "handycam.config.panel.requires": "Requires: %s",
+  "handycam.config.preview.damage": "Damage",
+  "handycam.config.preview.hit": "Hit",
+  "handycam.config.preview.explosion": "Explosion",
+  "handycam.config.preview.unavailable": "3D preview unavailable",
+  "handycam.config.preview.hint_idle": "Click, then %s %s %s %s to walk and %s to jump. Drag to turn the view.",
+  "handycam.config.preview.hint_captured": "Esc or a click outside to let go. %s sprints.",
+
   "handycam.config.category.general": "General",
   "handycam.config.category.directional_tilt": "Directional",
   "handycam.config.category.breath_idle": "Breath & Idle",

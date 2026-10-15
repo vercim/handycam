@@ -81,6 +81,8 @@ JUnit 5 tests live in `src/test` and run on every target. They need no game: the
 - `PackageBoundariesTest` scans `src/main/java` to keep `ui/sim`, `ui/config` and `rig` free of Minecraft and loader imports.
 - `HandycamConfigFileTest` loads and saves `handycam.json` next to an oracle that reads it the old way (Gson onto the config object), including every migration step, unknown keys and broken files.
 - `HandycamOptionsTest` checks that every config field has an option, the defaults and ranges, and the English and Russian text of everything shown.
+- `NumericScaleTest`, `ValueFormatTest`, `OptionRowsTest` (`ui/config`), `SettingsLayoutTest` and `TextWrapTest` (`ui/widget`) cover everything of the settings screen that needs no game: slider scale and snapping, value text, the list rows, the wide and narrow layouts, text wrapping.
+- `ScreenTextTest` checks that every `handycam.config.*` key the screen's sources use exists in both lang files, that both files have the same keys, and that translations take the same number of arguments.
 - On NeoForge, ModDevGradle keeps JOML and Gson off the test classpath, so `build.neoforge.gradle.kts` adds them as `testImplementation`.
 
 ```powershell
@@ -99,6 +101,16 @@ Remove-Item Env:JAVA_TOOL_OPTIONS
 ```
 
 With neither property set the hook does nothing. Check the screenshots for: a 3x3 platform of textured, shaded blocks, the camera floating above it with a yellow view cone that tilts away from the faint level cone (clearly after the landing and the damage, slightly while walking), and the GUI around the view undisturbed. The scripted session does not pause when the window is unfocused.
+
+## Settings screen check
+
+The widgets and the screen (`ui/widget`, `handycam/config/HandycamConfigScreen`) draw with the game's GUI classes, so unit tests cannot cover them; check them in a dev client or a packaged JAR. Open the screen from Mod Menu (Fabric) or Mods > Handycam > Config (NeoForge), from the main menu and from inside a world, then:
+
+- every category is listed with its options; clicking a row (or Up/Down, Home/End, Page Up/Down on the list) selects it and the right panel shows the name, description, the default and the editor;
+- a number gets the tall slider (drag, wheel, arrow keys; dragging onto the default's tick gives exactly the default), a toggle or a choice gets a value list; options whose toggle is off are dimmed and the panel says what they require;
+- click the preview: W A S D and Space (and the sprint key) move the simulated player, the camera tilts, drag turns the view, the wheel zooms, Esc or a click outside lets go; the Damage, Hit and Explosion buttons trigger the reaction; moving a slider changes the tilt at once;
+- Cancel and Esc leave the game's camera as it was; Save changes it and the values are still there after a restart (`handycam.json`); Reset All shows "Unsaved" and applies on Save; changed values are highlighted in the list;
+- resize the window and try GUI scales 1 to 4: below 380 GUI pixels wide the preview moves to the top, the preview and the selection survive a resize, nothing draws outside its box.
 
 ## CI
 

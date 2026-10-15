@@ -33,11 +33,18 @@ src/main/java/dev/vercim/
                                      FractalNoise, Spring1D, Spring3D, Easing, FixedStepRunner (JDK + JOML only)
   ui/config/                       — Option (saved value in an external store + pending edit, range, toggle
                                      requirements) and ConfigModel (categories, apply/discard/reset, Gson file
-                                     load/save keyed by option id); JDK + Gson only
+                                     load/save keyed by option id); NumericScale (slider position <-> value, the
+                                     default as a snap point), ValueFormat ("% of default"), OptionRows (the model
+                                     as list rows); JDK + Gson only
   ui/scene/                        — 3D preview widget: Scene (what a mod implements), SceneRenderContext (the
                                      only drawing primitives a scene sees), PreviewWidget (fixed 1/120 s steps,
                                      orbit camera, keyboard capture), OrbitCamera, InputCapture; FboBackend +
                                      GlSceneRenderer are the only GL code (1.21.1: offscreen framebuffer)
+  ui/widget/                       — the settings screen's widgets on vanilla AbstractWidget: OptionListWidget
+                                     (categories + options), DescriptionPanel (selected option's text), VerticalSliderWidget
+                                     (numbers), ChoiceListWidget (toggles and enums); Theme (all colors and spacing),
+                                     SettingsLayout (wide: list | preview | panel; narrow: preview on top) and TextWrap
+                                     are Minecraft-free and unit-tested; OptionText is the only place option texts are built
   handycam/
     HandycamMod.java               — shared init (config dir + HandycamConfig.load)
     rig/                           — camera physics core; no Minecraft, loader or game-side imports
@@ -77,7 +84,8 @@ src/main/java/dev/vercim/
     HandycamOptions.java           — every config field as an Option: category, range, toggle requirements, keys
     HandycamRigParams.java         — RigParams backed by the saved config (the game)
     PendingRigParams.java          — RigParams backed by the values being edited (the config screen preview)
-    HandycamConfigScreen.java      — shared Cloth Config screen (both loaders)
+    HandycamConfigScreen.java      — the settings screen (both loaders): option list, live 3D preview, panel with
+                                     the selected option's description and editor; Save/Cancel/Reset All
   mixin/
     CameraMixin.java               — injects the rig's pitch/yaw/roll/y into the vanilla camera
     CameraAccessor.java            — @Accessor/@Invoker for Camera fields and move()
@@ -97,7 +105,8 @@ src/main/java/dev/vercim/
                                      the tilting camera; TiltDisplay amplifies angles for drawing only
   handycam/dev/                    — PreviewDebugScreen, PreviewSmokeTest: development aid for the preview
                                      (see docs/WORKFLOW.md), never shown to players
-src/test/java/                     — JUnit 5: ui.sim and rig unit tests, rig-vs-golden equivalence, package boundaries
+src/test/java/                     — JUnit 5: ui.sim, ui.config, ui.widget (layout, text wrap) and rig unit tests,
+                                     rig-vs-golden equivalence, package boundaries, lang keys of the screen
 src/test/resources/                — camera-golden.bin.gz (output of the pre-rig layer stack)
 src/main/resources/
   assets/handycam/lang/            — en_us.json, ru_ru.json (keep in sync)
@@ -136,7 +145,7 @@ Exact Minecraft signatures per version are in [docs/VERSION_NOTES.md](docs/VERSI
 
 - **Mixins:** Fabric registers `handycam.mixins.json` in `fabric.mod.json` (`"mixins"`); NeoForge needs `[[mixins]]` in `META-INF/neoforge.mods.toml`.
 - **Config screen:** Fabric via `ModMenuApi` (Mod Menu is Fabric-only and optional); NeoForge via its own config-screen factory and in-game mod list.
-- **Cloth Config versions:** the major tracks an internal API generation, not the Minecraft version; check Cloth Config releases per target.
+- **Cloth Config versions:** the major tracks an internal API generation, not the Minecraft version; check Cloth Config releases per target. The settings screen no longer uses Cloth Config; it is still declared as a dependency (build scripts, `fabric.mod.json`, `neoforge.mods.toml`, README) until the new screen is verified in a packaged build, then it is removed in one commit (list in [docs/preview-findings.md](docs/preview-findings.md), D7).
 - **Plugins:** before changing the Gradle wrapper, check compatibility of Stonecutter, Loom Back Compat, Fabric Loom, and NeoForge ModDev.
 - **Mod Menu metadata:** `fabric.mod.json` `custom.modmenu` holds links (Discord), badges, and `update_checker`.
 
@@ -150,7 +159,7 @@ To propagate a changed default to existing users, bump `CURRENT_VERSION` and add
 
 User-visible text uses `Component.translatable("handycam.config.xxx")`, never `Component.literal()`. Keep both lang files in sync. When adding a config entry, add its label and `.tooltip` keys (the names given in `HandycamOptions`) in English and Russian; `HandycamOptionsTest` fails for a shown option without text.
 
-A new setting needs: the field in `HandycamConfig`, an `Option` in `HandycamOptions` (a field without one is neither loaded nor saved; the test fails), the lang keys, and, until Cloth Config is gone, its entry in the Cloth screen.
+A new setting needs: the field in `HandycamConfig`, an `Option` in `HandycamOptions` (a field without one is neither loaded nor saved; the test fails) and the lang keys. The settings screen builds itself from the options: category, range, `requires(...)` toggles, enum values; there is no per-setting screen code. Texts the screen itself uses (`handycam.config.save`, `...preview.*`, `...panel.*`) are checked against both lang files by `ScreenTextTest`.
 
 Key conventions: categories `handycam.config.category.<name>`, enum values `handycam.config.<enum_type>.<value>`.
 
