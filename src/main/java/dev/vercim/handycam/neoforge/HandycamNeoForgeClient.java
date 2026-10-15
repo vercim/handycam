@@ -6,6 +6,7 @@ package dev.vercim.handycam.neoforge;
 import dev.vercim.handycam.HandycamMod;
 import dev.vercim.handycam.camera.CameraShakeSystem;
 import dev.vercim.handycam.config.HandycamConfig;
+import dev.vercim.handycam.dev.PreviewSmokeTest;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
@@ -37,6 +38,7 @@ public final class HandycamNeoForgeClient {
         HandycamMod.initClient(FMLPaths.CONFIGDIR.get());
         NeoForge.EVENT_BUS.addListener(ClientTickEvent.Post.class, e -> {
             Minecraft mc = Minecraft.getInstance();
+            PreviewSmokeTest.onClientTick(mc);
             if (mc.player != null) CameraShakeSystem.tick(mc.player);
 
             while (TOGGLE_EFFECTS_KEY.consumeClick()) {

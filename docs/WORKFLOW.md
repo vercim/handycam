@@ -87,6 +87,19 @@ JUnit 5 tests live in `src/test` and run on every target. They need no game: the
 .\gradlew.bat :1.21.1-fabric:test :1.21.1-neoforge:test
 ```
 
+## Preview renderer check
+
+The 3D preview (`ui/scene`) draws into an offscreen framebuffer, which unit tests cannot cover. Two development switches open a demo screen from the title screen (`handycam/dev`); set them through `JAVA_TOOL_OPTIONS` so Gradle passes them to the game:
+
+```powershell
+$env:JAVA_TOOL_OPTIONS = "-Dhandycam.previewDemo=true"            # open the demo to play with: click, WASD, Space, drag, wheel, Esc
+$env:JAVA_TOOL_OPTIONS = "-Dhandycam.previewSmoke=C:/tmp/preview.png"  # scripted session: save a screenshot, then quit
+.\gradlew.bat runActiveClient
+Remove-Item Env:JAVA_TOOL_OPTIONS
+```
+
+With neither property set the hook does nothing. Check the screenshot for: a chequered platform with textured, shaded blocks, a red box with a dark "camera" box and a yellow line, red/green/blue axes at a corner, and the GUI around the view undisturbed.
+
 ## CI
 
 The build workflow (`.github/workflows/build.yml`) runs on pushes to `main` and pull requests only when build-relevant files change:

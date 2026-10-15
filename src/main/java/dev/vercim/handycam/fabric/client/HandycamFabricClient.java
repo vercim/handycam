@@ -6,6 +6,7 @@ import com.mojang.blaze3d.platform.InputConstants;
 import dev.vercim.handycam.HandycamMod;
 import dev.vercim.handycam.camera.CameraShakeSystem;
 import dev.vercim.handycam.config.HandycamConfig;
+import dev.vercim.handycam.dev.PreviewSmokeTest;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
@@ -28,6 +29,7 @@ public final class HandycamFabricClient implements ClientModInitializer {
         ));
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
+            PreviewSmokeTest.onClientTick(client);
             if (client.player != null) CameraShakeSystem.tick(client.player);
 
             while (toggleEffectsKey.consumeClick()) {

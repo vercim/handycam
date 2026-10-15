@@ -34,6 +34,10 @@ src/main/java/dev/vercim/
   ui/config/                       — Option (saved value in an external store + pending edit, range, toggle
                                      requirements) and ConfigModel (categories, apply/discard/reset, Gson file
                                      load/save keyed by option id); JDK + Gson only
+  ui/scene/                        — 3D preview widget: Scene (what a mod implements), SceneRenderContext (the
+                                     only drawing primitives a scene sees), PreviewWidget (fixed 1/120 s steps,
+                                     orbit camera, keyboard capture), OrbitCamera, InputCapture; FboBackend +
+                                     GlSceneRenderer are the only GL code (1.21.1: offscreen framebuffer)
   handycam/
     HandycamMod.java               — shared init (config dir + HandycamConfig.load)
     rig/                           — camera physics core; no Minecraft, loader or game-side imports
@@ -87,6 +91,8 @@ src/main/java/dev/vercim/
                                      HandycamConfigScreen (wrapper)
   neoforge/                        — HandycamNeoForge, HandycamNeoForgeClient (MOD-bus setup, F10 key),
                                      HandycamConfigScreenNeoForge (wrapper)
+  handycam/dev/                    — DemoScene, PreviewDebugScreen, PreviewSmokeTest: development aid for the
+                                     preview renderer (see docs/WORKFLOW.md), never shown to players
 src/test/java/                     — JUnit 5: ui.sim and rig unit tests, rig-vs-golden equivalence, package boundaries
 src/test/resources/                — camera-golden.bin.gz (output of the pre-rig layer stack)
 src/main/resources/
@@ -104,7 +110,7 @@ Build scripts: `build.fabric.gradle.kts` (Loom via `loom-back-compat`, publishes
 
 `CameraShakeSystem` (game adapter) feeds `CameraRig` a `RigInput` every 20 Hz tick (`tick()`) and asks it once per rendered frame for a `RigOutput` (`compute()`, real frame time as `dt`). The rig sums the `CameraOffset` of every layer and the mixin applies the result. Layers are independent and never interact. The game only passes a vertical offset; `RigOutput.x/z` stay 0.
 
-`rig/` and `ui/sim/` must stay free of Minecraft, loader and Blaze3d imports (`ui/` also of `dev.vercim.handycam`); `PackageBoundariesTest` enforces it. Layers read settings only through `RigParams`, never `HandycamConfig` directly, and write crosshair data into `CrosshairState`, not static fields.
+`rig/`, `ui/sim/` and `ui/config/` must stay free of Minecraft, loader and Blaze3d imports (all of `ui/` also of `dev.vercim.handycam`); `PackageBoundariesTest` enforces it. Layers read settings only through `RigParams`, never `HandycamConfig` directly, and write crosshair data into `CrosshairState`, not static fields.
 
 **Update visual state variables (phase, blend, decay) in `compute()` with `dt`, not in `tick()`.**
 
