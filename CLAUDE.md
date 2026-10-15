@@ -14,8 +14,8 @@ Handycam — client-side Minecraft mod, procedural handheld-camera effects. Fabr
 
 ## Current state
 
-- Version `2.0.1-beta` (`2.0.0-alpha` was the first Stonecutter release); last Architectury release is `1.3.2`.
-- Targets: `1.21.1-fabric`, `1.21.1-neoforge`, declared once in `settings.gradle.kts`. Older versions (1.20.1, 1.21.10, 1.21.11, 26.1, 26.2) exist only as read-only references in the `archive/<version>` git tags (the old per-version branches were deleted) and are not in the matrix yet. Inspect one with `git checkout archive/<version>` or `git show archive/<version>:<path>`. Never add new long-lived version branches.
+- Version `2.1.0` (`2.0.0-alpha` was the first Stonecutter release); last Architectury release is `1.3.2`.
+- Targets, declared once in `settings.gradle.kts`: Minecraft 1.20.1 on Fabric and Forge; 1.21.1, 1.21.4, 1.21.10, 1.21.11, 26.1, 26.1.2, 26.2, and 26.3 each on Fabric and NeoForge (18 in all). Per-target Java, Minecraft range, loader and library versions live in `versions/<target>/gradle.properties`. The `archive/<version>` git tags keep the final Architectury-era ports (1.20.1, 1.21.1, 1.21.10, 1.21.11, 26.1, 26.2) as read-only history; inspect one with `git checkout archive/<version>` or `git show archive/<version>:<path>`. Never add new long-lived version branches.
 - `vcsVersion = 1.21.1-fabric`: commit with `.sc_active_version` set to `1.21.1-fabric`.
 
 ## Rules that must not be forgotten
@@ -29,6 +29,7 @@ Handycam — client-side Minecraft mod, procedural handheld-camera effects. Fabr
 ```
 src/main/java/dev/vercim/handycam/
   HandycamMod.java                 — shared init (config dir + HandycamConfig.load)
+  HandycamKeys.java                — the F10 toggle key (per-version key category) and its overlay message
   camera/
     CameraShakeSystem.java         — orchestrates all layers
     ShakeLayer.java                — layer interface
@@ -61,11 +62,13 @@ src/main/java/dev/vercim/handycam/
     HandycamConfig.java            — config load/save/migrate (config/handycam-config.json)
     HandycamConfigScreen.java      — shared Cloth Config screen (both loaders)
   mixin/
-    CameraMixin.java               — injects pitch/yaw/roll/y offset into the vanilla camera
-    CameraAccessor.java            — @Accessor/@Invoker for Camera fields and move()
+    CameraMixin.java               — injects pitch/yaw/roll/y offset into the vanilla camera (Camera.setup up to 1.21.11,
+                                     Camera.update from 26.1; 1.20.1 writes xRot/yRot and hands the roll to GameRendererMixin)
+    CameraAccessor.java            — @Accessor/@Invoker for Camera fields and move()/setRotation()
     GameRendererMixin.java         — strips death/underwater FOV when enableVanillaFov=false; feeds ZoomCompensation
+                                     (targets GameRenderer up to 1.21.11, Camera from 26.1; also the 1.20.1 roll bridge)
     AbstractClientPlayerMixin.java — zeroes the sprint/speed/bow FOV modifier when enableVanillaFov=false (spyglass kept)
-    GuiMixin.java                  — offsets/scales crosshair render per CrosshairSwaySystem
+    GuiMixin.java                  — offsets/scales crosshair render per CrosshairSwaySystem (Gui up to 26.1, Hud from 26.2)
     ClientPacketListenerMixin.java — intercepts explosion packets → CameraShakeSystem.onExplosion()
     LightningBoltMixin.java        — intercepts lightning tick → CameraShakeSystem.onLightning()
     LocalPlayerMixin.java          — intercepts item use completion → CameraShakeSystem.onItemEaten()
@@ -73,16 +76,19 @@ src/main/java/dev/vercim/handycam/
                                      HandycamConfigScreen (wrapper)
   neoforge/                        — HandycamNeoForge, HandycamNeoForgeClient (MOD-bus setup, F10 key),
                                      HandycamConfigScreenNeoForge (wrapper)
+  forge/                           — HandycamForge, HandycamForgeClient, HandycamConfigScreenForge (1.20.1 only)
 src/main/resources/
   assets/handycam/lang/            — en_us.json, ru_ru.json (keep in sync)
-  fabric.mod.json, META-INF/neoforge.mods.toml, handycam.mixins.json, icon.png
+  fabric.mod.json, META-INF/neoforge.mods.toml, META-INF/mods.toml (Forge), pack.mcmeta (Forge),
+  handycam.mixins.json, icon.png
+versions/<target>/gradle.properties — per-target Java, Minecraft range, loader and library versions
 ```
 
 Platform entry points call `HandycamConfigScreen.create(parent, saveCallback)` with the loader-specific config directory.
 
 Loader-specific code is wrapped in Stonecutter conditions (`//? fabric { … //?}`, `//? neoforge { … *///?}`); the inactive loader's code appears commented out in the source tree. Syntax and rules: [docs/WORKFLOW.md](docs/WORKFLOW.md#conditional-sources). Express Minecraft-version differences with narrow local conditions, never by copying files.
 
-Build scripts: `build.fabric.gradle.kts` (Loom via `loom-back-compat`, publishes `remapJar`), `build.neoforge.gradle.kts` (ModDevGradle, publishes `jar`), `stonecutter.gradle.kts` (defines `runActiveClient`, `buildActive`, `clean`).
+Build scripts: `build.fabric.gradle.kts` (Loom via `loom-back-compat`: the remapping Loom up to 1.21.11, the unobfuscated one from 26.1; publishes `loomx.modJar`), `build.neoforge.gradle.kts` (ModDevGradle, publishes `jar`), `build.forge.gradle.kts` (ModDevGradle Legacy, 1.20.1 only, publishes `reobfJar`), `stonecutter.gradle.kts` (defines `runActiveClient`, `buildActive`, `clean`).
 
 ## Architecture
 
@@ -102,12 +108,12 @@ Config is loaded on client start via `HandycamMod.initClient(configDir)`. The ef
 - `GameRendererMixin` also reads the final world FOV in `getProjectionMatrix` (`HEAD`) for `ZoomCompensation`; do not read zoom from the `getFov` return, the value there depends on mixin order with Zoomify and similar mods.
 - `GuiMixin` wraps `renderCrosshair` (HEAD push / TAIL pop) and skips the offset outside first-person.
 
-Exact Minecraft signatures per version are in [docs/VERSION_NOTES.md](docs/VERSION_NOTES.md).
+Those rules describe the 1.21.x path (1.21.1 through 1.21.11). 26.1+ and 1.20.1 apply the offset differently (cached view matrix and `Camera.update` on 26.1+; `xRot`/`yRot` plus a roll injection in `renderLevel` on 1.20.1) while keeping the same layer conventions: a positive layer pitch tilts the view up on every version. Exact Minecraft signatures and the per-version differences are in [docs/VERSION_NOTES.md](docs/VERSION_NOTES.md).
 
 ## Loader integration
 
-- **Mixins:** Fabric registers `handycam.mixins.json` in `fabric.mod.json` (`"mixins"`); NeoForge needs `[[mixins]]` in `META-INF/neoforge.mods.toml`.
-- **Config screen:** Fabric via `ModMenuApi` (Mod Menu is Fabric-only and optional); NeoForge via its own config-screen factory and in-game mod list.
+- **Mixins:** Fabric registers `handycam.mixins.json` in `fabric.mod.json` (`"mixins"`); NeoForge needs `[[mixins]]` in `META-INF/neoforge.mods.toml`; Forge 1.20.1 registers it through the `MixinConfigs` manifest attribute and needs the refmap the Forge build adds (SRG names at runtime).
+- **Config screen:** Fabric via `ModMenuApi` (Mod Menu is Fabric-only and optional); NeoForge and Forge via their own config-screen factories and in-game mod lists.
 - **Cloth Config versions:** the major tracks an internal API generation, not the Minecraft version; check Cloth Config releases per target.
 - **Plugins:** before changing the Gradle wrapper, check compatibility of Stonecutter, Loom Back Compat, Fabric Loom, and NeoForge ModDev.
 - **Mod Menu metadata:** `fabric.mod.json` `custom.modmenu` holds links (Discord), badges, and `update_checker`.
@@ -154,3 +160,5 @@ Build and run problems (wrong JDK, missing symbols in a generated target, wrong 
 
 - **GSON ignores field defaults** → GSON bypasses constructors; `HandycamConfig` registers an `InstanceCreator`, keep it.
 - **Camera position broken after writing `Camera.position`** → use `Camera.move()` via the `@Invoker` in `CameraAccessor`.
+- **`@Accessor` on a field that has a static twin differing only in case** (`Camera.forwards` vs `FORWARDS` on 26.1+) → Mixin binds the getter to the static field; do not add such accessors.
+- **A `@Redirect` or `@Inject` by method name finds nothing on one loader** → the loader patched the method (NeoForge splits `Camera.modifyFovBasedOnDeathOrFluid` into a `(FFZ)F` overload); name every descriptor.
