@@ -92,3 +92,12 @@ Besides the camera offset the layers produce crosshair offsets (`MouseLeadLayer`
 
 - `RigInput` carries the tick-detected events (landing fall distance, damage, hit). Explosion and item-eaten events arrive between ticks and act at once, so they are direct calls on `CameraRig` (`onExplosion`, `onItemEaten`) instead of `RigInput` fields; delaying them to the next tick would change the game.
 - The golden fixture was recorded at commit `7ff43cf`; the rig reproduces it bit for bit on the recording machine. A known quirk is preserved: the HUD crosshair keeps its last offset while the effects toggle is off, because the layers do not run then.
+
+## Stage 2 notes
+
+- `HandycamConfig` stays the store the game and the mixins read. `HandycamOptions` binds an `Option` to each public field by name (66 options, 63 shown in 10 categories, the three `landing*Max` limits in a hidden category so they are still read and written). Editing changes only the option; `applyPending()` writes the fields.
+- Sliders had no real range in code: Cloth sliders covered a percentage of the default (for example 0-200 %). Option ranges are those percentages times the default, with a step of 1 % of the default. One change: `bowConcentration` tops out at 1.0 (the old slider reached 0.999, then clamped to 1.0 anyway).
+- `handycam.json` is now read and written through `ConfigModel`. Differences from the old Gson path: values of the wrong type keep their default instead of failing the load; unknown keys are kept on save; the file is replaced atomically; an unreadable or non-object file is copied to `handycam.json.bak` before defaults take over (a syntax error used to throw out of mod startup, an I/O error silently overwrote the file). Key order in the file is now `configVersion`, then the options by category.
+- Out-of-range values in the file are not clamped on load, so a hand-edited value still works in the game; the screen clamps when it is touched.
+- Cloth Config and its screen are untouched and still the only UI; they write the same fields directly. Removal stays the last step (D7).
+- The old Cloth-era file needed no conversion: it already was `handycam.json` with the same keys. The two files left by dev runs (Fabric and NeoForge, version 4) load identically through old and new code.

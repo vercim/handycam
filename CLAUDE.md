@@ -31,6 +31,9 @@ Handycam — client-side Minecraft mod, procedural handheld-camera effects. Fabr
 src/main/java/dev/vercim/
   ui/sim/                          — Minecraft-free primitives meant to move into a shared library: PerlinNoise,
                                      FractalNoise, Spring1D, Spring3D, Easing, FixedStepRunner (JDK + JOML only)
+  ui/config/                       — Option (saved value in an external store + pending edit, range, toggle
+                                     requirements) and ConfigModel (categories, apply/discard/reset, Gson file
+                                     load/save keyed by option id); JDK + Gson only
   handycam/
     HandycamMod.java               — shared init (config dir + HandycamConfig.load)
     rig/                           — camera physics core; no Minecraft, loader or game-side imports
@@ -65,8 +68,11 @@ src/main/java/dev/vercim/
       ZoomCompensation.java        — zoom ratio from the final world FOV; scales shake down while zoomed
       CrosshairSwaySystem.java     — crosshair displacement the HUD mixin reads
   config/
-    HandycamConfig.java            — config load/save/migrate (<config dir>/handycam.json)
-    HandycamRigParams.java         — RigParams backed by the saved config
+    HandycamConfig.java            — the saved values the game reads; load/save go through ConfigModel + migrate()
+                                     (<config dir>/handycam.json)
+    HandycamOptions.java           — every config field as an Option: category, range, toggle requirements, keys
+    HandycamRigParams.java         — RigParams backed by the saved config (the game)
+    PendingRigParams.java          — RigParams backed by the values being edited (the config screen preview)
     HandycamConfigScreen.java      — shared Cloth Config screen (both loaders)
   mixin/
     CameraMixin.java               — injects the rig's pitch/yaw/roll/y into the vanilla camera
@@ -126,13 +132,15 @@ Exact Minecraft signatures per version are in [docs/VERSION_NOTES.md](docs/VERSI
 
 ## Config versioning
 
-`HandycamConfig.CURRENT_VERSION` is currently `4`. `migrate()` applies changes sequentially by `configVersion`; configs without the field deserialize to `0`.
+`HandycamConfig.CURRENT_VERSION` is currently `4`. `migrate()` applies changes sequentially by `configVersion`; configs without the field load as `0`. The file is read into a fresh `HandycamConfig` through `ConfigModel`: keys are the field names, missing or unusable values keep the field's initializer, unknown keys are kept on save, and an unreadable file is copied to `handycam.json.bak` before defaults take over.
 
-To propagate a changed default to existing users, bump `CURRENT_VERSION` and add an `if (configVersion < N) { ... }` block in `migrate()`. Cosmetic default changes need no migration — just change the field initializer. Keep the config file name and format stable across releases.
+To propagate a changed default to existing users, bump `CURRENT_VERSION` and add an `if (configVersion < N) { ... }` block in `migrate()`. Cosmetic default changes need no migration — just change the field initializer. Keep the config file name and key names stable across releases (`HandycamConfigFileTest` compares against the old Gson format).
 
 ## Localization
 
-User-visible text uses `Component.translatable("handycam.config.xxx")`, never `Component.literal()`. Keep both lang files in sync. When adding a config entry, add label `handycam.config.<field>` and tooltip `handycam.config.<field>.tooltip` in English and Russian.
+User-visible text uses `Component.translatable("handycam.config.xxx")`, never `Component.literal()`. Keep both lang files in sync. When adding a config entry, add its label and `.tooltip` keys (the names given in `HandycamOptions`) in English and Russian; `HandycamOptionsTest` fails for a shown option without text.
+
+A new setting needs: the field in `HandycamConfig`, an `Option` in `HandycamOptions` (a field without one is neither loaded nor saved; the test fails), the lang keys, and, until Cloth Config is gone, its entry in the Cloth screen.
 
 Key conventions: categories `handycam.config.category.<name>`, enum values `handycam.config.<enum_type>.<value>`.
 
@@ -140,7 +148,7 @@ Key conventions: categories `handycam.config.category.<name>`, enum values `hand
 
 1. Create a class in `rig/layers/` implementing `ShakeLayer`.
 2. Implement `compute(RigInput, RigParams, RigView, float time, float dt)` → `CameraOffset`.
-3. Add config fields to `HandycamConfig.java` if needed (consider migration), and the matching getters to `RigParams` and `HandycamRigParams` (field and method share a name; `HandycamRigParamsTest` checks the wiring).
+3. Add config fields to `HandycamConfig.java` if needed (consider migration) with their `Option`s in `HandycamOptions`, and the matching getters to `RigParams`, `HandycamRigParams` and `PendingRigParams` (field, option id and method share a name; `HandycamRigParamsTest` and `PendingRigParamsTest` check the wiring).
 4. Register in the `CameraRig` layer list (order matters) and add a test.
 5. Add to the shared config screen with `.setTooltip()`.
 6. Add translation keys to both lang files.
@@ -164,5 +172,5 @@ Add a target in `settings.gradle.kts` and fix API differences with narrow Stonec
 
 Build and run problems (wrong JDK, missing symbols in a generated target, wrong client): [docs/WORKFLOW.md](docs/WORKFLOW.md#troubleshooting). Code-level pitfalls:
 
-- **GSON ignores field defaults** → GSON bypasses constructors; `HandycamConfig` registers an `InstanceCreator`, keep it.
+- **A new config field is ignored from the file** → it has no `Option` in `HandycamOptions`; only options are read and written.
 - **Camera position broken after writing `Camera.position`** → use `Camera.move()` via the `@Invoker` in `CameraAccessor`.

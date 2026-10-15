@@ -78,7 +78,9 @@ Keep conditions as narrow as practical. If a whole entry point is loader-specifi
 JUnit 5 tests live in `src/test` and run on every target. They need no game: the camera rig and `ui/sim` are plain Java.
 
 - `RigEquivalenceTest` replays a scripted session through `CameraRig` and compares it with `src/test/resources/dev/vercim/handycam/rig/camera-golden.bin.gz`, recorded from the layer stack before it was moved into `rig/` (tolerance 1e-6; the output was bit-identical when the rig was introduced).
-- `PackageBoundariesTest` scans `src/main/java` to keep `ui/sim` and `rig` free of Minecraft and loader imports.
+- `PackageBoundariesTest` scans `src/main/java` to keep `ui/sim`, `ui/config` and `rig` free of Minecraft and loader imports.
+- `HandycamConfigFileTest` loads and saves `handycam.json` next to an oracle that reads it the old way (Gson onto the config object), including every migration step, unknown keys and broken files.
+- `HandycamOptionsTest` checks that every config field has an option, the defaults and ranges, and the English and Russian text of everything shown.
 - On NeoForge, ModDevGradle keeps JOML and Gson off the test classpath, so `build.neoforge.gradle.kts` adds them as `testImplementation`.
 
 ```powershell
