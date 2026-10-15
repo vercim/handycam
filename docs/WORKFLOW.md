@@ -8,6 +8,8 @@ Handycam uses one [Stonecutter](https://stonecutter.kikugie.dev/) repository: a 
 
 | Target | Loader | Java |
 |---|---|---:|
+| `1.20.1-fabric` | Fabric | 17 |
+| `1.20.1-forge` | Forge | 17 |
 | `1.21.1-fabric` | Fabric | 21 |
 | `1.21.1-neoforge` | NeoForge | 21 |
 | `1.21.4-fabric` | Fabric | 21 |
@@ -29,7 +31,7 @@ The matrix is declared once in [`settings.gradle.kts`](../settings.gradle.kts); 
 
 ## Requirements
 
-- JDK 25+ to launch Gradle (Fabric Loom 1.18 refuses to load on anything older); the Java 21 toolchain that compiles the mod is provisioned automatically. CI installs both JDKs.
+- JDK 25+ to launch Gradle (Fabric Loom 1.18 refuses to load on anything older); the toolchain that compiles each target (Java 17 for 1.20.1, 21 for 1.21.x, 25 for 26.x) is provisioned automatically. CI installs all three JDKs.
 - Windows: PowerShell, use `.\gradlew.bat`.
 - macOS / Linux: use `./gradlew` (run `chmod +x gradlew` if it is not executable).
 - To force a specific launcher JDK: macOS `export JAVA_HOME=$(/usr/libexec/java_home -v 25)`, Windows `$env:JAVA_HOME = "C:\path\to\jdk-25"`.
@@ -39,7 +41,7 @@ The matrix is declared once in [`settings.gradle.kts`](../settings.gradle.kts); 
 Windows (PowerShell):
 
 ```powershell
-Set-Content -NoNewline .sc_active_version "1.21.1-fabric"   # or 1.21.1-neoforge
+Set-Content -NoNewline .sc_active_version "1.21.1-fabric"   # any target from the matrix
 .\gradlew.bat runActiveClient
 .\gradlew.bat buildActive
 .\gradlew.bat buildAndCollect
@@ -50,7 +52,7 @@ Set-Content -NoNewline .sc_active_version "1.21.1-fabric"   # or 1.21.1-neoforge
 macOS / Linux:
 
 ```bash
-printf '1.21.1-fabric' > .sc_active_version   # or 1.21.1-neoforge
+printf '1.21.1-fabric' > .sc_active_version   # any target from the matrix
 ./gradlew runActiveClient
 ./gradlew buildActive
 ./gradlew buildAndCollect
@@ -74,7 +76,7 @@ After changing `.sc_active_version`, re-sync Gradle (IDE reload or any `gradlew`
 
 ## Conditional sources
 
-Shared code is ordinary Java. Loader-specific code uses Stonecutter conditions; the inactive loader's code appears commented out in the source tree:
+Shared code is ordinary Java. Loader-specific code uses Stonecutter conditions (`fabric`, `neoforge`, `forge`); the inactive loader's code appears commented out in the source tree:
 
 ```java
 //? fabric {
@@ -83,6 +85,8 @@ fabricOnlyCall();
 /*neoForgeOnlyCall();
 *///?}
 ```
+
+Minecraft-version conditions use version predicates, `//? if >=1.21.10 { ... //?} else if >=1.21.4 { ... //?} else { ... //?}`, and may combine with a loader constant (`//? if neoforge && >=1.21.10`). The block that is not active for the file's version is commented out, so write new code in the form the committed version (`1.21.1`) shows. Conditions cannot nest inside a commented-out loader block (Java has no nested block comments): use a combined condition or a flat chain instead.
 
 Keep conditions as narrow as practical. If a whole entry point is loader-specific, keep its `package` declaration outside the conditional block so the inactive target generates a valid, otherwise empty source file. Minecraft-version differences are expressed the same way, next to the affected code (see [VERSION_NOTES.md](VERSION_NOTES.md)).
 
@@ -109,6 +113,7 @@ IDE runs are not enough for loader or Mixin changes (1.3.2 shipped a JAR without
 
 - launch the Fabric JAR with Fabric API, Cloth Config, and Mod Menu;
 - launch the NeoForge JAR with Cloth Config;
+- launch the Forge JAR with Cloth Config (the Forge build writes a `handycam.refmap.json`; only the packaged JAR proves it maps every target);
 - verify config loading and saving;
 - verify the F10 effects toggle;
 - verify first-person camera, crosshair compensation, and damage, bow, food, explosion, jump, and landing effects;
@@ -155,3 +160,5 @@ It needs the repository variables `MODRINTH_PROJECT_ID` and `CURSEFORGE_PROJECT_
 - **"Cannot find symbol" in a generated target** → check the active Stonecutter target and its conditional blocks, then re-sync Gradle.
 - **Wrong client runs** → update `.sc_active_version` and use `runActiveClient`.
 - **Mod loads but nothing happens in the packaged JAR** → the Mixin config is not registered for that loader; inspect the JAR metadata.
+- **"Mod development has not been enabled yet" in `build.forge.gradle.kts`** → inside `legacyForge { }` a script `val` named like an extension property (`minecraftVersion`) is shadowed; compute the value outside the block.
+- **A new world never opens with `--quickPlaySingleplayer`** → a world saved by an older Minecraft may ask for an upgrade (26.2 and later) or use an old layout (26.1); generate the test world with that version's server.

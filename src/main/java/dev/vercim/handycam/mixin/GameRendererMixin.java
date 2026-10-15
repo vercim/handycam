@@ -1,7 +1,11 @@
 package dev.vercim.handycam.mixin;
 
+import dev.vercim.handycam.camera.CameraShakeSystem;
 import dev.vercim.handycam.camera.ZoomCompensation;
 import dev.vercim.handycam.config.HandycamConfig;
+//? if <1.21 {
+/*import com.mojang.blaze3d.vertex.PoseStack;
+*///?}
 import net.minecraft.client.Camera;
 //? if <26.1 {
 import net.minecraft.client.renderer.GameRenderer;
@@ -91,6 +95,26 @@ public abstract class GameRendererMixin {
     }
     //?}
 
+    //? if <1.21 {
+    /*// 1.20.1 builds the view matrix from yaw and pitch only, so the roll is added to the pose stack right before
+    // the renderer derives its inverse view rotation from it. The roll is negated: the camera rolls one way, the
+    // world the other.
+    @Inject(method = "renderLevel",
+            at = @At(value = "INVOKE",
+                     target = "Lcom/mojang/blaze3d/systems/RenderSystem;setInverseViewRotationMatrix(Lorg/joml/Matrix3f;)V",
+                     remap = false,
+                     shift = At.Shift.BEFORE))
+    private void handycam$applyRoll(float partialTick, long finishTimeNano, PoseStack poseStack, CallbackInfo ci) {
+        float roll = CameraShakeSystem.getViewRoll();
+        if (Math.abs(roll) <= 1.0e-4f) return;
+
+        PoseStack.Pose pose = poseStack.last();
+        float radians = -roll * Mth.DEG_TO_RAD;
+        pose.pose().rotateLocalZ(radians);
+        pose.normal().rotateLocalZ(radians);
+    }
+
+    *///?}
     @Unique
     private boolean handycam$stripVanillaFov() {
         //? if >=26.1 {

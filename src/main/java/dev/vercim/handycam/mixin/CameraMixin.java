@@ -56,6 +56,9 @@ public abstract class CameraMixin {
 
     @Unique
     private void handycam$apply(Entity entity, boolean detached, boolean thirdPersonReverse, float partialTick) {
+        //? if <1.21 {
+        /*CameraShakeSystem.setViewRoll(0f);
+        *///?}
         if (!(entity instanceof LocalPlayer player)) return;
 
         HandycamConfig cfg = HandycamConfig.get();
@@ -80,7 +83,7 @@ public abstract class CameraMixin {
         self.invokeSetRotation(self.getYRot() + offset.yaw, self.getXRot() - offset.pitch);
         if (Math.abs(offset.roll) > 1.0e-4f) self.getRotation().rotateZ(offset.roll * Mth.DEG_TO_RAD);
         if (Math.abs(offset.y) > 1.0e-5f) self.invokeMove(0f, offset.y, 0f);
-        *///?} else {
+        *///?} else if >=1.21 {
         Quaternionf rotation = self.getRotation();
         if (Math.abs(offset.pitch) > 1.0e-4f) rotation.rotateX( offset.pitch * Mth.DEG_TO_RAD);
         if (Math.abs(offset.yaw)   > 1.0e-4f) rotation.rotateY(-offset.yaw   * Mth.DEG_TO_RAD);
@@ -91,6 +94,13 @@ public abstract class CameraMixin {
             self.setXRot(self.getXRot() + offset.pitch);
             self.setYRot(self.getYRot() + offset.yaw);
         }
-        //?}
+        //?} else {
+        /*// 1.20.1 renders the world from xRot/yRot alone (the camera quaternion is not used), so pitch and yaw go
+        // into the angles, with the same minus on the pitch as on 26.1, and the roll is applied by GameRendererMixin.
+        self.setXRot(self.getXRot() - offset.pitch);
+        self.setYRot(self.getYRot() + offset.yaw);
+        CameraShakeSystem.setViewRoll(offset.roll);
+        if (Math.abs(offset.y) > 1.0e-5f) self.invokeMove(0f, offset.y, 0f);
+        *///?}
     }
 }

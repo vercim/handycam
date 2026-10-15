@@ -28,6 +28,11 @@ public interface CameraAccessor {
     void invokeSetRotation(float yRot, float xRot);
 
     *///?}
+    //? if >=1.21 {
     @Invoker("move")
     void invokeMove(float distanceOffset, float verticalOffset, float horizontalOffset);
+    //?} else {
+    /*@Invoker("move")
+    void invokeMove(double distanceOffset, double verticalOffset, double horizontalOffset);
+    *///?}
 }

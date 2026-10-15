@@ -3,7 +3,9 @@ package dev.vercim.handycam.mixin;
 import dev.vercim.handycam.camera.CrosshairSwaySystem;
 import dev.vercim.handycam.config.HandycamConfig;
 import net.minecraft.client.CameraType;
+//? if >=1.21 {
 import net.minecraft.client.DeltaTracker;
+//?}
 import net.minecraft.client.Minecraft;
 //? if >=26.2 {
 /*import net.minecraft.client.gui.Hud;
@@ -35,10 +37,13 @@ public abstract class GuiMixin {
     //? if >=26.1 {
     /*@Inject(method = "extractCrosshair", at = @At("HEAD"))
     private void handycam$crosshairPush(GuiGraphicsExtractor graphics, DeltaTracker tracker, CallbackInfo ci) {
-    *///?} else {
+    *///?} else if >=1.21 {
     @Inject(method = "renderCrosshair", at = @At("HEAD"))
     private void handycam$crosshairPush(GuiGraphics graphics, DeltaTracker tracker, CallbackInfo ci) {
-    //?}
+    //?} else {
+    /*@Inject(method = "renderCrosshair", at = @At("HEAD"))
+    private void handycam$crosshairPush(GuiGraphics graphics, CallbackInfo ci) {
+    *///?}
         handycam$pushed = false;
         if (Minecraft.getInstance().options.getCameraType() != CameraType.FIRST_PERSON) return;
 
@@ -82,10 +87,13 @@ public abstract class GuiMixin {
     //? if >=26.1 {
     /*@Inject(method = "extractCrosshair", at = @At("TAIL"))
     private void handycam$crosshairPop(GuiGraphicsExtractor graphics, DeltaTracker tracker, CallbackInfo ci) {
-    *///?} else {
+    *///?} else if >=1.21 {
     @Inject(method = "renderCrosshair", at = @At("TAIL"))
     private void handycam$crosshairPop(GuiGraphics graphics, DeltaTracker tracker, CallbackInfo ci) {
-    //?}
+    //?} else {
+    /*@Inject(method = "renderCrosshair", at = @At("TAIL"))
+    private void handycam$crosshairPop(GuiGraphics graphics, CallbackInfo ci) {
+    *///?}
         if (!handycam$pushed) return;
         handycam$pushed = false;
 

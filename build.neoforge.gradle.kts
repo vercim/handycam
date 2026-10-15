@@ -67,7 +67,7 @@ tasks.processResources {
     )
     inputs.properties(metadata)
     filesMatching(listOf("META-INF/neoforge.mods.toml", "handycam.mixins.json")) { expand(metadata) }
-    exclude("fabric.mod.json")
+    exclude("fabric.mod.json", "META-INF/mods.toml", "pack.mcmeta")
 }
 
 tasks.withType<JavaCompile>().configureEach {

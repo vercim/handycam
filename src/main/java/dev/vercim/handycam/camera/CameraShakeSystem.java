@@ -54,6 +54,15 @@ public final class CameraShakeSystem {
 
     private static final float[] scratch = new float[4];
 
+    //? if <1.21 {
+    /*// 1.20.1 renders the world from yaw and pitch only; the roll of the current frame is handed to GameRendererMixin.
+    private static float viewRoll = 0f;
+
+    public static void setViewRoll(float roll) { viewRoll = roll; }
+
+    public static float getViewRoll() { return viewRoll; }
+    *///?}
+
     private static float fadeBlend = 1f;
     private static final float FADE_SPEED = 3f;
 

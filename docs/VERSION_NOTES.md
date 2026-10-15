@@ -299,6 +299,47 @@ NeoForge metadata pins Minecraft to `[1.21.4,1.21.5)` and Cloth Config to `[17,)
 #### Verified
 - 2026-10-15, mod 2.1.0 (dev build): dev client of both targets joined a flat singleplayer world with no mixin errors and every Handycam handler present in the exported target classes (`-Dmixin.debug.export=true`); both JARs register `handycam.mixins.json` and contain no other-loader classes. Packaged-JAR gameplay in a clean profile: ☐
 
+### MC 1.20.1 — Fabric / Forge
+
+Targets: `1.20.1-fabric`, `1.20.1-forge` · first mod version: 2.1.0 · date: 2026-10-15 · the only Forge target; built with `build.forge.gradle.kts` (ModDevGradle Legacy).
+
+#### Dependencies
+```properties
+java_version=17
+mixin_compatibility_level=JAVA_17
+fabric_loader_min_version=0.16.10
+fabric_api_version=0.92.12+1.20.1
+cloth_config_version=11.1.136
+modmenu_version=7.2.2               # Fabric only, optional
+forge_version=47.4.28               # built against 1.20.1-47.4.28
+forge_min_version=47.2.0            # mods.toml: [47.2.0,48)
+```
+Forge metadata pins Minecraft to `[1.20.1,1.20.2)` and Cloth Config to `[11,)`. The Mod Menu and Fabric API pairs are the ones the Architectury `1.3.x` build used, newer patch levels.
+
+#### API differences (vs. baseline 1.21.1)
+| Area | Baseline (1.21.1) | 1.20.1 | Where / condition |
+|---|---|---|---|
+| `Gui.renderCrosshair()` | `(GuiGraphics, DeltaTracker)` | `(GuiGraphics)`; `DeltaTracker` does not exist | `mixin/GuiMixin.java`, `//? if >=1.21` |
+| `Camera.move()` | `(float, float, float)` | `(double, double, double)` | `mixin/CameraAccessor.java`, `//? if >=1.21` |
+| How the world is oriented | `Camera.rotation` (quaternion) | `GameRenderer.renderLevel` builds the view matrix from `xRot` / `yRot` only; the quaternion is ignored by the renderer | `mixin/CameraMixin.java`, `//? if <1.21` |
+| Applying the shake | rotate the quaternion | add yaw and `-pitch` to `xRot` / `yRot` (all perspectives); the roll goes through `CameraShakeSystem.setViewRoll` into an `@Inject` before `RenderSystem.setInverseViewRotationMatrix` in `renderLevel`, which does `rotateLocalZ(-roll)` on the pose and normal matrices | `mixin/CameraMixin.java`, `mixin/GameRendererMixin.java`, `camera/CameraShakeSystem.java` |
+| Cloth Config | `builder.setDefaultBackgroundTexture(null)` | crashes on Cloth Config 11, so it is skipped | `config/HandycamConfigScreen.java`, `//? if >=1.21` |
+| `getFov` / `getProjectionMatrix` / `getFieldOfViewModifier` | baseline shapes | same as baseline | |
+| Loader entry points | `fabric/` and `neoforge/` | `fabric/` and `forge/` (`ConfigScreenHandler`, `TickEvent.ClientTickEvent`, `@Mod.EventBusSubscriber`) | `forge/*.java` |
+
+#### Loader notes
+- Forge: Mojang names in development, SRG at runtime. The Mixin annotation processor (`org.spongepowered:mixin:0.8.5:processor`, wired by the `mixin {}` block) writes `handycam.refmap.json`; the Forge build adds the `"refmap"` key to `handycam.mixins.json` (the other loaders ship no refmap and would warn about a missing one) and the jar manifest carries `MixinConfigs: handycam.mixins.json`. The release JAR is the `reobfJar` output in `build/libs`; the Mojang-named jar stays in `build/devlibs`. `META-INF/mods.toml` and `pack.mcmeta` are Forge-only resources.
+- The dev run logs `Reference map 'handycam.refmap.json' ... could not be read`: expected, the refmap exists only in the packaged JAR.
+
+#### Quirks
+- Inside `legacyForge { }` a script-level `val minecraftVersion` is shadowed by the extension's own property (reading it throws "Mod development has not been enabled yet"): compute strings outside the block.
+- `LegacyForgeExtension` has no getter for `version`, so the Kotlin DSL needs `enable { forgeVersion = ... }`.
+- Layers are shared with the other versions and keep the same camera conventions; the sign flips and yaw removals of the Architectury 1.20.1 port are not carried over. The feel was not compared side by side with the old build.
+
+#### Verified
+- 2026-10-15, mod 2.1.0 (dev build): see the 1.21.4 entry for the checks run; Fabric ☑ Forge ☑. A debug print on Fabric confirmed pitch/yaw land in the camera angles and the roll reaches `renderLevel` every frame.
+- 2026-10-15, packaged JARs launched in real loader installs (portablemc, clean profile, flat world): Fabric 0.19.5 and Forge 47.4.28 joined with all seven mixin targets carrying Handycam handlers (intermediary names on Fabric, the packaged refmap on Forge). In-game feel check: ☐
+
 ### MC 1.21.1 — Fabric / NeoForge
 
 Targets: `1.21.1-fabric`, `1.21.1-neoforge` · first mod version: 2.0.0-alpha · date: 2026-07-28 · **baseline for all diffs**
@@ -339,7 +380,7 @@ Applying offsets: `rotateX(pitch)` → `rotateY(-yaw)` → `rotateZ(roll)` (yaw 
 #### Loader notes
 - Fabric: Mixins registered in `fabric.mod.json`; entry point `HandycamFabricClient`; config screen via Mod Menu; Fabric API required, Mod Menu optional.
 - NeoForge: Mixins registered via `[[mixins]]` in `neoforge.mods.toml`; client lifecycle subscribers use the MOD event bus; tick listener on `NeoForge.EVENT_BUS`; Cloth Config required.
-- Stonecutter conditions currently only select loaders (`//? fabric`, `//? neoforge`); there are no Minecraft-version conditions yet.
+- This is the version the shared source tree is written for: loader conditions (`//? fabric`, `//? neoforge`, `//? forge`) select loaders, and the version conditions in the entries below describe how every other target departs from this one.
 
 #### Quirks
 - 2.0.0-alpha first packaged build registered the Mixin config correctly for both loaders (the `1.3.2` fix); keep verifying it on every release.
