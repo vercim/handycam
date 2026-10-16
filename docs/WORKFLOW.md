@@ -168,7 +168,7 @@ Use a clean client profile each time.
 4. Create and push the matching `v<mod_version>` tag:
 
    ```bash
-   git tag -a v<mod_version>
+   git tag v<mod_version>
    ```
 
    ```bash
