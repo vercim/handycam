@@ -10,8 +10,8 @@ Handycam uses one [Stonecutter](https://stonecutter.kikugie.dev/) repository: a 
 |---|---|---:|
 | `1.20.1-fabric` | Fabric | 17 |
 | `1.20.1-forge` | Forge | 17 |
-| `1.21.1-fabric`, `1.21.4-fabric`, `1.21.11-fabric` | Fabric | 21 |
-| `1.21.1-neoforge`, `1.21.4-neoforge`, `1.21.11-neoforge` | NeoForge | 21 |
+| `1.21.1-fabric`, `1.21.4-fabric`, `1.21.10-fabric`, `1.21.11-fabric` | Fabric | 21 |
+| `1.21.1-neoforge`, `1.21.4-neoforge`, `1.21.10-neoforge`, `1.21.11-neoforge` | NeoForge | 21 |
 | `26.1-fabric`, `26.1.2-fabric`, `26.2-fabric`, `26.3-fabric` | Fabric | 25 |
 | `26.1-neoforge`, `26.1.2-neoforge`, `26.2-neoforge`, `26.3-neoforge` | NeoForge | 25 |
 

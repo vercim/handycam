@@ -59,7 +59,7 @@ src/main/java/dev/vercim/handycam/
       FractalNoise.java            — multi-octave Perlin
       SpringSimulator.java         — underdamped spring for impact effects
   config/
-    HandycamConfig.java            — config load/save/migrate (config/handycam-config.json)
+    HandycamConfig.java            — config load/save/migrate (config/handycam.json)
     HandycamConfigScreen.java      — shared Cloth Config screen (both loaders)
   mixin/
     CameraMixin.java               — injects pitch/yaw/roll/y offset into the vanilla camera (Camera.setup up to 1.21.11,
@@ -116,7 +116,7 @@ Those rules describe the 1.21.x path (1.21.1 through 1.21.11). 26.1+ and 1.20.1 
 - **Config screen:** Fabric via `ModMenuApi` (Mod Menu is Fabric-only and optional); NeoForge and Forge via their own config-screen factories and in-game mod lists.
 - **Cloth Config versions:** the major tracks an internal API generation, not the Minecraft version; check Cloth Config releases per target.
 - **Plugins:** before changing the Gradle wrapper, check compatibility of Stonecutter, Loom Back Compat, Fabric Loom, and NeoForge ModDev.
-- **Mod Menu metadata:** `fabric.mod.json` `custom.modmenu` holds links (Discord), badges, and `update_checker`.
+- **Mod Menu metadata:** `fabric.mod.json` `custom.modmenu` holds the Discord link and `update_checker`.
 
 ## Config versioning
 

@@ -83,7 +83,7 @@ Likely trouble spots, in order: `Camera`, `Gui`, `GameRenderer` mixins; then `Pl
 
 ### MC 26.3 — Fabric / NeoForge
 
-Targets: `26.3-fabric`, `26.3-neoforge` · first mod version: 2.1.0 · date: 2026-10-15
+Targets: `26.3-fabric`, `26.3-neoforge` · first mod version: 2.1.0-beta · date: 2026-10-15
 
 #### Dependencies
 ```properties
@@ -115,7 +115,7 @@ Camera, FOV, crosshair (`Hud`), key mapping, and NeoForge entry points are uncha
 
 ### MC 26.2 — Fabric / NeoForge
 
-Targets: `26.2-fabric`, `26.2-neoforge` · first mod version: 2.1.0 · date: 2026-10-15
+Targets: `26.2-fabric`, `26.2-neoforge` · first mod version: 2.1.0-beta · date: 2026-10-15
 
 #### Dependencies
 ```properties
@@ -145,7 +145,7 @@ NeoForge metadata pins Minecraft to `[26.2,26.2.1)` and Cloth Config to `[26.2,)
 
 ### MC 26.1.2 — Fabric / NeoForge
 
-Targets: `26.1.2-fabric`, `26.1.2-neoforge` · first mod version: 2.1.0 · date: 2026-10-15
+Targets: `26.1.2-fabric`, `26.1.2-neoforge` · first mod version: 2.1.0-beta · date: 2026-10-15
 
 #### Dependencies
 ```properties
@@ -167,7 +167,7 @@ None from 26.1: every hook and signature the mod uses is identical, so the targe
 
 ### MC 26.1 — Fabric / NeoForge
 
-Targets: `26.1-fabric`, `26.1-neoforge` · first mod version: 2.1.0 · date: 2026-10-15
+Targets: `26.1-fabric`, `26.1-neoforge` · first mod version: 2.1.0-beta · date: 2026-10-15
 
 Minecraft 26.1 is unobfuscated (Mojang names at runtime) and needs Java 25; this is the biggest API step in the matrix.
 
@@ -209,7 +209,7 @@ NeoForge metadata pins Minecraft to `[26.1,26.1.1)` and Cloth Config to `[26.1,)
 
 ### MC 1.21.11 — Fabric / NeoForge
 
-Targets: `1.21.11-fabric`, `1.21.11-neoforge` · first mod version: 2.1.0 · date: 2026-10-15
+Targets: `1.21.11-fabric`, `1.21.11-neoforge` · first mod version: 2.1.0-beta · date: 2026-10-15
 
 #### Dependencies
 ```properties
@@ -236,7 +236,7 @@ Everything else used by the mod (FOV hooks, crosshair, explosion packet, NeoForg
 
 ### MC 1.21.10 — Fabric / NeoForge
 
-Targets: `1.21.10-fabric`, `1.21.10-neoforge` · first mod version: 2.1.0 · date: 2026-10-15
+Targets: `1.21.10-fabric`, `1.21.10-neoforge` · first mod version: 2.1.0-beta · date: 2026-10-15
 
 #### Dependencies
 ```properties
@@ -267,7 +267,7 @@ NeoForge metadata pins Minecraft to `[1.21.10,1.21.11)` and Cloth Config to `[20
 
 ### MC 1.21.4 — Fabric / NeoForge
 
-Targets: `1.21.4-fabric`, `1.21.4-neoforge` · first mod version: 2.1.0 · date: 2026-10-15
+Targets: `1.21.4-fabric`, `1.21.4-neoforge` · first mod version: 2.1.0-beta · date: 2026-10-15
 
 #### Dependencies
 ```properties
@@ -301,7 +301,7 @@ NeoForge metadata pins Minecraft to `[1.21.4,1.21.5)` and Cloth Config to `[17,)
 
 ### MC 1.20.1 — Fabric / Forge
 
-Targets: `1.20.1-fabric`, `1.20.1-forge` · first mod version: 2.1.0 · date: 2026-10-15 · the only Forge target; built with `build.forge.gradle.kts` (ModDevGradle Legacy).
+Targets: `1.20.1-fabric`, `1.20.1-forge` · first mod version: 2.1.0-beta · date: 2026-10-15 · the only Forge target; built with `build.forge.gradle.kts` (ModDevGradle Legacy).
 
 #### Dependencies
 ```properties
