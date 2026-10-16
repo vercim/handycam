@@ -35,6 +35,6 @@ stonecutter {
         targets.forEach { (minecraft, loaders) ->
             loaders.forEach { loader -> version("$minecraft-$loader", minecraft).buildscript = "build.$loader.gradle.kts" }
         }
-        vcsVersion = "1.21.1-fabric"
+        vcsVersion = "26.3-fabric"
     }
 }

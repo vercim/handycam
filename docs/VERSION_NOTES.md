@@ -65,7 +65,7 @@ Targets: `X.Y.Z-fabric`, `X.Y.Z-neoforge` · first mod version: A.B.C · date: Y
 
 For each new version, after adding the target:
 
-- Add the target to `settings.gradle.kts`; configure its loader dependencies (loader build script, `gradle.properties`, or a Stonecutter property table once the matrix grows).
+- Add the target to `settings.gradle.kts`; create `versions/<target>/gradle.properties` for each loader (copy the closest existing target).
 - `Camera.setup()` parameters, `Camera` fields (`xRot`, `yRot`, `rotation`), `Camera.move()` name and parameters.
 - `GameRenderer.getFov()` signature and return type.
 - `Gui.renderCrosshair()` signature (`DeltaTracker` or `float`) and `GuiGraphics.pose()` type.
@@ -364,7 +364,7 @@ NeoForge metadata also pins Minecraft to `[1.21.1,1.21.2)` and Cloth Config to `
 | `Camera` fields | `xRot`, `yRot` (degrees), `rotation` (`org.joml.Quaternionf`, mutate in place) via `@Accessor` |
 | `Camera.move()` | `move(float distanceOffset, float verticalOffset, float horizontalOffset)` via `@Invoker`; never write `Camera.position` directly |
 | `GameRenderer.getFov()` | `(Camera, float, boolean)`; return type `double` → `CallbackInfoReturnable<Double>`; injected at `HEAD` only. `enableVanillaFov = false` redirects `LivingEntity.isDeadOrDying()` and `Mth.lerp(DDD)D` (underwater) inside it; do not override its return value, that kills the spyglass and Zoomify (`@ModifyReturnValue` at `RETURN`) |
-| `AbstractClientPlayer.getFieldOfViewModifier()` | `()F`, injected at `RETURN`, cancellable; returns `0.1` for the first-person spyglass (`isScoping()`), otherwise the sprint/speed/bow/flying product |
+| `AbstractClientPlayer.getFieldOfViewModifier()` | `()F`, injected at `RETURN`, cancellable; vanilla returns `0.1` for the first-person spyglass (`isScoping()`), otherwise the sprint/speed/bow/flying product. With `enableVanillaFov = false` the mixin replaces the result with `1` unless the spyglass is active |
 | `GameRenderer.getProjectionMatrix()` | `(double fov)` → `Matrix4f`; injected at `HEAD` to read the final world FOV (spyglass and zoom mods already applied), paired with a `getFov` `HEAD` hook that flags the `useFov == true` call |
 | `Gui.renderCrosshair()` | `(GuiGraphics, DeltaTracker)`; `GuiGraphics.pose()` is a `PoseStack` (`pushPose()` / `popPose()`, 3D `translate` / `scale`) |
 | Explosions | `ClientPacketListener.handleExplosion(ClientboundExplodePacket)`; coordinates via `getX()`, `getY()`, `getZ()` |
@@ -386,7 +386,7 @@ Applying offsets: `rotateX(pitch)` → `rotateY(-yaw)` → `rotateZ(roll)` (yaw 
 - 2.0.0-alpha first packaged build registered the Mixin config correctly for both loaders (the `1.3.2` fix); keep verifying it on every release.
 
 #### Verified
-- CI builds both targets on every build-relevant push (green as of 2026-09-25).
+- CI builds both targets (with all others) on every build-relevant push.
 - Manual packaged-JAR test of 2.0.0-alpha: not recorded here — fill in on the next release run.
 
 ## Archived ports (pre-Stonecutter)
@@ -404,19 +404,10 @@ These were built with Architectury in per-version branches (last Architectury re
 
 Full original notes (including build-plugin versions): `git show v2.0.0-alpha:docs/VERSION_NOTES.md`; migration rationale: `git show v2.0.0-alpha:docs/MIGRATION.md`.
 
-### Known API shifts by version
+### Legacy notes from the Architectury ports
 
-- **1.21.4:** same `Gui.renderCrosshair(GuiGraphics, DeltaTracker)` shape as 1.21.1; `Camera.setup()` still takes `BlockGetter`.
-- **1.21.11:** `Camera.setup()` first parameter is `Level` (not `BlockGetter`); `GameRenderer.getFov()` returns primitive `float`; `GuiGraphics.pose()` is a `Matrix3x2fStack` (`pushMatrix()` / `popMatrix()`, 2D `translate(x, y)` / `scale(x, y)`); `KeyMapping` category is now `KeyMapping.Category`, registered via `KeyMapping.Category.register(Identifier)`.
-- **26.1:** requires Java 25 and Gradle 9.6.1 in the old setup; pin Fabric runtime helper dependencies so dev-runtime resolution stays on the `26.1` module line instead of drifting to later `26.1.x` Fabric submodules.
-- **26.2:** the crosshair hook lives in `Hud.extractRenderState(...)`, not the old `Gui.extractCrosshair(...)` location; `GuiMixin` injects around `Hud.extractCrosshair(...)` from inside `Hud.extractRenderState(...)`.
-- **1.20.1:**
-  - `renderCrosshair(GuiGraphics)` has no `DeltaTracker`; `Camera.move()` takes `double`s; `getFov` returns `double`.
-  - After rolling `Camera.rotation`, rebuild the cached `forwards` / `up` / `left` vectors (accessors required).
-  - The world renders from a yaw/pitch-only view matrix, so visible strafe banking needs an extra bridge in `GameRendererMixin`: inject right before `RenderSystem.setInverseViewRotationMatrix(...)` and apply `CameraShakeSystem.getCurrentRoll()` with `PoseStack.Pose.pose().rotateLocalZ(...)` and `normal().rotateLocalZ(...)`. Use local Z; world-space Z makes the effect depend on the compass direction.
-  - Keep mixin compatibility level `JAVA_17` (`JAVA_21` crashes Fabric 1.20.1 during bootstrap); the old Loom needed a Java 21 Gradle JVM while the game runs on Java 17.
-  - Cloth Config crashes if `builder.setDefaultBackgroundTexture(null)` is used; leave the default background.
-  - Config loading needed a defensive `sanitize()` pass for stale or invalid values from older configs.
-  - Read directional intent from `LocalPlayer.xxa` / `zza`, not `input.leftImpulse` / `forwardImpulse`.
-  - `StrafeTiltLayer` stays a pure roll effect; `WalkBobLayer` must not add lateral yaw sway (it masks strafe banking). `ForwardTiltLayer`, `JumpShakeLayer`, and `LandingImpactLayer` needed sign corrections after the camera port; re-verify lean and jump/landing pitch in-game after any camera-math change.
+Only what the per-version entries above do not already say; where they overlap, the entries win (this tree's API tables were rebuilt and verified against the sources).
+
+- **26.1 (old setup):** pin Fabric runtime helper dependencies so dev-runtime resolution stays on the `26.1` module line instead of drifting to later `26.1.x` Fabric submodules.
+- **1.20.1:** keep the mixin compatibility level at `JAVA_17` (`JAVA_21` crashes Fabric 1.20.1 during bootstrap); the old Loom needed a Java 21 Gradle JVM while the game ran on Java 17. For the roll bridge use local Z (`rotateLocalZ`); world-space Z makes the effect depend on the compass direction.
 - **All versions:** `CrouchShakeLayer` pitch targets are signed so crouching dips the camera and standing lifts it back; if it looks inverted, check `onCrouch()` / `onStand()` first.
