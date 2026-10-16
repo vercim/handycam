@@ -6,6 +6,7 @@
 
 ### Fixes
 - The mod icon is no longer blurred in the Forge 1.20.1 mod list.
+- The "Issues" button in the NeoForge and Forge mod list now opens the issue tracker instead of being greyed out.
 
 ## [2.0.1-beta] - 2026-10-11
 
