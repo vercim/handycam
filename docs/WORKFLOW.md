@@ -41,7 +41,7 @@ The matrix is declared once in [`settings.gradle.kts`](../settings.gradle.kts); 
 Windows (PowerShell):
 
 ```powershell
-Set-Content -NoNewline .sc_active_version "1.21.1-fabric"   # any target from the matrix
+Set-Content -NoNewline -Path .sc_active_version -Value "1.21.1-fabric"   # any target from the matrix; keep the named parameters (positional form swaps path and value in Windows PowerShell 5.1)
 .\gradlew.bat runActiveClient
 .\gradlew.bat buildActive
 .\gradlew.bat buildAndCollect
