@@ -33,32 +33,83 @@ The matrix is declared once in [`settings.gradle.kts`](../settings.gradle.kts); 
 
 - JDK 25+ to launch Gradle (Fabric Loom 1.18 refuses to load on anything older); the toolchain that compiles each target (Java 17 for 1.20.1, 21 for 1.21.x, 25 for 26.x) is provisioned automatically. CI installs all three JDKs.
 - Windows: PowerShell, use `.\gradlew.bat`.
-- macOS / Linux: use `./gradlew` (run `chmod +x gradlew` if it is not executable).
-- To force a specific launcher JDK: macOS `export JAVA_HOME=$(/usr/libexec/java_home -v 25)`, Windows `$env:JAVA_HOME = "C:\path\to\jdk-25"`.
+- macOS / Linux: use `./gradlew`; if it is not executable:
+
+  ```bash
+  chmod +x gradlew
+  ```
+
+- To force a specific launcher JDK, on macOS:
+
+  ```bash
+  export JAVA_HOME=$(/usr/libexec/java_home -v 25)
+  ```
+
+  on Windows (PowerShell):
+
+  ```powershell
+  $env:JAVA_HOME = "C:\path\to\jdk-25"
+  ```
 
 ## Commands
 
-Windows (PowerShell):
+### Windows (PowerShell)
+
+Select the active target (any target from the matrix; this rewrites the sources for it):
 
 ```powershell
-Set-Content -NoNewline -Path .sc_active_version -Value "1.21.1-fabric"   # any target from the matrix; keep the named parameters (positional form swaps path and value in Windows PowerShell 5.1)
+.\gradlew.bat "Set active project to 1.21.1-fabric"
+```
+
+```powershell
 .\gradlew.bat runActiveClient
+```
+
+```powershell
 .\gradlew.bat buildActive
+```
+
+```powershell
 .\gradlew.bat buildAndCollect
+```
+
+```powershell
 .\gradlew.bat clean buildAndCollect
+```
+
+```powershell
 .\gradlew.bat :1.21.1-neoforge:build
 ```
 
-macOS / Linux:
+### macOS / Linux
+
+Select the active target (any target from the matrix; this rewrites the sources for it):
 
 ```bash
-printf '1.21.1-fabric' > .sc_active_version   # any target from the matrix
+./gradlew "Set active project to 1.21.1-fabric"
+```
+
+```bash
 ./gradlew runActiveClient
+```
+
+```bash
 ./gradlew buildActive
+```
+
+```bash
 ./gradlew buildAndCollect
+```
+
+```bash
 ./gradlew clean buildAndCollect
+```
+
+```bash
 ./gradlew :1.21.1-neoforge:build
 ```
+
+### Tasks
 
 | Task | What it does |
 |---|---|
@@ -139,7 +190,11 @@ Use a clean client profile each time.
 4. Create and push the matching `v<mod_version>` tag:
 
    ```bash
-   git tag v<mod_version> && git push origin v<mod_version>
+   git tag v<mod_version>
+   ```
+
+   ```bash
+   git push origin v<mod_version>
    ```
 
 The tag workflow (`.github/workflows/release.yml`):
