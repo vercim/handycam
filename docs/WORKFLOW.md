@@ -113,7 +113,7 @@ Do not use `clean` routinely: it discards Gradle and Minecraft preparation work.
 
 Outputs: collected release JARs are in `build/libs/` (for example `handycam-2.1.0-beta+1.21.1-fabric.jar`); per-target output is in `versions/<target>/build/libs/`.
 
-Switch targets with the `Set active project to <target>` task: it updates `.sc_active_version` and rewrites the version- and loader-specific source blocks. Editing `.sc_active_version` by hand does not rewrite them (run the `Refresh active project` task afterwards), and a plain `gradlew :<target>:runClient` never does; the active target then compiles the stale sources. Commit with `1.21.1-fabric` active (the configured `vcsVersion`, `Reset active project` restores it).
+Switch targets with the `Set active project to <target>` task: it updates `.sc_active_version` and rewrites the version- and loader-specific source blocks. Editing `.sc_active_version` by hand does not rewrite them (run the `Refresh active project` task afterwards), and a plain `gradlew :<target>:runClient` never does; the active target then compiles the stale sources. Commit with `26.3-fabric` active (the newest target and the configured `vcsVersion`; `Reset active project` restores it).
 
 ## Conditional sources
 
@@ -127,7 +127,7 @@ fabricOnlyCall();
 *///?}
 ```
 
-Minecraft-version conditions use version predicates, `//? if >=1.21.10 { ... //?} else if >=1.21.4 { ... //?} else { ... //?}`, and may combine with a loader constant (`//? if neoforge && >=1.21.10`). The block that is not active for the file's version is commented out, so write new code in the form the committed version (`1.21.1`) shows. Conditions cannot nest inside a commented-out loader block (Java has no nested block comments): use a combined condition or a flat chain instead.
+Minecraft-version conditions use version predicates, `//? if >=1.21.10 { ... //?} else if >=1.21.4 { ... //?} else { ... //?}`, and may combine with a loader constant (`//? if neoforge && >=1.21.10`). The block that is not active for the file's version is commented out, so write new code in the form the committed version (`26.3`) shows. Conditions cannot nest inside a commented-out loader block (Java has no nested block comments): use a combined condition or a flat chain instead.
 
 Keep conditions as narrow as practical. If a whole entry point is loader-specific, keep its `package` declaration outside the conditional block so the inactive target generates a valid, otherwise empty source file. Minecraft-version differences are expressed the same way, next to the affected code (see [VERSION_NOTES.md](VERSION_NOTES.md)).
 
