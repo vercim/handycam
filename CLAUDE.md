@@ -14,7 +14,7 @@ Handycam — client-side Minecraft mod, procedural handheld-camera effects. Fabr
 
 ## Current state
 
-- Version `2.1.0` (`2.0.0-alpha` was the first Stonecutter release); last Architectury release is `1.3.2`.
+- Version `2.1.0-beta` (`2.0.0-alpha` was the first Stonecutter release); last Architectury release is `1.3.2`.
 - Targets, declared once in `settings.gradle.kts`: Minecraft 1.20.1 on Fabric and Forge; 1.21.1, 1.21.4, 1.21.10, 1.21.11, 26.1, 26.1.2, 26.2, and 26.3 each on Fabric and NeoForge (18 in all). Per-target Java, Minecraft range, loader and library versions live in `versions/<target>/gradle.properties`. The `archive/<version>` git tags keep the final Architectury-era ports (1.20.1, 1.21.1, 1.21.10, 1.21.11, 26.1, 26.2) as read-only history; inspect one with `git checkout archive/<version>` or `git show archive/<version>:<path>`. Never add new long-lived version branches.
 - `vcsVersion = 1.21.1-fabric`: commit with `.sc_active_version` set to `1.21.1-fabric`.
 
