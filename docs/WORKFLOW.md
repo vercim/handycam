@@ -123,7 +123,7 @@ Do not use `clean` routinely: it discards Gradle and Minecraft preparation work.
 
 Outputs: collected release JARs are in `build/libs/` (for example `handycam-2.1.0+1.21.1-fabric.jar`); per-target output is in `versions/<target>/build/libs/`.
 
-After changing `.sc_active_version`, re-sync Gradle (IDE reload or any `gradlew` call) so Stonecutter rewrites the loader-specific source blocks. Commit with `1.21.1-fabric` active (the configured `vcsVersion`).
+Switch targets with the `Set active project to <target>` task: it updates `.sc_active_version` and rewrites the version- and loader-specific source blocks. Editing `.sc_active_version` by hand does not rewrite them (run the `Refresh active project` task afterwards), and a plain `gradlew :<target>:runClient` never does; the active target then compiles the stale sources. Commit with `1.21.1-fabric` active (the configured `vcsVersion`, `Reset active project` restores it).
 
 ## Conditional sources
 
@@ -212,7 +212,7 @@ It needs the repository variables `MODRINTH_PROJECT_ID` and `CURSEFORGE_PROJECT_
 
 - **"Dependency requires at least JVM runtime version 25"** → Gradle was launched with an older JDK; launch it with JDK 25+ (`JAVA_HOME`, or `setup-java` in CI).
 - **Transparent world in dev** → Gradle is using the wrong JDK; use a Java 21 toolchain.
-- **"Cannot find symbol" in a generated target** → check the active Stonecutter target and its conditional blocks, then re-sync Gradle.
+- **"Cannot find symbol" for the baseline's classes (`UseAnim`, `GuiGraphics`, `KeyBindingHelper`) on a newer target** → the sources were not rewritten for it, usually because `.sc_active_version` was edited by hand or a `:<target>:` task was run directly; run `Set active project to <target>`. Other "cannot find symbol" errors: check the conditional blocks of that file.
 - **Wrong client runs** → update `.sc_active_version` and use `runActiveClient`.
 - **Mod loads but nothing happens in the packaged JAR** → the Mixin config is not registered for that loader; inspect the JAR metadata.
 - **"Mod development has not been enabled yet" in `build.forge.gradle.kts`** → inside `legacyForge { }` a script `val` named like an extension property (`minecraftVersion`) is shadowed; compute the value outside the block.
