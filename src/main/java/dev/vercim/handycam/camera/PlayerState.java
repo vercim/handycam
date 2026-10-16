@@ -6,10 +6,10 @@ import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.ItemStack;
 //? if >=1.21.4 {
-/*import net.minecraft.world.item.ItemUseAnimation;
-*///?} else {
-import net.minecraft.world.item.UseAnim;
-//?}
+import net.minecraft.world.item.ItemUseAnimation;
+//?} else {
+/*import net.minecraft.world.item.UseAnim;
+*///?}
 
 public final class PlayerState {
 
@@ -124,12 +124,12 @@ public final class PlayerState {
         if (player.isUsingItem()) {
             ItemStack use = player.getUseItem();
             //? if >=1.21.4 {
-            /*ItemUseAnimation anim = use.getItem().getUseAnimation(use);
+            ItemUseAnimation anim = use.getItem().getUseAnimation(use);
             isEating = (anim == ItemUseAnimation.EAT || anim == ItemUseAnimation.DRINK);
-            *///?} else {
-            UseAnim anim = use.getItem().getUseAnimation(use);
+            //?} else {
+            /*UseAnim anim = use.getItem().getUseAnimation(use);
             isEating = (anim == UseAnim.EAT || anim == UseAnim.DRINK);
-            //?}
+            *///?}
         }
 
         return new PlayerState(hSpeed, dy, player.isSprinting(), player.onGround(),

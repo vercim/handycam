@@ -65,17 +65,17 @@ Targets: `X.Y.Z-fabric`, `X.Y.Z-neoforge` · first mod version: A.B.C · date: Y
 
 For each new version, after adding the target:
 
-- [ ] Add the target to `settings.gradle.kts`; configure its loader dependencies (loader build script, `gradle.properties`, or a Stonecutter property table once the matrix grows).
-- [ ] `Camera.setup()` parameters, `Camera` fields (`xRot`, `yRot`, `rotation`), `Camera.move()` name and parameters.
-- [ ] `GameRenderer.getFov()` signature and return type.
-- [ ] `Gui.renderCrosshair()` signature (`DeltaTracker` or `float`) and `GuiGraphics.pose()` type.
-- [ ] `LocalPlayer` fields (`swinging`, `swingTime`, `hurtTime`), `CrossbowItem.isCharged()` still static, `UseAnim` / `ItemUseAnimation` EAT and DRINK, `CameraType` import path.
-- [ ] Explosion packet accessors and `LightningBolt` tick hook still match the mixins.
-- [ ] Express differences with narrow Stonecutter conditions, not copied files.
-- [ ] Mixin config registered for both loaders in the packaged JAR.
-- [ ] Test first/second/third-person camera, damage shake, bow and crossbow recoil, creative-flight fade-out, FOV override (`enableVanillaFov = false`), crosshair offset (mouse lead and bow draw shrink).
-- [ ] Add the target to CI artifact validation (it counts targets automatically) and to the release acceptance matrix.
-- [ ] Fill this file's entry for the version; add a `CHANGELOG.md` line under `Compatibility`.
+- Add the target to `settings.gradle.kts`; configure its loader dependencies (loader build script, `gradle.properties`, or a Stonecutter property table once the matrix grows).
+- `Camera.setup()` parameters, `Camera` fields (`xRot`, `yRot`, `rotation`), `Camera.move()` name and parameters.
+- `GameRenderer.getFov()` signature and return type.
+- `Gui.renderCrosshair()` signature (`DeltaTracker` or `float`) and `GuiGraphics.pose()` type.
+-  `LocalPlayer` fields (`swinging`, `swingTime`, `hurtTime`), `CrossbowItem.isCharged()` still static, `UseAnim` / `ItemUseAnimation` EAT and DRINK, `CameraType` import path.
+- Explosion packet accessors and `LightningBolt` tick hook still match the mixins.
+- Express differences with narrow Stonecutter conditions, not copied files.
+- Mixin config registered for both loaders in the packaged JAR.
+- Test first/second/third-person camera, damage shake, bow and crossbow recoil, creative-flight fade-out, FOV override (`enableVanillaFov = false`), crosshair offset (mouse lead and bow draw shrink).
+- Add the target to CI artifact validation (it counts targets automatically) and to the release acceptance matrix.
+- Fill this file's entry for the version; add a `CHANGELOG.md` line under `Compatibility`.
 
 Likely trouble spots, in order: `Camera`, `Gui`, `GameRenderer` mixins; then `PlayerState` (player/item APIs); then loader metadata and dependency version ranges.
 

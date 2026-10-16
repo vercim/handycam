@@ -45,9 +45,9 @@ public final class CameraShakeSystem {
     private static int     prevHurtTime = 0;
     private static float   prevHealth   = -1f;
     //? if >=26.3 {
-    /*private static boolean prevSwinging  = false;
+    private static boolean prevSwinging  = false;
     private static float   prevSwingAnim = 0f;
-    *///?}
+    //?}
 
     private static boolean wasPaused = false;
     private static CameraOffset lastComputedOffset = CameraOffset.ZERO;
@@ -122,15 +122,15 @@ public final class CameraShakeSystem {
     // from the swing animation instead: it begins at 0 and drops back when a swing restarts mid-animation.
     private static boolean swingStarted(LocalPlayer player) {
         //? if >=26.3 {
-        /*boolean swinging = player.isSwinging();
+        boolean swinging = player.isSwinging();
         float anim = player.getSwingAnimation(1f);
         boolean started = swinging && (!prevSwinging || anim < prevSwingAnim);
         prevSwinging  = swinging;
         prevSwingAnim = anim;
         return started;
-        *///?} else {
-        return player.swinging && player.swingTime == 0;
-        //?}
+        //?} else {
+        /*return player.swinging && player.swingTime == 0;
+        *///?}
     }
 
     public static CameraOffset computeFrame(LocalPlayer player, float partialTick) {

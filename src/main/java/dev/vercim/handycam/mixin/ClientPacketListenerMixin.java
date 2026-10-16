@@ -14,9 +14,9 @@ public class ClientPacketListenerMixin {
     @Inject(method = "handleExplosion", at = @At("HEAD"))
     private void handycam$onExplosion(ClientboundExplodePacket packet, CallbackInfo ci) {
         //? if >=1.21.4 {
-        /*CameraShakeSystem.onExplosion(packet.center().x, packet.center().y, packet.center().z);
-        *///?} else {
-        CameraShakeSystem.onExplosion(packet.getX(), packet.getY(), packet.getZ());
-        //?}
+        CameraShakeSystem.onExplosion(packet.center().x, packet.center().y, packet.center().z);
+        //?} else {
+        /*CameraShakeSystem.onExplosion(packet.getX(), packet.getY(), packet.getZ());
+        *///?}
     }
 }

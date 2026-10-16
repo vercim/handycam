@@ -6,8 +6,8 @@ import net.minecraft.client.KeyMapping;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 //? if >=1.21.11 {
-/*import net.minecraft.resources.Identifier;
-*///?} else if >=1.21.10 {
+import net.minecraft.resources.Identifier;
+//?} else if >=1.21.10 {
 /*import net.minecraft.resources.ResourceLocation;
 *///?}
 
@@ -15,14 +15,14 @@ import net.minecraft.network.chat.Component;
 public final class HandycamKeys {
 
     //? if >=1.21.11 {
-    /*private static final KeyMapping.Category CATEGORY = KeyMapping.Category.register(
+    private static final KeyMapping.Category CATEGORY = KeyMapping.Category.register(
             Identifier.fromNamespaceAndPath(HandycamMod.MOD_ID, "handycam"));
-    *///?} else if >=1.21.10 {
+    //?} else if >=1.21.10 {
     /*private static final KeyMapping.Category CATEGORY = KeyMapping.Category.register(
             ResourceLocation.fromNamespaceAndPath(HandycamMod.MOD_ID, "handycam"));
     *///?} else {
-    private static final String CATEGORY = "key.categories.handycam";
-    //?}
+    /*private static final String CATEGORY = "key.categories.handycam";
+    *///?}
 
     private HandycamKeys() {}
 
@@ -39,9 +39,9 @@ public final class HandycamKeys {
 
         Component message = Component.literal("Handycam: " + (cfg.effectsEnabled ? "ON" : "OFF"));
         //? if >=26.1 {
-        /*player.sendOverlayMessage(message);
-        *///?} else {
-        player.displayClientMessage(message, true);
-        //?}
+        player.sendOverlayMessage(message);
+        //?} else {
+        /*player.displayClientMessage(message, true);
+        *///?}
     }
 }

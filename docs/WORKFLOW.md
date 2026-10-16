@@ -72,11 +72,6 @@ Select the active target (any target from the matrix; this rewrites the sources 
 ```powershell
 .\gradlew.bat buildAndCollect
 ```
-
-```powershell
-.\gradlew.bat clean buildAndCollect
-```
-
 ```powershell
 .\gradlew.bat :1.21.1-neoforge:build
 ```
@@ -100,11 +95,6 @@ Select the active target (any target from the matrix; this rewrites the sources 
 ```bash
 ./gradlew buildAndCollect
 ```
-
-```bash
-./gradlew clean buildAndCollect
-```
-
 ```bash
 ./gradlew :1.21.1-neoforge:build
 ```
