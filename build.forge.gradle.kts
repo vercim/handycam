@@ -70,7 +70,7 @@ tasks.jar {
 
 tasks.processResources {
     val metadata = mapOf(
-        "version" to project.version,
+        "version" to modVersion,
         "minecraft_version" to minecraftVersion,
         "forge_min_version" to project.property("forge_min_version"),
         "minecraft_version_range" to project.property("minecraft_version_range"),
