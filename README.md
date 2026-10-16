@@ -2,7 +2,7 @@
 Handycam adds subtle, physics-inspired camera movement that makes Minecraft feel like it is being filmed with a real handheld camera. Every step, sprint, hit, and landing is reflected in the camera with spring-simulated, noise-driven motion.
 
 ![Configuration](https://cdn.modrinth.com/data/cached_images/7aa3b7a2f33b1a990f5c964f67d63890f61b65a1_0.webp)
-Every effect has its own intensity slider and can be toggled off independently. Open settings through ModMenu (Fabric) or the in-game mod menu (NeoForge).
+Every effect has its own intensity slider and can be toggled off independently. Open settings through ModMenu (Fabric) or the in-game mod menu (NeoForge and Forge).
 
 ![Dependencies](https://cdn.modrinth.com/data/cached_images/78f018e94dabc1d8158865367fc8c3952ceb20a0_0.webp)
 - [Cloth Config](https://modrinth.com/mod/cloth-config)

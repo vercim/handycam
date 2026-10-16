@@ -1,13 +1,14 @@
 modLoader = "javafml"
 loaderVersion = "${neoforge_loader_version_range}"
 license = "LGPL-3.0-only"
+issueTrackerURL = "https://github.com/vercim/handycam/issues"
 
 [[mods]]
 modId = "handycam"
 version = "${version}"
 displayName = "Handycam"
-logoFile = "icon.png"
-logoBlur = false
+${neoforge_icon_file_key} = "icon.png"
+${neoforge_icon_blur_key} = false
 displayURL = "https://modrinth.com/mod/handycam"
 authors = "vercim"
 description = '''
@@ -24,14 +25,14 @@ side = "CLIENT"
 [[dependencies.handycam]]
 modId = "minecraft"
 type = "required"
-versionRange = "[${minecraft_version},1.21.2)"
+versionRange = "${minecraft_version_range}"
 ordering = "NONE"
 side = "CLIENT"
 
 [[dependencies.handycam]]
 modId = "cloth_config"
 type = "required"
-versionRange = "[15,)"
+versionRange = "${cloth_config_version_range}"
 ordering = "AFTER"
 side = "CLIENT"
 

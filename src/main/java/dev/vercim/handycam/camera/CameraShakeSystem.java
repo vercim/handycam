@@ -44,11 +44,24 @@ public final class CameraShakeSystem {
     private static float   peakY        = 0f;
     private static int     prevHurtTime = 0;
     private static float   prevHealth   = -1f;
+    //? if >=26.3 {
+    private static boolean prevSwinging  = false;
+    private static float   prevSwingAnim = 0f;
+    //?}
 
     private static boolean wasPaused = false;
     private static CameraOffset lastComputedOffset = CameraOffset.ZERO;
 
     private static final float[] scratch = new float[4];
+
+    //? if <1.21 {
+    /*// 1.20.1 renders the world from yaw and pitch only; the roll of the current frame is handed to GameRendererMixin.
+    private static float viewRoll = 0f;
+
+    public static void setViewRoll(float roll) { viewRoll = roll; }
+
+    public static float getViewRoll() { return viewRoll; }
+    *///?}
 
     private static float fadeBlend = 1f;
     private static final float FADE_SPEED = 3f;
@@ -93,7 +106,8 @@ public final class CameraShakeSystem {
         prevHurtTime = hurtTime;
         prevHealth   = health;
 
-        if (player.swinging && player.swingTime == 0 && !sleeping) {
+        boolean swingStarted = swingStarted(player);
+        if (swingStarted && !sleeping) {
             HIT.onHit();
         }
 
@@ -102,6 +116,21 @@ public final class CameraShakeSystem {
 
         lastState = PlayerState.from(player);
         for (ShakeLayer layer : LAYERS) layer.tick(lastState);
+    }
+
+    // True on the first tick of a swing. 26.3 hides the swing counters behind a SwingState, so the start is read
+    // from the swing animation instead: it begins at 0 and drops back when a swing restarts mid-animation.
+    private static boolean swingStarted(LocalPlayer player) {
+        //? if >=26.3 {
+        boolean swinging = player.isSwinging();
+        float anim = player.getSwingAnimation(1f);
+        boolean started = swinging && (!prevSwinging || anim < prevSwingAnim);
+        prevSwinging  = swinging;
+        prevSwingAnim = anim;
+        return started;
+        //?} else {
+        /*return player.swinging && player.swingTime == 0;
+        *///?}
     }
 
     public static CameraOffset computeFrame(LocalPlayer player, float partialTick) {

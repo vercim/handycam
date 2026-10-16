@@ -517,7 +517,9 @@ public class HandycamConfigScreen {
             .setSaveConsumer(v -> cfg.explosionDecay = denorm(v, 0.6f))
             .build());
 
+        //? if >=1.21 {
         builder.setDefaultBackgroundTexture(null);
+        //?}
         builder.setSavingRunnable(saveCallback);
 
         return builder.build();

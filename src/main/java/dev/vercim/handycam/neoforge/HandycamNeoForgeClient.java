@@ -2,13 +2,11 @@ package dev.vercim.handycam.neoforge;
 
 //? neoforge {
 
-/*import com.mojang.blaze3d.platform.InputConstants;
+/*import dev.vercim.handycam.HandycamKeys;
 import dev.vercim.handycam.HandycamMod;
 import dev.vercim.handycam.camera.CameraShakeSystem;
-import dev.vercim.handycam.config.HandycamConfig;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraft.network.chat.Component;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -18,14 +16,17 @@ import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.common.NeoForge;
 
-@EventBusSubscriber(modid = HandycamMod.MOD_ID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
-public final class HandycamNeoForgeClient {
+*///?}
+// NeoForge picks the event bus from the event type from 21.10 on; before that the MOD bus is explicit.
+//? if neoforge && >=1.21.10 {
+/*@EventBusSubscriber(modid = HandycamMod.MOD_ID, value = Dist.CLIENT)
+*///?} else if neoforge {
+/*@EventBusSubscriber(modid = HandycamMod.MOD_ID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+*///?}
+//? neoforge {
+/*public final class HandycamNeoForgeClient {
 
-    private static final KeyMapping TOGGLE_EFFECTS_KEY = new KeyMapping(
-        "key.handycam.toggle_effects",
-        InputConstants.KEY_F10,
-        "key.categories.handycam"
-    );
+    private static final KeyMapping TOGGLE_EFFECTS_KEY = HandycamKeys.createToggleEffects();
 
     @SubscribeEvent
     public static void onRegisterKeyMappings(RegisterKeyMappingsEvent event) {
@@ -39,15 +40,7 @@ public final class HandycamNeoForgeClient {
             Minecraft mc = Minecraft.getInstance();
             if (mc.player != null) CameraShakeSystem.tick(mc.player);
 
-            while (TOGGLE_EFFECTS_KEY.consumeClick()) {
-                HandycamConfig cfg = HandycamConfig.get();
-                cfg.effectsEnabled = !cfg.effectsEnabled;
-                HandycamConfig.save(FMLPaths.CONFIGDIR.get());
-                if (mc.player != null) {
-                    mc.player.displayClientMessage(
-                        Component.literal("Handycam: " + (cfg.effectsEnabled ? "ON" : "OFF")), true);
-                }
-            }
+            while (TOGGLE_EFFECTS_KEY.consumeClick()) HandycamKeys.toggleEffects(mc.player);
         });
     }
 }

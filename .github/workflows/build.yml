@@ -9,9 +9,11 @@ on:
       - 'src/**'
       - 'build.fabric.gradle.kts'
       - 'build.neoforge.gradle.kts'
+      - 'build.forge.gradle.kts'
       - 'settings.gradle.kts'
       - 'stonecutter.gradle.kts'
       - 'gradle.properties'
+      - 'versions/**/gradle.properties'
       - 'gradle/wrapper/**'
       - 'gradlew'
       - 'gradlew.bat'
@@ -21,9 +23,11 @@ on:
       - 'src/**'
       - 'build.fabric.gradle.kts'
       - 'build.neoforge.gradle.kts'
+      - 'build.forge.gradle.kts'
       - 'settings.gradle.kts'
       - 'stonecutter.gradle.kts'
       - 'gradle.properties'
+      - 'versions/**/gradle.properties'
       - 'gradle/wrapper/**'
       - 'gradlew'
       - 'gradlew.bat'
@@ -42,12 +46,13 @@ jobs:
         uses: actions/checkout@v7
 
       # Gradle itself needs JDK 25 (Fabric Loom 1.18); the last version listed becomes JAVA_HOME.
-      # JDK 21 is the toolchain the mod compiles with.
-      - name: Set up JDK 21 and 25
+      # The mod compiles with JDK 17 (1.20.1), 21 (1.21.x) and 25 (26.x) toolchains.
+      - name: Set up JDK 17, 21 and 25
         uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: |
+            17
             21
             25
 

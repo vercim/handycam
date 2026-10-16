@@ -13,8 +13,13 @@ public abstract class AbstractClientPlayerMixin {
 
     // Vanilla FOV effects (sprint, speed, bow draw, flying) all come from this modifier; the spyglass returns 0.1
     // from it in first person, so it is the one case left alone.
+    //? if >=1.21.4 {
     @Inject(method = "getFieldOfViewModifier", at = @At("RETURN"), cancellable = true)
+    private void handycam$blockDynamicFov(boolean firstPerson, float effectScale, CallbackInfoReturnable<Float> cir) {
+    //?} else {
+    /*@Inject(method = "getFieldOfViewModifier", at = @At("RETURN"), cancellable = true)
     private void handycam$blockDynamicFov(CallbackInfoReturnable<Float> cir) {
+    *///?}
         if (HandycamConfig.get().enableVanillaFov) return;
 
         AbstractClientPlayer self = (AbstractClientPlayer) (Object) this;

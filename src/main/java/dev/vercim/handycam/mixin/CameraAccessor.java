@@ -23,6 +23,16 @@ public interface CameraAccessor {
     @Accessor("rotation")
     Quaternionf getRotation();
 
+    //? if >=26.1 {
+    @Invoker("setRotation")
+    void invokeSetRotation(float yRot, float xRot);
+
+    //?}
+    //? if >=1.21 {
     @Invoker("move")
     void invokeMove(float distanceOffset, float verticalOffset, float horizontalOffset);
+    //?} else {
+    /*@Invoker("move")
+    void invokeMove(double distanceOffset, double verticalOffset, double horizontalOffset);
+    *///?}
 }

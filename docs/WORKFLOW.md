@@ -8,41 +8,98 @@ Handycam uses one [Stonecutter](https://stonecutter.kikugie.dev/) repository: a 
 
 | Target | Loader | Java |
 |---|---|---:|
+| `1.20.1-fabric` | Fabric | 17 |
+| `1.20.1-forge` | Forge | 17 |
 | `1.21.1-fabric` | Fabric | 21 |
 | `1.21.1-neoforge` | NeoForge | 21 |
+| `1.21.4-fabric` | Fabric | 21 |
+| `1.21.4-neoforge` | NeoForge | 21 |
+| `1.21.10-fabric` | Fabric | 21 |
+| `1.21.10-neoforge` | NeoForge | 21 |
+| `1.21.11-fabric` | Fabric | 21 |
+| `1.21.11-neoforge` | NeoForge | 21 |
+| `26.1-fabric` | Fabric | 25 |
+| `26.1-neoforge` | NeoForge | 25 |
+| `26.1.2-fabric` | Fabric | 25 |
+| `26.1.2-neoforge` | NeoForge | 25 |
+| `26.2-fabric` | Fabric | 25 |
+| `26.2-neoforge` | NeoForge | 25 |
+| `26.3-fabric` | Fabric | 25 |
+| `26.3-neoforge` | NeoForge | 25 |
 
-The matrix is declared once in [`settings.gradle.kts`](../settings.gradle.kts). The active target for the convenience tasks is stored in `.sc_active_version`.
+The matrix is declared once in [`settings.gradle.kts`](../settings.gradle.kts); per-target Java, Minecraft range, loader and library versions live in `versions/<target>/gradle.properties`. The active target for the convenience tasks is stored in `.sc_active_version`.
 
 ## Requirements
 
-- JDK 25+ to launch Gradle (Fabric Loom 1.18 refuses to load on anything older); the Java 21 toolchain that compiles the mod is provisioned automatically. CI installs both JDKs.
+- JDK 25+ to launch Gradle (Fabric Loom 1.18 refuses to load on anything older); the toolchain that compiles each target (Java 17 for 1.20.1, 21 for 1.21.x, 25 for 26.x) is provisioned automatically. CI installs all three JDKs.
 - Windows: PowerShell, use `.\gradlew.bat`.
-- macOS / Linux: use `./gradlew` (run `chmod +x gradlew` if it is not executable).
-- To force a specific launcher JDK: macOS `export JAVA_HOME=$(/usr/libexec/java_home -v 25)`, Windows `$env:JAVA_HOME = "C:\path\to\jdk-25"`.
+- macOS / Linux: use `./gradlew`; if it is not executable:
+
+  ```bash
+  chmod +x gradlew
+  ```
+
+- To force a specific launcher JDK, on macOS:
+
+  ```bash
+  export JAVA_HOME=$(/usr/libexec/java_home -v 25)
+  ```
+
+  on Windows (PowerShell):
+
+  ```powershell
+  $env:JAVA_HOME = "C:\path\to\jdk-25"
+  ```
 
 ## Commands
 
-Windows (PowerShell):
+### Windows (PowerShell)
+
+Select the active target (any target from the matrix; this rewrites the sources for it):
 
 ```powershell
-Set-Content -NoNewline .sc_active_version "1.21.1-fabric"   # or 1.21.1-neoforge
+.\gradlew.bat "Set active project to 1.21.1-fabric"
+```
+
+```powershell
 .\gradlew.bat runActiveClient
+```
+
+```powershell
 .\gradlew.bat buildActive
+```
+
+```powershell
 .\gradlew.bat buildAndCollect
-.\gradlew.bat clean buildAndCollect
+```
+```powershell
 .\gradlew.bat :1.21.1-neoforge:build
 ```
 
-macOS / Linux:
+### macOS / Linux
+
+Select the active target (any target from the matrix; this rewrites the sources for it):
 
 ```bash
-printf '1.21.1-fabric' > .sc_active_version   # or 1.21.1-neoforge
+./gradlew "Set active project to 1.21.1-fabric"
+```
+
+```bash
 ./gradlew runActiveClient
+```
+
+```bash
 ./gradlew buildActive
+```
+
+```bash
 ./gradlew buildAndCollect
-./gradlew clean buildAndCollect
+```
+```bash
 ./gradlew :1.21.1-neoforge:build
 ```
+
+### Tasks
 
 | Task | What it does |
 |---|---|
@@ -54,13 +111,13 @@ printf '1.21.1-fabric' > .sc_active_version   # or 1.21.1-neoforge
 
 Do not use `clean` routinely: it discards Gradle and Minecraft preparation work.
 
-Outputs: collected release JARs are in `build/libs/` (for example `handycam-2.0.1-beta+1.21.1-fabric.jar`); per-target output is in `versions/<target>/build/libs/`.
+Outputs: collected release JARs are in `build/libs/` (for example `handycam-2.1.0+1.21.1-fabric.jar`); per-target output is in `versions/<target>/build/libs/`.
 
-After changing `.sc_active_version`, re-sync Gradle (IDE reload or any `gradlew` call) so Stonecutter rewrites the loader-specific source blocks. Commit with `1.21.1-fabric` active (the configured `vcsVersion`).
+Switch targets with the `Set active project to <target>` task: it updates `.sc_active_version` and rewrites the version- and loader-specific source blocks. Editing `.sc_active_version` by hand does not rewrite them (run the `Refresh active project` task afterwards), and a plain `gradlew :<target>:runClient` never does; the active target then compiles the stale sources. Commit with `1.21.1-fabric` active (the configured `vcsVersion`, `Reset active project` restores it).
 
 ## Conditional sources
 
-Shared code is ordinary Java. Loader-specific code uses Stonecutter conditions; the inactive loader's code appears commented out in the source tree:
+Shared code is ordinary Java. Loader-specific code uses Stonecutter conditions (`fabric`, `neoforge`, `forge`); the inactive loader's code appears commented out in the source tree:
 
 ```java
 //? fabric {
@@ -69,6 +126,8 @@ fabricOnlyCall();
 /*neoForgeOnlyCall();
 *///?}
 ```
+
+Minecraft-version conditions use version predicates, `//? if >=1.21.10 { ... //?} else if >=1.21.4 { ... //?} else { ... //?}`, and may combine with a loader constant (`//? if neoforge && >=1.21.10`). The block that is not active for the file's version is commented out, so write new code in the form the committed version (`1.21.1`) shows. Conditions cannot nest inside a commented-out loader block (Java has no nested block comments): use a combined condition or a flat chain instead.
 
 Keep conditions as narrow as practical. If a whole entry point is loader-specific, keep its `package` declaration outside the conditional block so the inactive target generates a valid, otherwise empty source file. Minecraft-version differences are expressed the same way, next to the affected code (see [VERSION_NOTES.md](VERSION_NOTES.md)).
 
@@ -95,6 +154,7 @@ IDE runs are not enough for loader or Mixin changes (1.3.2 shipped a JAR without
 
 - launch the Fabric JAR with Fabric API, Cloth Config, and Mod Menu;
 - launch the NeoForge JAR with Cloth Config;
+- launch the Forge JAR with Cloth Config (the Forge build writes a `handycam.refmap.json`; only the packaged JAR proves it maps every target);
 - verify config loading and saving;
 - verify the F10 effects toggle;
 - verify first-person camera, crosshair compensation, and damage, bow, food, explosion, jump, and landing effects;
@@ -120,7 +180,11 @@ Use a clean client profile each time.
 4. Create and push the matching `v<mod_version>` tag:
 
    ```bash
-   git tag v<mod_version> && git push origin v<mod_version>
+   git tag v<mod_version>
+   ```
+
+   ```bash
+   git push origin v<mod_version>
    ```
 
 The tag workflow (`.github/workflows/release.yml`):
@@ -138,6 +202,8 @@ It needs the repository variables `MODRINTH_PROJECT_ID` and `CURSEFORGE_PROJECT_
 
 - **"Dependency requires at least JVM runtime version 25"** → Gradle was launched with an older JDK; launch it with JDK 25+ (`JAVA_HOME`, or `setup-java` in CI).
 - **Transparent world in dev** → Gradle is using the wrong JDK; use a Java 21 toolchain.
-- **"Cannot find symbol" in a generated target** → check the active Stonecutter target and its conditional blocks, then re-sync Gradle.
+- **"Cannot find symbol" for the baseline's classes (`UseAnim`, `GuiGraphics`, `KeyBindingHelper`) on a newer target** → the sources were not rewritten for it, usually because `.sc_active_version` was edited by hand or a `:<target>:` task was run directly; run `Set active project to <target>`. Other "cannot find symbol" errors: check the conditional blocks of that file.
 - **Wrong client runs** → update `.sc_active_version` and use `runActiveClient`.
 - **Mod loads but nothing happens in the packaged JAR** → the Mixin config is not registered for that loader; inspect the JAR metadata.
+- **"Mod development has not been enabled yet" in `build.forge.gradle.kts`** → inside `legacyForge { }` a script `val` named like an extension property (`minecraftVersion`) is shadowed; compute the value outside the block.
+- **A new world never opens with `--quickPlaySingleplayer`** → a world saved by an older Minecraft may ask for an upgrade (26.2 and later) or use an old layout (26.1); generate the test world with that version's server.

@@ -1,3 +1,9 @@
+## [2.1.0-beta] - 2026-10-16
+
+### Compatibility
+- Added Minecraft 1.20.1 support for Fabric and Forge.
+- Added Minecraft 1.21.4, 1.21.10, 1.21.11, 26.1, 26.1.2, 26.2, and 26.3 support for Fabric and NeoForge.
+
 ## [2.0.1-beta] - 2026-10-11
 
 ### Compatibility

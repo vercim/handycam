@@ -44,7 +44,7 @@ repositories {
 
 dependencies {
     minecraft("com.mojang:minecraft:$minecraftVersion")
-    mappings(loom.layered { officialMojangMappings() })
+    loomx.applyMojangMappings()
     modImplementation("net.fabricmc:fabric-loader:${project.property("fabric_loader_version")}")
     modImplementation("net.fabricmc.fabric-api:fabric-api:${project.property("fabric_api_version")}")
     modImplementation("me.shedaniel.cloth:cloth-config-fabric:${project.property("cloth_config_version")}")
@@ -59,11 +59,12 @@ tasks.processResources {
         "fabric_api_version" to project.property("fabric_api_version"),
         "cloth_config_version" to project.property("cloth_config_version"),
         "modmenu_version" to project.property("modmenu_version"),
-        "java_version" to javaVersion
+        "java_version" to javaVersion,
+        "mixin_compatibility_level" to project.property("mixin_compatibility_level")
     )
     inputs.properties(metadata)
-    filesMatching("fabric.mod.json") { expand(metadata) }
-    exclude("META-INF/neoforge.mods.toml")
+    filesMatching(listOf("fabric.mod.json", "handycam.mixins.json")) { expand(metadata) }
+    exclude("META-INF/neoforge.mods.toml", "META-INF/mods.toml", "pack.mcmeta")
 }
 
 tasks.withType<JavaCompile>().configureEach {
@@ -73,14 +74,14 @@ tasks.withType<JavaCompile>().configureEach {
 tasks.register<Copy>("buildAndCollect") {
     group = "build"
     description = "Builds Fabric and copies its release JAR to the root build directory."
-    val releaseJar = tasks.named<AbstractArchiveTask>("remapJar")
+    val releaseJar = loomx.modJar
     dependsOn("build")
     from(releaseJar.flatMap { it.archiveFile })
     into(rootProject.layout.buildDirectory.dir("libs"))
 }
 
 publishMods {
-    val releaseJar = tasks.named<AbstractArchiveTask>("remapJar")
+    val releaseJar = loomx.modJar
     file.set(releaseJar.flatMap { it.archiveFile })
     version.set(publishVersion)
     changelog.set(providers.environmentVariable("RELEASE_CHANGELOG").orElse("See the GitHub release notes."))

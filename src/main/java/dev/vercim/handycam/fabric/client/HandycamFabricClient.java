@@ -2,16 +2,18 @@ package dev.vercim.handycam.fabric.client;
 
 //? fabric {
 
-import com.mojang.blaze3d.platform.InputConstants;
+import dev.vercim.handycam.HandycamKeys;
 import dev.vercim.handycam.HandycamMod;
 import dev.vercim.handycam.camera.CameraShakeSystem;
-import dev.vercim.handycam.config.HandycamConfig;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+//? if >=26.1 {
+import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
+//?} else {
+/*import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+*///?}
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.KeyMapping;
-import net.minecraft.network.chat.Component;
 
 public final class HandycamFabricClient implements ClientModInitializer {
 
@@ -21,24 +23,16 @@ public final class HandycamFabricClient implements ClientModInitializer {
     public void onInitializeClient() {
         HandycamMod.initClient(FabricLoader.getInstance().getConfigDir());
 
-        toggleEffectsKey = KeyBindingHelper.registerKeyBinding(new KeyMapping(
-            "key.handycam.toggle_effects",
-            InputConstants.KEY_F10,
-            "key.categories.handycam"
-        ));
+        //? if >=26.1 {
+        toggleEffectsKey = KeyMappingHelper.registerKeyMapping(HandycamKeys.createToggleEffects());
+        //?} else {
+        /*toggleEffectsKey = KeyBindingHelper.registerKeyBinding(HandycamKeys.createToggleEffects());
+        *///?}
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if (client.player != null) CameraShakeSystem.tick(client.player);
 
-            while (toggleEffectsKey.consumeClick()) {
-                HandycamConfig cfg = HandycamConfig.get();
-                cfg.effectsEnabled = !cfg.effectsEnabled;
-                HandycamConfig.save(FabricLoader.getInstance().getConfigDir());
-                if (client.player != null) {
-                    client.player.displayClientMessage(
-                        Component.literal("Handycam: " + (cfg.effectsEnabled ? "ON" : "OFF")), true);
-                }
-            }
+            while (toggleEffectsKey.consumeClick()) HandycamKeys.toggleEffects(client.player);
         });
     }
 }
