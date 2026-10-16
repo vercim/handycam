@@ -111,7 +111,7 @@ Select the active target (any target from the matrix; this rewrites the sources 
 
 Do not use `clean` routinely: it discards Gradle and Minecraft preparation work.
 
-Outputs: collected release JARs are in `build/libs/` (for example `handycam-2.1.0+1.21.1-fabric.jar`); per-target output is in `versions/<target>/build/libs/`.
+Outputs: collected release JARs are in `build/libs/` (for example `handycam-2.1.0-beta+1.21.1-fabric.jar`); per-target output is in `versions/<target>/build/libs/`.
 
 Switch targets with the `Set active project to <target>` task: it updates `.sc_active_version` and rewrites the version- and loader-specific source blocks. Editing `.sc_active_version` by hand does not rewrite them (run the `Refresh active project` task afterwards), and a plain `gradlew :<target>:runClient` never does; the active target then compiles the stale sources. Commit with `1.21.1-fabric` active (the configured `vcsVersion`, `Reset active project` restores it).
 
@@ -194,16 +194,16 @@ The tag workflow (`.github/workflows/release.yml`):
 - builds every target with `clean build` and requires exactly one release JAR per target;
 - verifies the publishing variables and secrets exist, and refuses to overwrite an existing GitHub release;
 - publishes every target to Modrinth and CurseForge, then creates the GitHub release with the changelog section as notes;
-- posts the changelog to Discord through a webhook and pings the `@updates` role (role ID is set in the step's `env`; best effort: skipped when `DISCORD_WEBHOOK_URL` is unset, and a failure does not fail the run).
+- posts the changelog to Discord through a webhook and pings the updates role (best effort: skipped when `DISCORD_WEBHOOK_URL` is unset, nobody is pinged when `DISCORD_ROLE_ID` is unset, and a failure does not fail the run).
 
-It needs the repository variables `MODRINTH_PROJECT_ID` and `CURSEFORGE_PROJECT_ID`, and the secrets `MODRINTH_TOKEN` and `CURSEFORGE_TOKEN`; the optional secret `DISCORD_WEBHOOK_URL` enables the Discord post. Never put tokens or webhook URLs in repository files. A published version cannot be re-released: fix forward with a new version and tag.
+It needs the repository variables `MODRINTH_PROJECT_ID` and `CURSEFORGE_PROJECT_ID`, and the secrets `MODRINTH_TOKEN` and `CURSEFORGE_TOKEN`; the optional secret `DISCORD_WEBHOOK_URL` enables the Discord post, and the optional variable `DISCORD_ROLE_ID` sets the role it pings. Never put tokens or webhook URLs in repository files. A published version cannot be re-released: fix forward with a new version and tag.
 
 ## Troubleshooting
 
 - **"Dependency requires at least JVM runtime version 25"** → Gradle was launched with an older JDK; launch it with JDK 25+ (`JAVA_HOME`, or `setup-java` in CI).
-- **Transparent world in dev** → Gradle is using the wrong JDK; use a Java 21 toolchain.
+- **Transparent world in dev** → the game runs on the wrong JDK; use the target's own toolchain (17 for 1.20.1, 21 for 1.21.x, 25 for 26.x).
 - **"Cannot find symbol" for the baseline's classes (`UseAnim`, `GuiGraphics`, `KeyBindingHelper`) on a newer target** → the sources were not rewritten for it, usually because `.sc_active_version` was edited by hand or a `:<target>:` task was run directly; run `Set active project to <target>`. Other "cannot find symbol" errors: check the conditional blocks of that file.
-- **Wrong client runs** → update `.sc_active_version` and use `runActiveClient`.
+- **Wrong client runs** → run `Set active project to <target>`, then `runActiveClient`.
 - **Mod loads but nothing happens in the packaged JAR** → the Mixin config is not registered for that loader; inspect the JAR metadata.
 - **"Mod development has not been enabled yet" in `build.forge.gradle.kts`** → inside `legacyForge { }` a script `val` named like an extension property (`minecraftVersion`) is shadowed; compute the value outside the block.
 - **A new world never opens with `--quickPlaySingleplayer`** → a world saved by an older Minecraft may ask for an upgrade (26.2 and later) or use an old layout (26.1); generate the test world with that version's server.
