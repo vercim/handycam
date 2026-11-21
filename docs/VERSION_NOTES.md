@@ -256,6 +256,7 @@ NeoForge metadata pins Minecraft to `[1.21.10,1.21.11)` and Cloth Config to `[20
 | `GuiGraphics.pose()` | `PoseStack`: `pushPose()` / `popPose()`, `translate(x, y, z)`, `scale(x, y, z)` | `Matrix3x2fStack`: `pushMatrix()` / `popMatrix()`, `translate(x, y)`, `scale(x, y)` | `mixin/GuiMixin.java`, `//? if >=1.21.10` |
 | Key mapping category | `String` (`key.categories.handycam`) | `KeyMapping.Category.register(ResourceLocation)` (lang key `key.category.handycam.handycam`) | `HandycamKeys.java`, `//? if >=1.21.10` |
 | NeoForge `@EventBusSubscriber` | `bus = Bus.MOD` is required | `bus` is gone; the bus follows from the event type | `neoforge/HandycamNeoForgeClient.java`, `//? if neoforge && >=1.21.10` |
+| Runtime game version | `WorldVersion.getName()` | `WorldVersion.name()` | `HandycamMod.java`, `//? if >=1.21.10` |
 
 `Camera.setup()` (`BlockGetter`), `GameRenderer.getFov()` (`float`), `getProjectionMatrix(float)`, `AbstractClientPlayer.getFieldOfViewModifier(boolean, float)`, the explosion packet (`center()`), and `Gui.renderCrosshair(GuiGraphics, DeltaTracker)` are unchanged from 1.21.4.
 

@@ -7,6 +7,8 @@ plugins {
     id("me.modmuss50.mod-publish-plugin")
 }
 
+apply(from = rootProject.file("gradle/telemetrika.gradle.kts"))
+
 val minecraftVersion = stonecutter.current.version
 val modVersion = project.property("mod_version") as String
 val publicModVersion = modVersion.substringBefore('-')

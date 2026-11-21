@@ -1,17 +1,68 @@
 package dev.vercim.handycam;
 
 import dev.vercim.handycam.config.HandycamConfig;
+import dev.vercim.handycam.internal.telemetrika.Telemetry;
+import net.minecraft.SharedConstants;
+import net.minecraft.client.Minecraft;
 
+import java.net.URI;
 import java.nio.file.Path;
 
 public final class HandycamMod {
 
     public static final String MOD_ID = "handycam";
+    private static final System.Logger LOG = System.getLogger(HandycamMod.class.getName());
 
     public static Path configDir;
+    private static volatile LoaderMetadata pendingTelemetry;
+    private static Telemetry telemetry;
 
-    public static void initClient(Path dir) {
+    public static void initClient(Path dir, String loader, String modVersion) {
         configDir = dir;
         HandycamConfig.load(dir);
+        pendingTelemetry = new LoaderMetadata(loader, modVersion);
     }
+
+    public static void startTelemetry(Minecraft client) {
+        LoaderMetadata metadata = pendingTelemetry;
+        if (metadata == null) return;
+        pendingTelemetry = null;
+
+        String endpoint = System.getProperty("handycam.telemetry.endpoint");
+        if (endpoint == null) return;
+
+        HandycamConfig config = HandycamConfig.get();
+        try {
+            telemetry = Telemetry.builder(MOD_ID)
+                    .endpoint(URI.create(endpoint))
+                    .stateDirectory(configDir)
+                    .collectionExecutor(client::execute)
+                    .enabled(() -> config.telemetryEnabled)
+                    .field("minecraft_version", HandycamMod::minecraftVersion)
+                    .field("loader", metadata::loader)
+                    .field("mod_version", metadata::modVersion)
+                    .build();
+            telemetry.start();
+        } catch (IllegalArgumentException ex) {
+            LOG.log(System.Logger.Level.WARNING, "Invalid HTTPS endpoint for the telemetry pilot");
+        }
+    }
+
+    public static void stopTelemetry() {
+        pendingTelemetry = null;
+        if (telemetry != null) {
+            telemetry.close();
+            telemetry = null;
+        }
+    }
+
+    private static String minecraftVersion() {
+        //? if >=1.21.10 {
+        return SharedConstants.getCurrentVersion().name();
+        //?} else {
+        /*return SharedConstants.getCurrentVersion().getName();
+        *///?}
+    }
+
+    private record LoaderMetadata(String loader, String modVersion) {}
 }

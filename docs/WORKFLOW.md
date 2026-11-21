@@ -150,6 +150,39 @@ IDE runs are not enough for loader or Mixin changes (1.3.2 shipped a JAR without
 
 Use a clean client profile each time.
 
+## Telemetry pilot
+
+Build `telemetrika-core-0.1.0-SNAPSHOT.jar` from the Telemetrika checkout with `gradlew jar`. HandyCam defaults to the JAR in a sibling `telemetrika` checkout. From a different directory layout, pass the absolute JAR path.
+
+```powershell
+$coreJar = (Resolve-Path 'C:/path/to/telemetrika/build/libs/telemetrika-core-0.1.0-SNAPSHOT.jar').Path
+.\gradlew.bat buildAndCollect "-PtelemetrikaJar=$coreJar"
+```
+
+Each release JAR embeds the core under `dev/vercim/handycam/internal/telemetrika/`. Install the JAR from `build/libs/` and its loader dependencies into a clean client profile. Use the matching Minecraft and loader versions in the target matrix.
+
+1. Run `.\gradlew.bat pilotReceiver` in Telemetrika. Copy the HTTPS URL it prints.
+2. Export the test certificate with the following command in Telemetrika. Copy the test client's JDK truststore from `lib/security/cacerts` to a test file and import that certificate into the copy.
+
+   ```powershell
+   $pilotTrustStore = Join-Path $PWD 'build/pilot-cacerts'
+   Copy-Item 'C:/path/to/client-jdk/lib/security/cacerts' $pilotTrustStore
+   keytool -exportcert -rfc -alias telemetrika-test-loopback -keystore src/test/resources/loopback.p12 -storepass loopback -file build/pilot-receiver.pem
+   keytool -importcert -alias telemetrika-pilot -file build/pilot-receiver.pem -keystore "$pilotTrustStore"
+   ```
+
+3. Set `"telemetryEnabled": true` in the test profile's `config/handycam.json` before launching it. Add these JVM arguments with the actual URL, truststore path, and password.
+
+   ```text
+   -Dhandycam.telemetry.endpoint=https://127.0.0.1:PORT/v1/snapshots
+   -Djavax.net.ssl.trustStore="PATH_TO_TEST_TRUSTSTORE"
+   -Djavax.net.ssl.trustStorePassword=PASSWORD
+   ```
+
+4. Launch to the main menu. The receiver should print one `handycam` report with a UUID and only `minecraft_version`, `loader`, and `mod_version` inside `fields`. Check the values against that client. A fresh profile with the flag set to `false` should leave the receiver idle and have no installation state. The regular interval is seven days from the last accepted report, so use fresh profiles for independent runs.
+
+Check the packaged JAR on Fabric 1.20.1 and 26.3, Forge 1.20.1, and NeoForge 1.21.1 and 1.21.10. NeoForge 1.21.10 uses the newer event subscriber API.
+
 ## Changelog
 
 [`CHANGELOG.md`](../CHANGELOG.md) is user-facing and is also published as the release notes, so it must be updated together with the version.

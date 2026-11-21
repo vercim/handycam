@@ -6,6 +6,7 @@ import dev.vercim.handycam.HandycamKeys;
 import dev.vercim.handycam.HandycamMod;
 import dev.vercim.handycam.camera.CameraShakeSystem;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 //? if >=26.1 {
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
@@ -21,7 +22,11 @@ public final class HandycamFabricClient implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
-        HandycamMod.initClient(FabricLoader.getInstance().getConfigDir());
+        FabricLoader loader = FabricLoader.getInstance();
+        String version = loader.getModContainer(HandycamMod.MOD_ID).orElseThrow()
+                .getMetadata().getVersion().getFriendlyString();
+        HandycamMod.initClient(loader.getConfigDir(), "fabric", version);
+        ClientLifecycleEvents.CLIENT_STOPPING.register(client -> HandycamMod.stopTelemetry());
 
         //? if >=26.1 {
         toggleEffectsKey = KeyMappingHelper.registerKeyMapping(HandycamKeys.createToggleEffects());
@@ -30,6 +35,7 @@ public final class HandycamFabricClient implements ClientModInitializer {
         *///?}
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
+            HandycamMod.startTelemetry(client);
             if (client.player != null) CameraShakeSystem.tick(client.player);
 
             while (toggleEffectsKey.consumeClick()) HandycamKeys.toggleEffects(client.player);

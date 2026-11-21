@@ -21,6 +21,7 @@ public class HandycamConfig {
     private static HandycamConfig instance;
 
     public int configVersion = 0;
+    public volatile boolean telemetryEnabled = false;
 
     public boolean effectsEnabled            = true;
     public boolean disableInCreativeFlight   = true;

@@ -10,8 +10,10 @@ import net.minecraft.client.Minecraft;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.GameShuttingDownEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.loading.FMLPaths;
@@ -28,14 +30,18 @@ public final class HandycamForgeClient {
 
     @SubscribeEvent
     public static void onClientSetup(FMLClientSetupEvent event) {
-        HandycamMod.initClient(FMLPaths.CONFIGDIR.get());
+        String version = ModList.get().getModContainerById(HandycamMod.MOD_ID).orElseThrow()
+                .getModInfo().getVersion().toString();
+        HandycamMod.initClient(FMLPaths.CONFIGDIR.get(), "forge", version);
         MinecraftForge.EVENT_BUS.addListener(HandycamForgeClient::onClientTick);
+        MinecraftForge.EVENT_BUS.addListener((GameShuttingDownEvent ignored) -> HandycamMod.stopTelemetry());
     }
 
     private static void onClientTick(TickEvent.ClientTickEvent event) {
         if (event.phase != TickEvent.Phase.END) return;
 
         Minecraft mc = Minecraft.getInstance();
+        HandycamMod.startTelemetry(mc);
         if (mc.player != null) CameraShakeSystem.tick(mc.player);
 
         while (TOGGLE_EFFECTS_KEY.consumeClick()) HandycamKeys.toggleEffects(mc.player);

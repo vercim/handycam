@@ -1,3 +1,8 @@
+## [Unreleased]
+
+### Config
+- Added a disabled-by-default telemetry pilot for Minecraft version, Handycam version, and loader. The pilot requires an explicit test endpoint.
+
 ## [2.1.0-beta] - 2026-10-16
 
 ### Compatibility

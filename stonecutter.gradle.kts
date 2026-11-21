@@ -12,6 +12,8 @@ stonecutter parameters {
     constants.match(current.project.substringAfterLast('-'), "fabric", "neoforge", "forge")
 }
 
+apply(from = "gradle/relocate-telemetrika.gradle.kts")
+
 tasks.register<org.gradle.api.tasks.Delete>("clean") {
     group = "build"
     description = "Cleans collected artifacts and every selected target when used as an unqualified task."
