@@ -171,7 +171,7 @@ Each release JAR embeds the core under `dev/vercim/handycam/internal/telemetrika
    keytool -importcert -alias telemetrika-pilot -file build/pilot-receiver.pem -keystore "$pilotTrustStore"
    ```
 
-3. Set `"telemetryEnabled": true` in the test profile's `config/handycam.json` before launching it. Add these JVM arguments with the actual URL, truststore path, and password.
+3. Use a clean test profile. A new config or a config without `telemetryEnabled` defaults to `true`. A saved `"telemetryEnabled": false` disables telemetry. Add these arguments to the Minecraft JVM with the actual URL, truststore path, and password.
 
    ```text
    -Dhandycam.telemetry.endpoint=https://127.0.0.1:PORT/v1/snapshots
@@ -180,6 +180,8 @@ Each release JAR embeds the core under `dev/vercim/handycam/internal/telemetrika
    ```
 
 4. Launch to the main menu. The receiver should print one `handycam` report with a UUID and only `minecraft_version`, `loader`, and `mod_version` inside `fields`. Check the values against that client. A fresh profile with the flag set to `false` should leave the receiver idle and have no installation state. The regular interval is seven days from the last accepted report, so use fresh profiles for independent runs.
+
+For `runActiveClient`, the config lives in `versions/<target>/run/config/handycam.json`. The endpoint and truststore arguments must reach the game JVM.
 
 Check the packaged JAR on Fabric 1.20.1 and 26.3, Forge 1.20.1, and NeoForge 1.21.1 and 1.21.10. NeoForge 1.21.10 uses the newer event subscriber API.
 
