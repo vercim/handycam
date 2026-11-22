@@ -95,22 +95,16 @@ An ordinary dev launch with no configured endpoint leaves telemetry inactive. To
 Windows (PowerShell):
 
 ```powershell
-$previousJavaToolOptions = $env:JAVA_TOOL_OPTIONS
-try {
-    $env:JAVA_TOOL_OPTIONS = "$previousJavaToolOptions -Dhandycam.telemetry.endpoint=https://telemetrika-receiver-test.vercim.workers.dev/v1/snapshots"
-    .\gradlew.bat runActiveClient
-} finally {
-    $env:JAVA_TOOL_OPTIONS = $previousJavaToolOptions
-}
+.\gradlew.bat runActiveClient -PtelemetryEndpoint=https://telemetrika-receiver-test.vercim.workers.dev/v1/snapshots
 ```
 
 macOS / Linux:
 
 ```bash
-JAVA_TOOL_OPTIONS="${JAVA_TOOL_OPTIONS:+$JAVA_TOOL_OPTIONS }-Dhandycam.telemetry.endpoint=https://telemetrika-receiver-test.vercim.workers.dev/v1/snapshots" ./gradlew runActiveClient
+./gradlew runActiveClient -PtelemetryEndpoint=https://telemetrika-receiver-test.vercim.workers.dev/v1/snapshots
 ```
 
-For a specific target, replace `runActiveClient` with `:<target>:runClient`. For a manual IDE or launcher profile, add the same `-Dhandycam.telemetry.endpoint=...` option to the game's JVM arguments.
+For a specific target, replace `runActiveClient` with `:<target>:runClient`. The `telemetryEndpoint` property affects the dev client only; `telemetrikaEndpoint` controls the endpoint packaged in the JAR. For a manual IDE or launcher profile, add `-Dhandycam.telemetry.endpoint=...` to the game's JVM arguments.
 
 ### Tasks
 

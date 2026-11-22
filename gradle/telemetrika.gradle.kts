@@ -18,6 +18,12 @@ val telemetryEndpoint = providers.gradleProperty("telemetrikaEndpoint").orElse("
 
 dependencies.add("implementation", coreClasses)
 
+tasks.withType<JavaExec>().matching { it.name == "runClient" }.configureEach {
+    providers.gradleProperty("telemetryEndpoint").orNull?.let {
+        systemProperty("handycam.telemetry.endpoint", it)
+    }
+}
+
 tasks.named<ProcessResources>("processResources") {
     inputs.property("telemetrikaEndpoint", telemetryEndpoint)
     filesMatching("handycam-telemetry-endpoint.txt") {
