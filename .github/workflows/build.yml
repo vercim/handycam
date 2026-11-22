@@ -47,8 +47,8 @@ jobs:
       contents: read
       packages: read
     env:
-      ORG_GRADLE_PROJECT_githubPackagesUsername: ${{ vars.TELEMETRIKA_PACKAGES_USERNAME || github.actor }}
-      ORG_GRADLE_PROJECT_githubPackagesPassword: ${{ secrets.TELEMETRIKA_PACKAGES_TOKEN || github.token }}
+      ORG_GRADLE_PROJECT_githubPackagesUsername: ${{ vars.PACKAGES_READ_USERNAME || github.actor }}
+      ORG_GRADLE_PROJECT_githubPackagesPassword: ${{ secrets.PACKAGES_READ_TOKEN || github.token }}
 
     steps:
       - name: Check out repository

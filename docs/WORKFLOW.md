@@ -154,7 +154,7 @@ The build workflow (`.github/workflows/build.yml`) runs on pushes to `main` and 
 
 Documentation-only changes (including `docs/`, `README.md`, `CHANGELOG.md`) do not start it. CI builds every target and verifies one release JAR per target.
 
-Build and release workflows need read access to the Telemetrika package. If the workflow token lacks access, set the `TELEMETRIKA_PACKAGES_USERNAME` Actions variable and the `TELEMETRIKA_PACKAGES_TOKEN` Actions secret for a package reader. [GitHub Packages authentication](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-gradle-registry#authenticating-to-github-packages)
+Build and release workflows need read access to the Telemetrika package. If the workflow token lacks access, set the `PACKAGES_READ_USERNAME` Actions variable and the `PACKAGES_READ_TOKEN` Actions secret for a package reader. [GitHub Packages authentication](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-gradle-registry#authenticating-to-github-packages)
 
 A change is ready to merge when:
 
