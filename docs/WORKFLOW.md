@@ -150,56 +150,6 @@ IDE runs are not enough for loader or Mixin changes (1.3.2 shipped a JAR without
 
 Use a clean client profile each time.
 
-## Telemetry
-
-### Local pilot
-
-Build `telemetrika-core-0.1.0-SNAPSHOT.jar` from the Telemetrika checkout with `gradlew jar`. HandyCam defaults to the JAR in a sibling `telemetrika` checkout. From a different directory layout, pass the absolute JAR path.
-
-```powershell
-$coreJar = (Resolve-Path 'C:/path/to/telemetrika/build/libs/telemetrika-core-0.1.0-SNAPSHOT.jar').Path
-.\gradlew.bat buildAndCollect "-PtelemetrikaJar=$coreJar"
-```
-
-Each release JAR embeds the core under `dev/vercim/handycam/internal/telemetrika/`. Install the JAR from `build/libs/` and its loader dependencies into a clean client profile. Use the matching Minecraft and loader versions in the target matrix.
-
-1. Run `.\gradlew.bat pilotReceiver` in Telemetrika. Copy the HTTPS URL it prints.
-2. Export the test certificate with the following command in Telemetrika. Copy the test client's JDK truststore from `lib/security/cacerts` to a test file and import that certificate into the copy.
-
-   ```powershell
-   $pilotTrustStore = Join-Path $PWD 'build/pilot-cacerts'
-   Copy-Item 'C:/path/to/client-jdk/lib/security/cacerts' $pilotTrustStore
-   keytool -exportcert -rfc -alias telemetrika-test-loopback -keystore src/test/resources/loopback.p12 -storepass loopback -file build/pilot-receiver.pem
-   keytool -importcert -alias telemetrika-pilot -file build/pilot-receiver.pem -keystore "$pilotTrustStore"
-   ```
-
-3. Use a clean test profile. A new config or a config without `telemetryEnabled` defaults to `true`. A saved `"telemetryEnabled": false` disables telemetry. Add these arguments to the Minecraft JVM with the actual URL, truststore path, and password.
-
-   ```text
-   -Dhandycam.telemetry.endpoint=https://127.0.0.1:PORT/v1/snapshots
-   -Djavax.net.ssl.trustStore="PATH_TO_TEST_TRUSTSTORE"
-   -Djavax.net.ssl.trustStorePassword=PASSWORD
-   ```
-
-4. Launch to the main menu. The receiver should print one `handycam` report with a UUID, game and mod versions, the loader and the camera settings from config schema 4. Check the values against that client. A fresh profile with the flag set to `false` should leave the receiver idle and have no installation state. The regular interval is seven days from the last accepted report, so use fresh profiles for independent runs.
-
-For `runActiveClient`, the config lives in `versions/<target>/run/config/handycam.json`. The endpoint and truststore arguments must reach the game JVM.
-
-Check the packaged JAR on Fabric 1.20.1 and 26.3, Forge 1.20.1, and NeoForge 1.21.1 and 1.21.10. NeoForge 1.21.10 uses the newer event subscriber API.
-
-### Production release
-
-1. Deploy the production Worker and verify a stored snapshot in the production PostHog project. [Telemetrika production guide](https://github.com/vercim/telemetrika/blob/main/worker/README.md#deploy-the-handycam-production-receiver)
-2. Set the HandyCam repository's Actions variable `HANDYCAM_TELEMETRY_ENDPOINT` to the verified HTTPS URL ending in `/v1/snapshots`. Set the Actions secret `TELEMETRIKA_REPO_TOKEN` to a fine-grained GitHub token with **Contents: Read-only** access to `vercim/telemetrika`. The build and release workflows compile the commit pinned in [the Telemetrika build action](../.github/actions/build-telemetrika/action.yml). The build workflow uses a test address for packaging verification and runs on pushes and same-repository pull requests.
-3. To prepare a release candidate locally, pass the production address as `telemetrikaEndpoint` along with the core JAR. The packaged URL is used by default. `-Dhandycam.telemetry.endpoint=...` overrides it for local pilot checks. Builds with an empty endpoint and no JVM override leave telemetry inactive.
-
-   ```powershell
-   .\gradlew.bat clean buildAndCollect "-PtelemetrikaJar=$coreJar" "-PtelemetrikaEndpoint=$productionUrl"
-   ```
-
-4. Run the release candidate on the five targets listed above with the standard JVM truststore and no endpoint override. Confirm the reported version, loader and camera settings in production PostHog. For the opt-out check, start with `"telemetryEnabled": false` in a separate fresh profile and verify that it sends no snapshot. Check that **General → Telemetry** updates the saved setting.
-5. Before publishing, add the **Contains Telemetry** disclosure to the Modrinth project with consent model **Opt-out**. Describe the snapshot fields, the Cloudflare Worker, PostHog and the in-game toggle. [Modrinth content disclosures](https://support.modrinth.com/en/articles/16567675-content-disclosures)
-
 ## Changelog
 
 [`CHANGELOG.md`](../CHANGELOG.md) is user-facing and is also published as the release notes, so it must be updated together with the version.
@@ -213,7 +163,7 @@ Check the packaged JAR on Fabric 1.20.1 and 26.3, Forge 1.20.1, and NeoForge 1.2
 ## Release
 
 1. Update `mod_version` in `gradle.properties` and add its section to `CHANGELOG.md`.
-2. Run `clean buildAndCollect` with the production endpoint and validate the packaged JARs. [Production telemetry](#production-release)
+2. Set the `HANDYCAM_TELEMETRY_ENDPOINT` Actions variable to the production Worker URL. Pass the same URL as `-PtelemetrikaEndpoint=URL` when running `clean buildAndCollect` locally and validate the packaged JARs.
 3. Create and push the matching `v<mod_version>` tag.
 
    ```bash
@@ -228,7 +178,7 @@ The tag workflow (`.github/workflows/release.yml`):
 
 - validates that the tag matches `mod_version` and that the changelog has a section for it;
 - rejects pre-release suffixes other than `-alpha` / `-beta` (they become alpha / beta releases on the platforms);
-- builds every target with `clean build` and checks each release JAR for the relocated core and the configured endpoint;
+- builds every target with `clean build` and checks that the number of release JARs matches the number of targets;
 - verifies the publishing variables and secrets exist, and refuses to overwrite an existing GitHub release;
 - publishes every target to Modrinth and CurseForge, then creates the GitHub release with the changelog section as notes;
 - posts the changelog to Discord through a webhook and pings the updates role (best effort: skipped when `DISCORD_WEBHOOK_URL` is unset, nobody is pinged when `DISCORD_ROLE_ID` is unset, and a failure does not fail the run).

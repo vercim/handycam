@@ -6,8 +6,6 @@ on:
       - main
     paths:
       - '.github/workflows/build.yml'
-      - '.github/actions/build-telemetrika/**'
-      - '.github/scripts/verify-release-jars.py'
       - 'src/**'
       - 'build.fabric.gradle.kts'
       - 'build.neoforge.gradle.kts'
@@ -23,8 +21,6 @@ on:
   pull_request:
     paths:
       - '.github/workflows/build.yml'
-      - '.github/actions/build-telemetrika/**'
-      - '.github/scripts/verify-release-jars.py'
       - 'src/**'
       - 'build.fabric.gradle.kts'
       - 'build.neoforge.gradle.kts'
@@ -47,8 +43,12 @@ jobs:
     name: Build all supported targets
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
     env:
-      ORG_GRADLE_PROJECT_telemetrikaEndpoint: https://telemetry.example.com/v1/snapshots
+      ORG_GRADLE_PROJECT_githubPackagesUsername: ${{ github.actor }}
+      ORG_GRADLE_PROJECT_githubPackagesPassword: ${{ github.token }}
 
     steps:
       - name: Check out repository
@@ -68,15 +68,18 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v6
 
-      - name: Build the pinned Telemetrika core
-        uses: ./.github/actions/build-telemetrika
-        with:
-          token: ${{ secrets.TELEMETRIKA_REPO_TOKEN }}
-
       - name: Build all Stonecutter targets
         run: |
           chmod +x gradlew
           ./gradlew build --no-daemon
 
       - name: Verify artifacts
-        run: python3 .github/scripts/verify-release-jars.py
+        shell: bash
+        run: |
+          mapfile -t target_dirs < <(find versions -mindepth 1 -maxdepth 1 -type d | sort)
+          mapfile -t artifacts < <(find versions -path '*/build/libs/*.jar' -type f ! -name '*-sources.jar' ! -name '*-dev.jar' | sort)
+          test "${#target_dirs[@]}" -gt 0 || { echo "::error::No Stonecutter targets were found"; exit 1; }
+          test "${#artifacts[@]}" -eq "${#target_dirs[@]}" || {
+            echo "::error::Expected one release JAR per Stonecutter target, found ${#artifacts[@]} JARs for ${#target_dirs[@]} targets"
+            exit 1
+          }

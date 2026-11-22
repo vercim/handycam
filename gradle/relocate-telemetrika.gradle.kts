@@ -37,8 +37,8 @@ abstract class RelocateTelemetrika : DefaultTask() {
         val license = "META-INF/LICENSE-Telemetrika"
 
         JarFile(inputJar.get().asFile).use { input ->
-            check(input.getJarEntry(source + "Telemetry.class") != null) { "Missing Telemetrika API in the core JAR." }
-            val licenseEntry = checkNotNull(input.getJarEntry(license)) { "Missing license in the Telemetrika core JAR." }
+            check(input.getJarEntry(source + "Telemetry.class") != null) { "Missing Telemetrika API in the JAR." }
+            val licenseEntry = checkNotNull(input.getJarEntry(license)) { "Missing license in the Telemetrika JAR." }
             output.parentFile.mkdirs()
             JarOutputStream(output.outputStream().buffered()).use { jar ->
                 input.entries().asSequence()
@@ -63,9 +63,24 @@ abstract class RelocateTelemetrika : DefaultTask() {
     }
 }
 
+repositories {
+    maven {
+        name = "githubPackages"
+        url = uri("https://maven.pkg.github.com/vercim/handycam")
+        content { includeModule("im.verc.telemetrika", "telemetrika") }
+        credentials(PasswordCredentials::class)
+    }
+}
+
+val telemetrikaVersion = providers.gradleProperty("telemetrikaVersion").get()
+val telemetrikaDependency = dependencies.create("im.verc.telemetrika:telemetrika:$telemetrikaVersion")
+val telemetrikaPackage = configurations.detachedConfiguration(telemetrikaDependency).apply {
+    isTransitive = false
+}
+
 tasks.register<RelocateTelemetrika>("relocateTelemetrika") {
-    val coreJar = providers.gradleProperty("telemetrikaJar")
-        .orElse("../telemetrika/build/libs/telemetrika-core-0.1.0-SNAPSHOT.jar")
-    inputJar.set(layout.file(coreJar.map { file(it) }))
-    outputJar = layout.buildDirectory.file("telemetrika/telemetrika-core-handycam.jar")
+    val localJar = providers.gradleProperty("telemetrikaJar").map { file(it) }
+    val packageJar = providers.provider { telemetrikaPackage.singleFile }
+    inputJar.set(layout.file(localJar.orElse(packageJar)))
+    outputJar = layout.buildDirectory.file("telemetrika/telemetrika-handycam.jar")
 }

@@ -1,5 +1,4 @@
 .gradle/
-/.telemetrika-core/
 build/
 */build/
 .idea/
