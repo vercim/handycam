@@ -33,15 +33,15 @@ public final class HandycamMod {
 
         HandycamConfig config = HandycamConfig.get();
         try {
-            telemetry = Telemetry.builder(MOD_ID)
+            Telemetry.Builder builder = Telemetry.builder(MOD_ID)
                     .endpoint(URI.create(endpoint))
                     .stateDirectory(configDir)
                     .collectionExecutor(client::execute)
                     .enabled(() -> config.telemetryEnabled)
                     .field("minecraft_version", HandycamMod::minecraftVersion)
                     .field("loader", metadata::loader)
-                    .field("mod_version", metadata::modVersion)
-                    .build();
+                    .field("mod_version", metadata::modVersion);
+            telemetry = HandycamTelemetrySettings.register(builder, config).build();
             telemetry.start();
         } catch (IllegalArgumentException ex) {
             LOG.log(System.Logger.Level.WARNING, "Invalid HTTPS endpoint for the telemetry pilot");
