@@ -34,7 +34,6 @@ loom {
         runDir = "run"
         environment = "client"
         programArgs("--username=Dev")
-        vmArg("-Dhandycam.telemetry.endpoint=${providers.gradleProperty("telemetrikaDevEndpoint").get()}")
         configName = "Handycam Fabric Client"
     }
 }

@@ -42,8 +42,6 @@ The matrix is declared once in [`settings.gradle.kts`](../settings.gradle.kts); 
 
 ## Commands
 
-`runActiveClient` and the loader's `runClient` use the Telemetrika pilot Worker by default. The pilot omits the `authorized` property, so these snapshots are excluded from production statistics. Pass `-PtelemetrikaDevEndpoint=` to disable telemetry for a dev launch, or set it to another HTTPS pilot receiver. Release JARs use the separate `telemetrikaEndpoint` property.
-
 ### Windows (PowerShell)
 
 Select the active target (any target from the matrix; this rewrites the sources for it):
@@ -89,6 +87,30 @@ Select the active target (any target from the matrix; this rewrites the sources 
 ```bash
 ./gradlew :1.21.1-neoforge:build
 ```
+
+### Test telemetry through the pilot
+
+An ordinary dev launch with no configured endpoint leaves telemetry inactive. To test telemetry, enable it in Handycam and override the endpoint for the game JVM. The pilot Worker omits the `authorized` property in PostHog. The JVM override applies to this launch and leaves the endpoint packaged in the JAR untouched.
+
+Windows (PowerShell):
+
+```powershell
+$previousJavaToolOptions = $env:JAVA_TOOL_OPTIONS
+try {
+    $env:JAVA_TOOL_OPTIONS = "$previousJavaToolOptions -Dhandycam.telemetry.endpoint=https://telemetrika-receiver-pilot.skutovlev.workers.dev/v1/snapshots"
+    .\gradlew.bat runActiveClient
+} finally {
+    $env:JAVA_TOOL_OPTIONS = $previousJavaToolOptions
+}
+```
+
+macOS / Linux:
+
+```bash
+JAVA_TOOL_OPTIONS="${JAVA_TOOL_OPTIONS:+$JAVA_TOOL_OPTIONS }-Dhandycam.telemetry.endpoint=https://telemetrika-receiver-pilot.skutovlev.workers.dev/v1/snapshots" ./gradlew runActiveClient
+```
+
+For a specific target, replace `runActiveClient` with `:<target>:runClient`. For a manual IDE or launcher profile, add the same `-Dhandycam.telemetry.endpoint=...` option to the game's JVM arguments.
 
 ### Tasks
 
