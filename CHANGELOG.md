@@ -1,7 +1,7 @@
 ## [Unreleased]
 
 ### Config
-- HandyCam release builds send weekly snapshots with version information and camera settings. Turn off Telemetry in the General settings to stop sending reports.
+- HandyCam release builds send weekly snapshots with version information, Global Intensity, and experimental effect settings. Turn off Telemetry in the General settings to stop sending reports.
 
 ## [2.1.0-beta] - 2026-10-16
 

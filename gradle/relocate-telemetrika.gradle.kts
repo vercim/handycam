@@ -27,7 +27,7 @@ abstract class RelocateTelemetrika : DefaultTask() {
 
     @TaskAction
     fun relocate() {
-        val source = "im/verc/telemetrika/"
+        val source = "dev/vercim/telemetrika/"
         val target = "dev/vercim/handycam/internal/telemetrika/"
         val remapper = object : Remapper(Opcodes.ASM9) {
             override fun map(internalName: String): String =
@@ -66,14 +66,14 @@ abstract class RelocateTelemetrika : DefaultTask() {
 repositories {
     maven {
         name = "githubPackages"
-        url = uri("https://maven.pkg.github.com/vercim/handycam")
-        content { includeModule("im.verc.telemetrika", "telemetrika") }
+        url = uri("https://maven.pkg.github.com/vercim/telemetrika-lib")
+        content { includeModule("dev.vercim.telemetrika", "telemetrika") }
         credentials(PasswordCredentials::class)
     }
 }
 
 val telemetrikaVersion = providers.gradleProperty("telemetrikaVersion").get()
-val telemetrikaDependency = dependencies.create("im.verc.telemetrika:telemetrika:$telemetrikaVersion")
+val telemetrikaDependency = dependencies.create("dev.vercim.telemetrika:telemetrika:$telemetrikaVersion")
 val telemetrikaPackage = configurations.detachedConfiguration(telemetrikaDependency).apply {
     isTransitive = false
 }

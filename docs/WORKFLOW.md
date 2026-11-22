@@ -20,6 +20,7 @@ The matrix is declared once in [`settings.gradle.kts`](../settings.gradle.kts); 
 ## Requirements
 
 - JDK 25+ to launch Gradle (Fabric Loom 1.18 refuses to load on anything older); the toolchain that compiles each target (Java 17 for 1.20.1, 21 for 1.21.x, 25 for 26.x) is provisioned automatically. CI installs all three JDKs.
+- Telemetrika comes from the private `vercim/telemetrika-lib` GitHub Packages registry. Set `githubPackagesUsername` and `githubPackagesPassword` in `~/.gradle/gradle.properties` using an account with package access and a classic token with `read:packages`. For a local library build, pass `-PtelemetrikaJar=/absolute/path/to/telemetrika-0.1.0.jar`.
 - Windows: PowerShell, use `.\gradlew.bat`.
 - macOS / Linux: use `./gradlew`; if it is not executable:
 
@@ -128,6 +129,8 @@ The build workflow (`.github/workflows/build.yml`) runs on pushes to `main` and 
 - `.github/workflows/build.yml`.
 
 Documentation-only changes (including `docs/`, `README.md`, `CHANGELOG.md`) do not start it. CI builds every target and verifies one release JAR per target.
+
+Build and release workflows need read access to the Telemetrika package. If the workflow token lacks access, set the `TELEMETRIKA_PACKAGES_USERNAME` Actions variable and the `TELEMETRIKA_PACKAGES_TOKEN` Actions secret for a package reader. [GitHub Packages authentication](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-gradle-registry#authenticating-to-github-packages)
 
 A change is ready to merge when:
 
