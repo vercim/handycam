@@ -5,7 +5,9 @@ import dev.vercim.handycam.internal.telemetrika.Telemetry;
 import net.minecraft.SharedConstants;
 import net.minecraft.client.Minecraft;
 
+import java.io.IOException;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 
 public final class HandycamMod {
@@ -28,11 +30,11 @@ public final class HandycamMod {
         if (metadata == null) return;
         pendingTelemetry = null;
 
-        String endpoint = System.getProperty("handycam.telemetry.endpoint");
-        if (endpoint == null) return;
-
         HandycamConfig config = HandycamConfig.get();
         try {
+            String endpoint = telemetryEndpoint();
+            if (endpoint.isBlank()) return;
+
             Telemetry.Builder builder = Telemetry.builder(MOD_ID)
                     .endpoint(URI.create(endpoint))
                     .stateDirectory(configDir)
@@ -43,8 +45,8 @@ public final class HandycamMod {
                     .field("mod_version", metadata::modVersion);
             telemetry = HandycamTelemetrySettings.register(builder, config).build();
             telemetry.start();
-        } catch (IllegalArgumentException ex) {
-            LOG.log(System.Logger.Level.WARNING, "Invalid HTTPS endpoint for the telemetry pilot");
+        } catch (IOException | IllegalArgumentException ex) {
+            LOG.log(System.Logger.Level.WARNING, "HandyCam telemetry endpoint is invalid or unavailable");
         }
     }
 
@@ -53,6 +55,14 @@ public final class HandycamMod {
         if (telemetry != null) {
             telemetry.close();
             telemetry = null;
+        }
+    }
+
+    private static String telemetryEndpoint() throws IOException {
+        String override = System.getProperty("handycam.telemetry.endpoint");
+        if (override != null) return override;
+        try (var resource = HandycamMod.class.getResourceAsStream("/handycam-telemetry-endpoint.txt")) {
+            return resource == null ? "" : new String(resource.readAllBytes(), StandardCharsets.UTF_8).strip();
         }
     }
 

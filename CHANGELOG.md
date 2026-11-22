@@ -1,8 +1,7 @@
 ## [Unreleased]
 
 ### Config
-- Added a telemetry pilot for Minecraft version, Handycam version, and loader. With an explicit test endpoint, telemetry is enabled by default and can be disabled in `handycam.json`.
-- Expanded pilot snapshots to include the camera and effect settings along with the config schema version.
+- HandyCam release builds send weekly snapshots with version information and camera settings. Turn off Telemetry in the General settings to stop sending reports.
 
 ## [2.1.0-beta] - 2026-10-16
 

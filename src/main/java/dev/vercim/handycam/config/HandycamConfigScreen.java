@@ -62,6 +62,11 @@ public class HandycamConfigScreen {
             .setTooltip(Component.translatable("handycam.config.detail_layers.tooltip"))
             .setSaveConsumer(v -> cfg.noiseOctaves = v)
             .build());
+        general.addEntry(e.startBooleanToggle(Component.translatable("handycam.config.telemetry_enabled"), cfg.telemetryEnabled)
+            .setDefaultValue(true)
+            .setTooltip(Component.translatable("handycam.config.telemetry_enabled.tooltip"))
+            .setSaveConsumer(v -> cfg.telemetryEnabled = v)
+            .build());
 
         ConfigCategory tilt = builder.getOrCreateCategory(Component.translatable("handycam.config.category.directional_tilt"));
 

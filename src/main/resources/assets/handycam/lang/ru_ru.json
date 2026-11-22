@@ -18,6 +18,8 @@
 
   "handycam.config.effects_enabled": "Эффекты включены",
   "handycam.config.effects_enabled.tooltip": "Главный переключатель эффектов",
+  "handycam.config.telemetry_enabled": "Телеметрия",
+  "handycam.config.telemetry_enabled.tooltip": "Отправлять еженедельные отчёты с версиями и настройками камеры",
   "handycam.config.disable_in_creative_flight": "Отключить в полёте (креатив)",
   "handycam.config.disable_in_creative_flight.tooltip": "Отключить эффекты при полёте в креативе",
   "handycam.config.enable_effects_third_person": "Эффекты от 3-го лица",

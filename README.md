@@ -4,6 +4,10 @@ Handycam adds subtle, physics-inspired camera movement that makes Minecraft feel
 ![Configuration](https://cdn.modrinth.com/data/cached_images/7aa3b7a2f33b1a990f5c964f67d63890f61b65a1_0.webp)
 Every effect has its own intensity slider and can be toggled off independently. Open settings through ModMenu (Fabric) or the in-game mod menu (NeoForge and Forge).
 
+## Telemetry
+
+Release builds send a weekly snapshot with a random installation ID, the Minecraft and HandyCam versions, the loader, and camera and effect settings. The snapshot goes to the Telemetrika Cloudflare Worker and then to PostHog. Turn off **General → Telemetry** in HandyCam's settings or set `"telemetryEnabled": false` in `config/handycam.json` to stop sending snapshots.
+
 ![Dependencies](https://cdn.modrinth.com/data/cached_images/78f018e94dabc1d8158865367fc8c3952ceb20a0_0.webp)
 - [Cloth Config](https://modrinth.com/mod/cloth-config)
 - [Fabric API](https://modrinth.com/mod/fabric-api) — Fabric only

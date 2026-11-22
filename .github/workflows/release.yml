@@ -17,6 +17,8 @@ jobs:
   publish:
     name: Build and publish all supported targets
     runs-on: ubuntu-latest
+    env:
+      ORG_GRADLE_PROJECT_telemetrikaEndpoint: ${{ vars.HANDYCAM_TELEMETRY_ENDPOINT }}
 
     steps:
       - name: Check out release tag
@@ -46,6 +48,8 @@ jobs:
         id: release
         shell: bash
         run: |
+          test -n "$ORG_GRADLE_PROJECT_telemetrikaEndpoint" || { echo '::error::Set the HANDYCAM_TELEMETRY_ENDPOINT Actions variable'; exit 1; }
+
           version="$(grep '^mod_version=' gradle.properties | cut -d= -f2)"
           expected_tag="v${version}"
           if [ "$GITHUB_REF_NAME" != "$expected_tag" ]; then
@@ -71,8 +75,16 @@ jobs:
           echo "version=$version" >> "$GITHUB_OUTPUT"
           echo "release_type=$release_type" >> "$GITHUB_OUTPUT"
 
+      - name: Build the pinned Telemetrika core
+        uses: ./.github/actions/build-telemetrika
+        with:
+          token: ${{ secrets.TELEMETRIKA_REPO_TOKEN }}
+
       - name: Build all supported Stonecutter targets
         run: ./gradlew clean build --no-daemon
+
+      - name: Verify release JARs
+        run: python3 .github/scripts/verify-release-jars.py
 
       - name: Verify publishing configuration
         env:
@@ -96,14 +108,6 @@ jobs:
             echo "::error::GitHub release $GITHUB_REF_NAME already exists. Publish a new version and tag instead."
             exit 1
           fi
-
-          mapfile -t target_dirs < <(find versions -mindepth 1 -maxdepth 1 -type d | sort)
-          mapfile -t artifacts < <(find versions -path '*/build/libs/*.jar' -type f ! -name '*-sources.jar' ! -name '*-dev.jar' | sort)
-          test "${#target_dirs[@]}" -gt 0 || { echo "::error::No Stonecutter targets were found"; exit 1; }
-          test "${#artifacts[@]}" -eq "${#target_dirs[@]}" || {
-            echo "::error::Expected one release JAR per Stonecutter target, found ${#artifacts[@]} JARs for ${#target_dirs[@]} targets"
-            exit 1
-          }
 
       - name: Read changelog
         id: changelog

@@ -18,6 +18,8 @@
 
   "handycam.config.effects_enabled": "Effects Enabled",
   "handycam.config.effects_enabled.tooltip": "Master switch for all effects",
+  "handycam.config.telemetry_enabled": "Telemetry",
+  "handycam.config.telemetry_enabled.tooltip": "Send weekly reports with version information and camera settings",
   "handycam.config.disable_in_creative_flight": "Disable in Creative Flight",
   "handycam.config.disable_in_creative_flight.tooltip": "Disable all effects when flying in creative mode",
   "handycam.config.enable_effects_third_person": "Enable Effects in 3rd Person",
