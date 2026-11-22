@@ -97,7 +97,7 @@ Windows (PowerShell):
 ```powershell
 $previousJavaToolOptions = $env:JAVA_TOOL_OPTIONS
 try {
-    $env:JAVA_TOOL_OPTIONS = "$previousJavaToolOptions -Dhandycam.telemetry.endpoint=https://telemetrika-receiver-test.skutovlev.workers.dev/v1/snapshots"
+    $env:JAVA_TOOL_OPTIONS = "$previousJavaToolOptions -Dhandycam.telemetry.endpoint=https://telemetrika-receiver-test.vercim.workers.dev/v1/snapshots"
     .\gradlew.bat runActiveClient
 } finally {
     $env:JAVA_TOOL_OPTIONS = $previousJavaToolOptions
@@ -107,7 +107,7 @@ try {
 macOS / Linux:
 
 ```bash
-JAVA_TOOL_OPTIONS="${JAVA_TOOL_OPTIONS:+$JAVA_TOOL_OPTIONS }-Dhandycam.telemetry.endpoint=https://telemetrika-receiver-test.skutovlev.workers.dev/v1/snapshots" ./gradlew runActiveClient
+JAVA_TOOL_OPTIONS="${JAVA_TOOL_OPTIONS:+$JAVA_TOOL_OPTIONS }-Dhandycam.telemetry.endpoint=https://telemetrika-receiver-test.vercim.workers.dev/v1/snapshots" ./gradlew runActiveClient
 ```
 
 For a specific target, replace `runActiveClient` with `:<target>:runClient`. For a manual IDE or launcher profile, add the same `-Dhandycam.telemetry.endpoint=...` option to the game's JVM arguments.
@@ -190,7 +190,7 @@ Use a clean client profile each time.
 ## Release
 
 1. Update `mod_version` in `gradle.properties` and add its section to `CHANGELOG.md`.
-2. Set the `HANDYCAM_TELEMETRY_ENDPOINT` Actions variable to the production Worker URL. Pass the same URL as `-PtelemetrikaEndpoint=URL` when running `clean buildAndCollect` locally and validate the packaged JARs.
+2. Set the `PRODUCTION_TELEMETRY_ENDPOINT` Actions secret to the production Worker URL. Pass the same URL as `-PtelemetrikaEndpoint=URL` when running `clean buildAndCollect` locally and validate the packaged JARs.
 3. Create and push the matching `v<mod_version>` tag.
 
    ```bash

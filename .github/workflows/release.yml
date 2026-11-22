@@ -21,7 +21,7 @@ jobs:
     env:
       ORG_GRADLE_PROJECT_githubPackagesUsername: ${{ vars.TELEMETRIKA_PACKAGES_USERNAME || github.actor }}
       ORG_GRADLE_PROJECT_githubPackagesPassword: ${{ secrets.TELEMETRIKA_PACKAGES_TOKEN || github.token }}
-      ORG_GRADLE_PROJECT_telemetrikaEndpoint: ${{ vars.HANDYCAM_TELEMETRY_ENDPOINT }}
+      ORG_GRADLE_PROJECT_telemetrikaEndpoint: ${{ secrets.PRODUCTION_TELEMETRY_ENDPOINT }}
 
     steps:
       - name: Check out release tag
@@ -51,7 +51,7 @@ jobs:
         id: release
         shell: bash
         run: |
-          test -n "$ORG_GRADLE_PROJECT_telemetrikaEndpoint" || { echo '::error::Set the HANDYCAM_TELEMETRY_ENDPOINT Actions variable'; exit 1; }
+          test -n "$ORG_GRADLE_PROJECT_telemetrikaEndpoint" || { echo '::error::Set the PRODUCTION_TELEMETRY_ENDPOINT Actions secret'; exit 1; }
 
           version="$(grep '^mod_version=' gradle.properties | cut -d= -f2)"
           expected_tag="v${version}"
