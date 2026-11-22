@@ -35,6 +35,7 @@ neoForge {
             client()
             gameDirectory = file("run")
             programArgument("--username=Dev")
+            systemProperty("handycam.telemetry.endpoint", providers.gradleProperty("telemetrikaDevEndpoint").get())
             ideName = "Handycam NeoForge Client"
         }
     }

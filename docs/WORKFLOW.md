@@ -42,6 +42,8 @@ The matrix is declared once in [`settings.gradle.kts`](../settings.gradle.kts); 
 
 ## Commands
 
+`runActiveClient` and the loader's `runClient` use the Telemetrika pilot Worker by default. The pilot omits the `authorized` property, so these snapshots are excluded from production statistics. Pass `-PtelemetrikaDevEndpoint=` to disable telemetry for a dev launch, or set it to another HTTPS pilot receiver. Release JARs use the separate `telemetrikaEndpoint` property.
+
 ### Windows (PowerShell)
 
 Select the active target (any target from the matrix; this rewrites the sources for it):
