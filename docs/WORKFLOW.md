@@ -101,7 +101,7 @@ Before launching Minecraft, check that a `POST` with `Content-Type: application/
 Windows (PowerShell):
 
 ```powershell
-.\gradlew.bat runActiveClient -PtelemetryEndpoint=https://127.0.0.1:8787/v1/snapshots
+.\gradlew.bat runActiveClient '-PtelemetryEndpoint=https://127.0.0.1:8787/v1/snapshots'
 ```
 
 macOS / Linux:
@@ -110,7 +110,7 @@ macOS / Linux:
 ./gradlew runActiveClient -PtelemetryEndpoint=https://127.0.0.1:8787/v1/snapshots
 ```
 
-The game JVM must trust the receiver certificate. For a self-signed certificate, copy the game JDK's `lib/security/cacerts` to a local file and import the receiver certificate with `keytool -importcert -alias handycam-telemetry-loopback -file path/to/loopback.pem -keystore path/to/game-cacerts`. Add `-PtelemetryTrustStore=path/to/game-cacerts` to the Gradle command. Relative paths resolve from the repository root.
+The game JVM must trust the receiver certificate. For a self-signed certificate, copy the game JDK's `lib/security/cacerts` to a local file and import the receiver certificate with `keytool -importcert -alias handycam-telemetry-loopback -file path/to/loopback.pem -keystore path/to/game-cacerts`. Add `-PtelemetryTrustStore=path/to/game-cacerts` to the Gradle command. Relative paths resolve from the repository root. When calling `gradlew.bat` from PowerShell, quote each complete `-Pname=value` argument, including `'-PtelemetryTrustStore=path/to/game-cacerts'`.
 
 For a specific target, replace `runActiveClient` with `:<target>:runClient`. To test a packaged JAR, use a clean launcher profile and add `-Dhandycam.telemetry.endpoint=https://127.0.0.1:8787/v1/snapshots` to its JVM arguments. The override applies to that launch. It uses `config/handycam-telemetry-test/telemetrika/` for the installation ID and delivery timestamps. The packaged endpoint uses the state under `config/telemetrika/`.
 
