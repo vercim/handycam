@@ -20,6 +20,7 @@ The matrix is declared once in [`settings.gradle.kts`](../settings.gradle.kts); 
 ## Requirements
 
 - JDK 25+ to launch Gradle (Fabric Loom 1.18 refuses to load on anything older); the toolchain that compiles each target (Java 17 for 1.20.1, 21 for 1.21.x, 25 for 26.x) is provisioned automatically. CI installs all three JDKs.
+- Gradle resolves `dev.vercim.telemetrika:telemetrika` at the version pinned in `gradle.properties` from the private `vercim/telemetrika-lib` GitHub Packages registry. Set `githubPackagesUsername` and `githubPackagesPassword` in `~/.gradle/gradle.properties` using an account with package access and a classic token with `read:packages`. For a local library build, pass `-PtelemetrikaJar=/absolute/path/to/telemetrika-0.1.0.jar`. The build embeds the relocated library in every Handycam JAR, so players install Handycam and its usual mod dependencies.
 - Windows: PowerShell, use `.\gradlew.bat`.
 - macOS / Linux: use `./gradlew`; if it is not executable:
 
@@ -87,6 +88,59 @@ Select the active target (any target from the matrix; this rewrites the sources 
 ./gradlew :1.21.1-neoforge:build
 ```
 
+### Test telemetry locally
+
+Gradle dev clients send telemetry only when `-PtelemetryEndpoint` is supplied and the Handycam **General → Telemetry** setting is enabled. In Telemetrika's `worker/` directory, set `POSTHOG_PROJECT_TOKEN` and `POSTHOG_REGION` in the ignored `.dev.vars` file. Start the HTTPS Worker in a separate terminal. The `dev` script makes the Worker omit `authorized` from outgoing events. [Receiver setup](https://github.com/vercim/telemetrika-lib/blob/main/worker/README.md)
+
+#### Windows (PowerShell)
+
+This example assumes sibling checkouts under `$HOME\Documents\Git` and an existing loopback key, certificate, and Java truststore under `handycam\.gradle\telemetry-local`. If you need to set up TLS files first, follow the receiver setup linked above and the Java truststore instructions below.
+
+In the first terminal, start the Worker. Keep the terminal open while testing. If the Worker is already running on port `8787`, go straight to the second terminal.
+
+```powershell
+$repos = Join-Path $HOME 'Documents\Git'
+$tls = Join-Path $repos 'handycam\.gradle\telemetry-local'
+Set-Location (Join-Path $repos 'telemetrika-lib\worker')
+$workerEnvArgs = @()
+if (!(Test-Path '.dev.vars') -and (Test-Path '.env.production')) {
+    $workerEnvArgs = @('--env-file', '.env.production')
+}
+npm run dev -- --local --port 8787 --local-protocol https --https-key-path "$tls\loopback-key.pem" --https-cert-path "$tls\loopback.pem" @workerEnvArgs
+```
+
+The command uses `.dev.vars` when present. If only `.env.production` exists, it loads the PostHog token and region from that file. The Worker still runs locally with `COUNT_IN_STATISTICS=false`.
+
+In the second terminal, switch to Handycam and check the receiver. Expect HTTP `400` and `invalid_snapshot` from the empty request. Then launch the client.
+
+```powershell
+Set-Location (Join-Path $HOME 'Documents\Git\handycam')
+curl.exe -i --cacert .gradle/telemetry-local/loopback.pem -H 'Content-Type: application/json' --data-binary '{}' 'https://127.0.0.1:8787/v1/snapshots'
+.\gradlew.bat runActiveClient '-PtelemetryEndpoint=https://127.0.0.1:8787/v1/snapshots' '-PtelemetryTrustStore=.gradle/telemetry-local/game-cacerts'
+```
+
+#### macOS / Linux
+
+Start the Worker from `telemetrika-lib/worker`, using the paths to your TLS files.
+
+```bash
+npm run dev -- --local --port 8787 --local-protocol https --https-key-path path/to/loopback-key.pem --https-cert-path path/to/loopback.pem
+```
+
+In a second terminal, launch the client from the Handycam repository.
+
+```bash
+./gradlew runActiveClient -PtelemetryEndpoint=https://127.0.0.1:8787/v1/snapshots
+```
+
+The game JVM must trust the receiver certificate. For a self-signed certificate, copy the game JDK's `lib/security/cacerts` to a local file and import the receiver certificate with `keytool -importcert -alias handycam-telemetry-loopback -file path/to/loopback.pem -keystore path/to/game-cacerts`. Add `-PtelemetryTrustStore=path/to/game-cacerts` to the Gradle command. Relative paths resolve from the repository root. When calling `gradlew.bat` from PowerShell, quote each complete `-Pname=value` argument, including `'-PtelemetryTrustStore=path/to/game-cacerts'`.
+
+If a valid snapshot returns HTTP `503` with `analytics_unavailable`, check the PostHog token and region in the local Worker configuration.
+
+For a specific target, replace `runActiveClient` with `:<target>:runClient`. To test a packaged JAR, use a clean launcher profile and add `-Dhandycam.telemetry.endpoint=https://127.0.0.1:8787/v1/snapshots` to its JVM arguments. The override applies to that launch. It uses `config/handycam-telemetry-test/telemetrika/` for the installation ID and delivery timestamps. The packaged endpoint uses the state under `config/telemetrika/`.
+
+In the enabled profile, wait at the main menu for Telemetrika to record `last_success` in its state file. Find `telemetrika_snapshot` in the PostHog project's event stream by the file's `installation_id`. Production charts filter for `authorized: true`, so the local event is visible in the event stream. Check the loader, versions, Global Intensity, experimental settings, and absence of `authorized`. Relaunch with that profile and check that a second snapshot is held until the seven-day interval expires. In a separate fresh profile, set `"telemetryEnabled": false` in `config/handycam.json` before launch and verify that no Telemetrika state directory is created.
+
 ### Tasks
 
 | Task | What it does |
@@ -99,7 +153,7 @@ Select the active target (any target from the matrix; this rewrites the sources 
 
 Do not use `clean` routinely: it discards Gradle and Minecraft preparation work.
 
-Outputs: collected release JARs are in `build/libs/` (for example `handycam-2.1.0-beta+1.21.1-fabric.jar`); per-target output is in `versions/<target>/build/libs/`.
+Collected release JARs are in `build/libs/` (for example `handycam-2.2.0-alpha+1.21.1-fabric.jar`). Per-target output is in `versions/<target>/build/libs/`.
 
 Switch targets with the `Set active project to <target>` task: it updates `.sc_active_version` and rewrites the version- and loader-specific source blocks. Editing `.sc_active_version` by hand does not rewrite them (run the `Refresh active project` task afterwards), and a plain `gradlew :<target>:runClient` never does; the active target then compiles the stale sources. Commit with `26.3-fabric` active (the newest target and the configured `vcsVersion`; `Reset active project` restores it).
 
@@ -129,6 +183,8 @@ The build workflow (`.github/workflows/build.yml`) runs on pushes to `main` and 
 
 Documentation-only changes (including `docs/`, `README.md`, `CHANGELOG.md`) do not start it. CI builds every target and verifies one release JAR per target.
 
+Build and release workflows need read access to the Telemetrika package. If the workflow token lacks access, set the `PACKAGES_READ_USERNAME` Actions variable and the `PACKAGES_READ_TOKEN` Actions secret for a package reader. [GitHub Packages authentication](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-gradle-registry#authenticating-to-github-packages)
+
 A change is ready to merge when:
 
 - every target compiles and produces its release JAR;
@@ -144,6 +200,7 @@ IDE runs are not enough for loader or Mixin changes (1.3.2 shipped a JAR without
 - launch the NeoForge JAR with Cloth Config;
 - launch the Forge JAR with Cloth Config (the Forge build writes a `handycam.refmap.json`; only the packaged JAR proves it maps every target);
 - verify config loading and saving;
+- [verify local telemetry delivery](#test-telemetry-locally);
 - verify the F10 effects toggle;
 - verify first-person camera, crosshair compensation, and damage, bow, food, explosion, jump, and landing effects;
 - inspect both JARs if a Mixin works in development but not in the packaged mod.
@@ -163,9 +220,8 @@ Use a clean client profile each time.
 ## Release
 
 1. Update `mod_version` in `gradle.properties` and add its section to `CHANGELOG.md`.
-2. Run `clean buildAndCollect` (commands above for your OS).
-3. Validate each packaged JAR (see above).
-4. Create and push the matching `v<mod_version>` tag:
+2. Set the `PRODUCTION_TELEMETRY_ENDPOINT` Actions secret to `https://telemetrika-receiver.vercim.workers.dev/v1/snapshots`. Pass the same value as `-PtelemetrikaEndpoint=URL` when running `clean buildAndCollect` locally. Use the local JVM override for test runs of those JARs. [Test telemetry locally](#test-telemetry-locally)
+3. Create and push the matching `v<mod_version>` tag.
 
    ```bash
    git tag v<mod_version>
@@ -179,7 +235,7 @@ The tag workflow (`.github/workflows/release.yml`):
 
 - validates that the tag matches `mod_version` and that the changelog has a section for it;
 - rejects pre-release suffixes other than `-alpha` / `-beta` (they become alpha / beta releases on the platforms);
-- builds every target with `clean build` and requires exactly one release JAR per target;
+- builds every target with `clean build` and verifies that each release JAR includes the Telemetrika client, its license, and the configured production endpoint;
 - verifies the publishing variables and secrets exist, and refuses to overwrite an existing GitHub release;
 - publishes every target to Modrinth and CurseForge, then creates the GitHub release with the changelog section as notes;
 - posts the changelog to Discord through a webhook and pings the updates role (best effort: skipped when `DISCORD_WEBHOOK_URL` is unset, nobody is pinged when `DISCORD_ROLE_ID` is unset, and a failure does not fail the run).

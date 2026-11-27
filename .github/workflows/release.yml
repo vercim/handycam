@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: write
+  packages: read
 
 concurrency:
   group: release-${{ github.ref }}
@@ -17,6 +18,10 @@ jobs:
   publish:
     name: Build and publish all supported targets
     runs-on: ubuntu-latest
+    env:
+      ORG_GRADLE_PROJECT_githubPackagesUsername: ${{ vars.PACKAGES_READ_USERNAME || github.actor }}
+      ORG_GRADLE_PROJECT_githubPackagesPassword: ${{ secrets.PACKAGES_READ_TOKEN || github.token }}
+      ORG_GRADLE_PROJECT_telemetrikaEndpoint: ${{ secrets.PRODUCTION_TELEMETRY_ENDPOINT }}
 
     steps:
       - name: Check out release tag
@@ -46,6 +51,12 @@ jobs:
         id: release
         shell: bash
         run: |
+          test -n "$ORG_GRADLE_PROJECT_telemetrikaEndpoint" || { echo '::error::Set the PRODUCTION_TELEMETRY_ENDPOINT Actions secret'; exit 1; }
+          if [[ "${ORG_GRADLE_PROJECT_telemetrikaEndpoint,,}" == https://telemetrika-receiver-test.* ]]; then
+            echo '::error::PRODUCTION_TELEMETRY_ENDPOINT points to the test receiver'
+            exit 1
+          fi
+
           version="$(grep '^mod_version=' gradle.properties | cut -d= -f2)"
           expected_tag="v${version}"
           if [ "$GITHUB_REF_NAME" != "$expected_tag" ]; then
@@ -104,6 +115,17 @@ jobs:
             echo "::error::Expected one release JAR per Stonecutter target, found ${#artifacts[@]} JARs for ${#target_dirs[@]} targets"
             exit 1
           }
+          for artifact in "${artifacts[@]}"; do
+            entries="$(jar --list --file "$artifact")"
+            for entry in dev/vercim/handycam/internal/telemetrika/Telemetry.class META-INF/LICENSE-Telemetrika; do
+              grep -Fxq "$entry" <<< "$entries" || { echo "::error::$artifact is missing $entry"; exit 1; }
+            done
+            endpoint="$(unzip -p "$artifact" handycam-telemetry-endpoint.txt)"
+            test "$endpoint" = "$ORG_GRADLE_PROJECT_telemetrikaEndpoint" || {
+              echo "::error::$artifact contains an unexpected telemetry endpoint"
+              exit 1
+            }
+          done
 
       - name: Read changelog
         id: changelog

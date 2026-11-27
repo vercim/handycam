@@ -1,3 +1,8 @@
+## [2.2.0-alpha] - 2026-11-27
+
+### Config
+- Added telemetry for mod & game version, global intensity, experimental features (enabled by default and can be turned off).
+
 ## [2.1.0-beta] - 2026-10-16
 
 ### Compatibility

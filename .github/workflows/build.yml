@@ -13,6 +13,7 @@ on:
       - 'settings.gradle.kts'
       - 'stonecutter.gradle.kts'
       - 'gradle.properties'
+      - 'gradle/*.gradle.kts'
       - 'versions/**/gradle.properties'
       - 'gradle/wrapper/**'
       - 'gradlew'
@@ -27,6 +28,7 @@ on:
       - 'settings.gradle.kts'
       - 'stonecutter.gradle.kts'
       - 'gradle.properties'
+      - 'gradle/*.gradle.kts'
       - 'versions/**/gradle.properties'
       - 'gradle/wrapper/**'
       - 'gradlew'
@@ -39,7 +41,14 @@ concurrency:
 jobs:
   build:
     name: Build all supported targets
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+    env:
+      ORG_GRADLE_PROJECT_githubPackagesUsername: ${{ vars.PACKAGES_READ_USERNAME || github.actor }}
+      ORG_GRADLE_PROJECT_githubPackagesPassword: ${{ secrets.PACKAGES_READ_TOKEN || github.token }}
 
     steps:
       - name: Check out repository
