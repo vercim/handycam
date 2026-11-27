@@ -1,5 +1,4 @@
 import org.gradle.language.jvm.tasks.ProcessResources
-import org.gradle.jvm.tasks.Jar
 import java.net.URI
 
 val relocatedCore = rootProject.tasks.named("relocateTelemetrika")
@@ -16,22 +15,24 @@ val telemetryEndpoint = providers.gradleProperty("telemetrikaEndpoint").orElse("
     value
 }
 
-dependencies.add("implementation", coreClasses)
+dependencies.add("compileOnly", coreClasses)
 
 tasks.withType<JavaExec>().matching { it.name == "runClient" }.configureEach {
     systemProperty("handycam.telemetry.endpoint", providers.gradleProperty("telemetryEndpoint").getOrElse(""))
-}
-
-tasks.named<ProcessResources>("processResources") {
-    inputs.property("telemetrikaEndpoint", telemetryEndpoint)
-    filesMatching("handycam-telemetry-endpoint.txt") {
-        expand(mapOf("telemetrikaEndpoint" to telemetryEndpoint.get()))
+    providers.gradleProperty("telemetryTrustStore").orNull?.let { path ->
+        val trustStore = rootProject.file(path)
+        require(trustStore.isFile) { "telemetryTrustStore does not point to a file: $trustStore" }
+        systemProperty("javax.net.ssl.trustStore", trustStore.absolutePath)
     }
 }
 
-tasks.named<Jar>("jar") {
+tasks.named<ProcessResources>("processResources") {
     dependsOn(relocatedCore)
     from(coreClasses.elements.map { zipTree(it.single().asFile) }) {
         include("dev/vercim/handycam/internal/telemetrika/**", "META-INF/LICENSE-Telemetrika")
+    }
+    inputs.property("telemetrikaEndpoint", telemetryEndpoint)
+    filesMatching("handycam-telemetry-endpoint.txt") {
+        expand(mapOf("telemetrikaEndpoint" to telemetryEndpoint.get()))
     }
 }

@@ -90,7 +90,13 @@ Select the active target (any target from the matrix; this rewrites the sources 
 
 ### Test telemetry locally
 
-Gradle dev clients send telemetry only when `-PtelemetryEndpoint` is supplied and the Handycam **General → Telemetry** setting is enabled. Start the Telemetrika Worker locally on HTTPS with a certificate the game JVM trusts. The local Worker omits `authorized` from event properties. [Receiver setup](https://github.com/vercim/telemetrika-lib/blob/main/worker/README.md)
+Gradle dev clients send telemetry only when `-PtelemetryEndpoint` is supplied and the Handycam **General → Telemetry** setting is enabled. In Telemetrika's `worker/` directory, set `POSTHOG_PROJECT_TOKEN` and `POSTHOG_REGION` in the ignored `.dev.vars` file. Start the HTTPS Worker in a separate terminal. The `dev` script makes the Worker omit `authorized` from outgoing events. [Receiver setup](https://github.com/vercim/telemetrika-lib/blob/main/worker/README.md)
+
+```sh
+npm run dev -- --local --port 8787 --local-protocol https --https-key-path path/to/loopback-key.pem --https-cert-path path/to/loopback.pem
+```
+
+Before launching Minecraft, check that a `POST` with `Content-Type: application/json` and body `{}` to the local endpoint returns HTTP `400` and `invalid_snapshot`. If a valid snapshot returns `503` with `analytics_unavailable`, check the token and region in the Worker's PostHog settings.
 
 Windows (PowerShell):
 
@@ -104,9 +110,11 @@ macOS / Linux:
 ./gradlew runActiveClient -PtelemetryEndpoint=https://127.0.0.1:8787/v1/snapshots
 ```
 
+The game JVM must trust the receiver certificate. For a self-signed certificate, copy the game JDK's `lib/security/cacerts` to a local file and import the receiver certificate with `keytool -importcert -alias handycam-telemetry-loopback -file path/to/loopback.pem -keystore path/to/game-cacerts`. Add `-PtelemetryTrustStore=path/to/game-cacerts` to the Gradle command. Relative paths resolve from the repository root.
+
 For a specific target, replace `runActiveClient` with `:<target>:runClient`. To test a packaged JAR, use a clean launcher profile and add `-Dhandycam.telemetry.endpoint=https://127.0.0.1:8787/v1/snapshots` to its JVM arguments. The override applies to that launch. It uses `config/handycam-telemetry-test/telemetrika/` for the installation ID and delivery timestamps. The packaged endpoint uses the state under `config/telemetrika/`.
 
-In the enabled profile, wait at the main menu for Telemetrika to record `last_success` in its state file. Find the `telemetrika_snapshot` by the file's `installation_id` in the PostHog project or test receiver connected to the local Worker. Check the loader, versions, Global Intensity, experimental settings, and absence of `authorized`. Relaunch with that profile and check that a second snapshot is held until the seven-day interval expires. In a separate fresh profile, set `"telemetryEnabled": false` in `config/handycam.json` before launch and verify that no Telemetrika state directory is created.
+In the enabled profile, wait at the main menu for Telemetrika to record `last_success` in its state file. Find `telemetrika_snapshot` in the PostHog project's event stream by the file's `installation_id`. Production charts filter for `authorized: true`, so the local event is visible in the event stream. Check the loader, versions, Global Intensity, experimental settings, and absence of `authorized`. Relaunch with that profile and check that a second snapshot is held until the seven-day interval expires. In a separate fresh profile, set `"telemetryEnabled": false` in `config/handycam.json` before launch and verify that no Telemetrika state directory is created.
 
 ### Tasks
 
