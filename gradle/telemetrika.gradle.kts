@@ -19,9 +19,7 @@ val telemetryEndpoint = providers.gradleProperty("telemetrikaEndpoint").orElse("
 dependencies.add("implementation", coreClasses)
 
 tasks.withType<JavaExec>().matching { it.name == "runClient" }.configureEach {
-    providers.gradleProperty("telemetryEndpoint").orNull?.let {
-        systemProperty("handycam.telemetry.endpoint", it)
-    }
+    systemProperty("handycam.telemetry.endpoint", providers.gradleProperty("telemetryEndpoint").getOrElse(""))
 }
 
 tasks.named<ProcessResources>("processResources") {

@@ -32,12 +32,14 @@ public final class HandycamMod {
 
         HandycamConfig config = HandycamConfig.get();
         try {
-            String endpoint = telemetryEndpoint();
+            String override = System.getProperty("handycam.telemetry.endpoint");
+            String endpoint = override == null ? packagedTelemetryEndpoint() : override.strip();
             if (endpoint.isBlank()) return;
 
+            Path stateDirectory = override == null ? configDir : configDir.resolve("handycam-telemetry-test");
             Telemetry.Builder builder = Telemetry.builder(MOD_ID)
                     .endpoint(URI.create(endpoint))
-                    .stateDirectory(configDir)
+                    .stateDirectory(stateDirectory)
                     .collectionExecutor(client::execute)
                     .enabled(() -> config.telemetryEnabled)
                     .field("minecraft_version", HandycamMod::minecraftVersion)
@@ -46,7 +48,7 @@ public final class HandycamMod {
             telemetry = HandycamTelemetrySettings.register(builder, config).build();
             telemetry.start();
         } catch (IOException | IllegalArgumentException ex) {
-            LOG.log(System.Logger.Level.WARNING, "HandyCam telemetry endpoint is invalid or unavailable");
+            LOG.log(System.Logger.Level.WARNING, "Handycam telemetry endpoint is invalid or unavailable");
         }
     }
 
@@ -58,9 +60,7 @@ public final class HandycamMod {
         }
     }
 
-    private static String telemetryEndpoint() throws IOException {
-        String override = System.getProperty("handycam.telemetry.endpoint");
-        if (override != null) return override;
+    private static String packagedTelemetryEndpoint() throws IOException {
         try (var resource = HandycamMod.class.getResourceAsStream("/handycam-telemetry-endpoint.txt")) {
             return resource == null ? "" : new String(resource.readAllBytes(), StandardCharsets.UTF_8).strip();
         }

@@ -6,7 +6,9 @@ Every effect has its own intensity slider and can be toggled off independently. 
 
 ## Telemetry
 
-Release builds send a weekly snapshot with a random installation ID, the Minecraft and HandyCam versions, the loader, the config version, Global Intensity, and settings for the experimental Walk Bob, Draw Tilt, and Crosshair Shrink effects. The snapshot goes to the Telemetrika Cloudflare Worker and then to PostHog. Turn off **General → Telemetry** in HandyCam's settings or set `"telemetryEnabled": false` in `config/handycam.json` to stop sending snapshots.
+Telemetry is enabled by default in release builds. Handycam tries to send the first snapshot after the client starts. The next one is due seven days after the last successful send, while the game is running. Turn off **General → Telemetry** in Handycam's settings or set `"telemetryEnabled": false` in `config/handycam.json` to stop sending snapshots.
+
+Each snapshot contains a random installation ID, the Minecraft and Handycam versions, the loader, the config version, and Global Intensity. It also includes the toggle and sliders for experimental Walk Bob, the Draw Tilt toggle, and the Crosshair Shrink toggle and amount. Snapshots go through the Telemetrika Cloudflare Worker to PostHog.
 
 ![Dependencies](https://cdn.modrinth.com/data/cached_images/78f018e94dabc1d8158865367fc8c3952ceb20a0_0.webp)
 - [Cloth Config](https://modrinth.com/mod/cloth-config)

@@ -10,8 +10,8 @@ Handycam uses one [Stonecutter](https://stonecutter.kikugie.dev/) repository: a 
 |---|---|---:|
 | `1.20.1-fabric` | Fabric | 17 |
 | `1.20.1-forge` | Forge | 17 |
-| `1.21.1-fabric`, `1.21.4-fabric`, `1.21.11-fabric` | Fabric | 21 |
-| `1.21.1-neoforge`, `1.21.4-neoforge`, `1.21.11-neoforge` | NeoForge | 21 |
+| `1.21.1-fabric`, `1.21.4-fabric`, `1.21.10-fabric`, `1.21.11-fabric` | Fabric | 21 |
+| `1.21.1-neoforge`, `1.21.4-neoforge`, `1.21.10-neoforge`, `1.21.11-neoforge` | NeoForge | 21 |
 | `26.1-fabric`, `26.1.2-fabric`, `26.2-fabric`, `26.3-fabric` | Fabric | 25 |
 | `26.1-neoforge`, `26.1.2-neoforge`, `26.2-neoforge`, `26.3-neoforge` | NeoForge | 25 |
 
@@ -20,7 +20,7 @@ The matrix is declared once in [`settings.gradle.kts`](../settings.gradle.kts); 
 ## Requirements
 
 - JDK 25+ to launch Gradle (Fabric Loom 1.18 refuses to load on anything older); the toolchain that compiles each target (Java 17 for 1.20.1, 21 for 1.21.x, 25 for 26.x) is provisioned automatically. CI installs all three JDKs.
-- Telemetrika comes from the private `vercim/telemetrika-lib` GitHub Packages registry. Set `githubPackagesUsername` and `githubPackagesPassword` in `~/.gradle/gradle.properties` using an account with package access and a classic token with `read:packages`. For a local library build, pass `-PtelemetrikaJar=/absolute/path/to/telemetrika-0.1.0.jar`.
+- Gradle resolves `dev.vercim.telemetrika:telemetrika` at the version pinned in `gradle.properties` from the private `vercim/telemetrika-lib` GitHub Packages registry. Set `githubPackagesUsername` and `githubPackagesPassword` in `~/.gradle/gradle.properties` using an account with package access and a classic token with `read:packages`. For a local library build, pass `-PtelemetrikaJar=/absolute/path/to/telemetrika-0.1.0.jar`. The build embeds the relocated library in every Handycam JAR, so players install Handycam and its usual mod dependencies.
 - Windows: PowerShell, use `.\gradlew.bat`.
 - macOS / Linux: use `./gradlew`; if it is not executable:
 
@@ -88,23 +88,25 @@ Select the active target (any target from the matrix; this rewrites the sources 
 ./gradlew :1.21.1-neoforge:build
 ```
 
-### Test telemetry with the test Worker
+### Test telemetry locally
 
-An ordinary dev launch with no configured endpoint leaves telemetry inactive. To test telemetry, enable it in Handycam and override the endpoint for the game JVM. The test Worker omits the `authorized` property in PostHog. The JVM override applies to this launch and leaves the endpoint packaged in the JAR untouched.
+Gradle dev clients send telemetry only when `-PtelemetryEndpoint` is supplied and the Handycam **General → Telemetry** setting is enabled. Start the Telemetrika Worker locally on HTTPS with a certificate the game JVM trusts. The local Worker omits `authorized` from event properties. [Receiver setup](https://github.com/vercim/telemetrika-lib/blob/main/worker/README.md)
 
 Windows (PowerShell):
 
 ```powershell
-.\gradlew.bat runActiveClient -PtelemetryEndpoint=https://telemetrika-receiver-test.vercim.workers.dev/v1/snapshots
+.\gradlew.bat runActiveClient -PtelemetryEndpoint=https://127.0.0.1:8787/v1/snapshots
 ```
 
 macOS / Linux:
 
 ```bash
-./gradlew runActiveClient -PtelemetryEndpoint=https://telemetrika-receiver-test.vercim.workers.dev/v1/snapshots
+./gradlew runActiveClient -PtelemetryEndpoint=https://127.0.0.1:8787/v1/snapshots
 ```
 
-For a specific target, replace `runActiveClient` with `:<target>:runClient`. The `telemetryEndpoint` property affects the dev client only; `telemetrikaEndpoint` controls the endpoint packaged in the JAR. For a manual IDE or launcher profile, add `-Dhandycam.telemetry.endpoint=...` to the game's JVM arguments.
+For a specific target, replace `runActiveClient` with `:<target>:runClient`. To test a packaged JAR, use a clean launcher profile and add `-Dhandycam.telemetry.endpoint=https://127.0.0.1:8787/v1/snapshots` to its JVM arguments. The override applies to that launch. It uses `config/handycam-telemetry-test/telemetrika/` for the installation ID and delivery timestamps. The packaged endpoint uses the state under `config/telemetrika/`.
+
+In the enabled profile, wait at the main menu for Telemetrika to record `last_success` in its state file. Find the `telemetrika_snapshot` by the file's `installation_id` in the PostHog project or test receiver connected to the local Worker. Check the loader, versions, Global Intensity, experimental settings, and absence of `authorized`. Relaunch with that profile and check that a second snapshot is held until the seven-day interval expires. In a separate fresh profile, set `"telemetryEnabled": false` in `config/handycam.json` before launch and verify that no Telemetrika state directory is created.
 
 ### Tasks
 
@@ -118,7 +120,7 @@ For a specific target, replace `runActiveClient` with `:<target>:runClient`. The
 
 Do not use `clean` routinely: it discards Gradle and Minecraft preparation work.
 
-Outputs: collected release JARs are in `build/libs/` (for example `handycam-2.1.0-beta+1.21.1-fabric.jar`); per-target output is in `versions/<target>/build/libs/`.
+Collected release JARs are in `build/libs/` (for example `handycam-2.2.0-alpha+1.21.1-fabric.jar`). Per-target output is in `versions/<target>/build/libs/`.
 
 Switch targets with the `Set active project to <target>` task: it updates `.sc_active_version` and rewrites the version- and loader-specific source blocks. Editing `.sc_active_version` by hand does not rewrite them (run the `Refresh active project` task afterwards), and a plain `gradlew :<target>:runClient` never does; the active target then compiles the stale sources. Commit with `26.3-fabric` active (the newest target and the configured `vcsVersion`; `Reset active project` restores it).
 
@@ -165,6 +167,7 @@ IDE runs are not enough for loader or Mixin changes (1.3.2 shipped a JAR without
 - launch the NeoForge JAR with Cloth Config;
 - launch the Forge JAR with Cloth Config (the Forge build writes a `handycam.refmap.json`; only the packaged JAR proves it maps every target);
 - verify config loading and saving;
+- [verify local telemetry delivery](#test-telemetry-locally);
 - verify the F10 effects toggle;
 - verify first-person camera, crosshair compensation, and damage, bow, food, explosion, jump, and landing effects;
 - inspect both JARs if a Mixin works in development but not in the packaged mod.
@@ -184,7 +187,7 @@ Use a clean client profile each time.
 ## Release
 
 1. Update `mod_version` in `gradle.properties` and add its section to `CHANGELOG.md`.
-2. Set the `PRODUCTION_TELEMETRY_ENDPOINT` Actions secret to the production Worker URL. Pass the same URL as `-PtelemetrikaEndpoint=URL` when running `clean buildAndCollect` locally and validate the packaged JARs.
+2. Set the `PRODUCTION_TELEMETRY_ENDPOINT` Actions secret to `https://telemetrika-receiver.vercim.workers.dev/v1/snapshots`. Pass the same value as `-PtelemetrikaEndpoint=URL` when running `clean buildAndCollect` locally. Use the local JVM override for test runs of those JARs. [Test telemetry locally](#test-telemetry-locally)
 3. Create and push the matching `v<mod_version>` tag.
 
    ```bash
@@ -199,7 +202,7 @@ The tag workflow (`.github/workflows/release.yml`):
 
 - validates that the tag matches `mod_version` and that the changelog has a section for it;
 - rejects pre-release suffixes other than `-alpha` / `-beta` (they become alpha / beta releases on the platforms);
-- builds every target with `clean build` and checks that the number of release JARs matches the number of targets;
+- builds every target with `clean build` and verifies that each release JAR includes the Telemetrika client, its license, and the configured production endpoint;
 - verifies the publishing variables and secrets exist, and refuses to overwrite an existing GitHub release;
 - publishes every target to Modrinth and CurseForge, then creates the GitHub release with the changelog section as notes;
 - posts the changelog to Discord through a webhook and pings the updates role (best effort: skipped when `DISCORD_WEBHOOK_URL` is unset, nobody is pinged when `DISCORD_ROLE_ID` is unset, and a failure does not fail the run).

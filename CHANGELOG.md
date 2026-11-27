@@ -1,7 +1,7 @@
-## [Unreleased]
+## [2.2.0-alpha] - 2026-11-27
 
 ### Config
-- HandyCam release builds send weekly snapshots with version information, Global Intensity, and experimental effect settings. Turn off Telemetry in the General settings to stop sending reports.
+- Added telemetry for mod & game versions, global intensity, experimental features (enabled by default and can be turned off in settings).
 
 ## [2.1.0-beta] - 2026-10-16
 
