@@ -92,25 +92,50 @@ Select the active target (any target from the matrix; this rewrites the sources 
 
 Gradle dev clients send telemetry only when `-PtelemetryEndpoint` is supplied and the Handycam **General → Telemetry** setting is enabled. In Telemetrika's `worker/` directory, set `POSTHOG_PROJECT_TOKEN` and `POSTHOG_REGION` in the ignored `.dev.vars` file. Start the HTTPS Worker in a separate terminal. The `dev` script makes the Worker omit `authorized` from outgoing events. [Receiver setup](https://github.com/vercim/telemetrika-lib/blob/main/worker/README.md)
 
-```sh
+#### Windows (PowerShell)
+
+This example assumes sibling checkouts under `$HOME\Documents\Git` and an existing loopback key, certificate, and Java truststore under `handycam\.gradle\telemetry-local`. If you need to set up TLS files first, follow the receiver setup linked above and the Java truststore instructions below.
+
+In the first terminal, start the Worker. Keep the terminal open while testing. If the Worker is already running on port `8787`, go straight to the second terminal.
+
+```powershell
+$repos = Join-Path $HOME 'Documents\Git'
+$tls = Join-Path $repos 'handycam\.gradle\telemetry-local'
+Set-Location (Join-Path $repos 'telemetrika-lib\worker')
+$workerEnvArgs = @()
+if (!(Test-Path '.dev.vars') -and (Test-Path '.env.production')) {
+    $workerEnvArgs = @('--env-file', '.env.production')
+}
+npm run dev -- --local --port 8787 --local-protocol https --https-key-path "$tls\loopback-key.pem" --https-cert-path "$tls\loopback.pem" @workerEnvArgs
+```
+
+The command uses `.dev.vars` when present. If only `.env.production` exists, it loads the PostHog token and region from that file. The Worker still runs locally with `COUNT_IN_STATISTICS=false`.
+
+In the second terminal, switch to Handycam and check the receiver. Expect HTTP `400` and `invalid_snapshot` from the empty request. Then launch the client.
+
+```powershell
+Set-Location (Join-Path $HOME 'Documents\Git\handycam')
+curl.exe -i --cacert .gradle/telemetry-local/loopback.pem -H 'Content-Type: application/json' --data-binary '{}' 'https://127.0.0.1:8787/v1/snapshots'
+.\gradlew.bat runActiveClient '-PtelemetryEndpoint=https://127.0.0.1:8787/v1/snapshots' '-PtelemetryTrustStore=.gradle/telemetry-local/game-cacerts'
+```
+
+#### macOS / Linux
+
+Start the Worker from `telemetrika-lib/worker`, using the paths to your TLS files.
+
+```bash
 npm run dev -- --local --port 8787 --local-protocol https --https-key-path path/to/loopback-key.pem --https-cert-path path/to/loopback.pem
 ```
 
-Before launching Minecraft, check that a `POST` with `Content-Type: application/json` and body `{}` to the local endpoint returns HTTP `400` and `invalid_snapshot`. If a valid snapshot returns `503` with `analytics_unavailable`, check the token and region in the Worker's PostHog settings.
-
-Windows (PowerShell):
-
-```powershell
-.\gradlew.bat runActiveClient '-PtelemetryEndpoint=https://127.0.0.1:8787/v1/snapshots'
-```
-
-macOS / Linux:
+In a second terminal, launch the client from the Handycam repository.
 
 ```bash
 ./gradlew runActiveClient -PtelemetryEndpoint=https://127.0.0.1:8787/v1/snapshots
 ```
 
 The game JVM must trust the receiver certificate. For a self-signed certificate, copy the game JDK's `lib/security/cacerts` to a local file and import the receiver certificate with `keytool -importcert -alias handycam-telemetry-loopback -file path/to/loopback.pem -keystore path/to/game-cacerts`. Add `-PtelemetryTrustStore=path/to/game-cacerts` to the Gradle command. Relative paths resolve from the repository root. When calling `gradlew.bat` from PowerShell, quote each complete `-Pname=value` argument, including `'-PtelemetryTrustStore=path/to/game-cacerts'`.
+
+If a valid snapshot returns HTTP `503` with `analytics_unavailable`, check the PostHog token and region in the local Worker configuration.
 
 For a specific target, replace `runActiveClient` with `:<target>:runClient`. To test a packaged JAR, use a clean launcher profile and add `-Dhandycam.telemetry.endpoint=https://127.0.0.1:8787/v1/snapshots` to its JVM arguments. The override applies to that launch. It uses `config/handycam-telemetry-test/telemetrika/` for the installation ID and delivery timestamps. The packaged endpoint uses the state under `config/telemetrika/`.
 
